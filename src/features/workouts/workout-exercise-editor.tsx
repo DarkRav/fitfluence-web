@@ -58,7 +58,7 @@ export function WorkoutExerciseEditor({
   }, [exercise, form]);
 
   return (
-    <div className="rounded-xl border border-border bg-sidebar/30 p-4">
+    <div className="space-y-3 rounded-lg border border-border bg-card p-3">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-foreground">{exercise.exerciseName}</p>
@@ -92,13 +92,28 @@ export function WorkoutExerciseEditor({
           });
         })}
       >
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               {ru.common.labels.sets}
             </label>
             <AppInput type="number" min={1} {...form.register("sets", { valueAsNumber: true })} />
           </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              {ru.common.labels.targetRpe}
+            </label>
+            <AppInput
+              type="number"
+              min={1}
+              max={10}
+              step="0.5"
+              {...form.register("targetRpe", { valueAsNumber: true })}
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               {ru.common.labels.repsMin}
@@ -117,21 +132,6 @@ export function WorkoutExerciseEditor({
               type="number"
               min={1}
               {...form.register("repsMax", { valueAsNumber: true })}
-            />
-          </div>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              {ru.common.labels.targetRpe}
-            </label>
-            <AppInput
-              type="number"
-              min={1}
-              max={10}
-              step="0.5"
-              {...form.register("targetRpe", { valueAsNumber: true })}
             />
           </div>
           <div className="space-y-1.5">

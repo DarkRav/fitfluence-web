@@ -260,6 +260,9 @@ export const ru = {
     max200Validation: "Максимум 200 символов",
     max2000Validation: "Максимум 2000 символов",
     dragToReorderHint: "Перетащите для изменения порядка",
+    exerciseSettingsTitle: "Параметры упражнения",
+    exerciseSettingsSubtitle: "Выберите упражнение слева и настройте его параметры.",
+    selectExerciseToEdit: "Выберите упражнение из списка, чтобы открыть настройки.",
   },
   layout: {
     topbarTitle: "Панель управления Fitfluence",

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { adminWorkoutScope } from "@/features/workouts/scopes/adminWorkoutScope";
 import { influencerWorkoutScope } from "@/features/workouts/scopes/influencerWorkoutScope";
@@ -42,6 +43,7 @@ export function WorkoutDetailsPage({
   const { pushToast } = useAppToast();
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
   const [localExercises, setLocalExercises] = useState<WorkoutExerciseRecord[]>([]);
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
 
   const detailsQuery = useQuery({
     queryKey: [...scope.queryKeys.details, workoutTemplateId],
@@ -211,8 +213,17 @@ export function WorkoutDetailsPage({
       return;
     }
 
-    setLocalExercises(getSortedExercisesForState(detailsQuery.data.exercises));
-  }, [detailsQuery.data]);
+    const nextExercises = getSortedExercisesForState(detailsQuery.data.exercises);
+    setLocalExercises(nextExercises);
+    if (!selectedExerciseId && nextExercises.length > 0) {
+      setSelectedExerciseId(nextExercises[0]?.id ?? null);
+      return;
+    }
+
+    if (selectedExerciseId && !nextExercises.some((item) => item.id === selectedExerciseId)) {
+      setSelectedExerciseId(nextExercises[0]?.id ?? null);
+    }
+  }, [detailsQuery.data, selectedExerciseId]);
 
   if (detailsQuery.isLoading) {
     return <LoadingState title={ru.workouts.detailsLoadError} />;
@@ -237,6 +248,9 @@ export function WorkoutDetailsPage({
       />
     );
   }
+
+  const selectedExercise =
+    localExercises.find((exercise) => exercise.id === selectedExerciseId) ?? null;
 
   return (
     <div className="space-y-4">
@@ -314,29 +328,79 @@ export function WorkoutDetailsPage({
             {ru.workouts.noExercises}
           </p>
         ) : (
-          <ReorderableExercisesList
-            exercises={localExercises}
-            isReordering={reorderMutation.isPending}
-            onReorder={(nextExercises) => {
-              const previousExercises = localExercises;
-              setLocalExercises(nextExercises);
-              reorderMutation.mutate({ nextExercises, previousExercises });
-            }}
-            renderExercise={(exercise) => (
-              <WorkoutExerciseEditor
-                key={exercise.id}
-                exercise={exercise}
-                isSubmitting={updateExerciseMutation.isPending}
-                isDeleting={deleteExerciseMutation.isPending}
-                onSave={async (exerciseTemplateId, payload) => {
-                  await updateExerciseMutation.mutateAsync({ exerciseTemplateId, payload });
+          <div className="grid gap-4 lg:grid-cols-5">
+            <div className="space-y-3 lg:col-span-3">
+              <ReorderableExercisesList
+                exercises={localExercises}
+                isReordering={reorderMutation.isPending}
+                onReorder={(nextExercises) => {
+                  const previousExercises = localExercises;
+                  setLocalExercises(nextExercises);
+                  reorderMutation.mutate({ nextExercises, previousExercises });
                 }}
-                onDelete={async (exerciseTemplateId) => {
-                  await deleteExerciseMutation.mutateAsync(exerciseTemplateId);
+                renderExercise={(exercise) => {
+                  const isSelected = selectedExerciseId === exercise.id;
+                  return (
+                    <button
+                      key={exercise.id}
+                      type="button"
+                      onClick={() => setSelectedExerciseId(exercise.id)}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors ${
+                        isSelected
+                          ? "bg-secondary/15 text-foreground"
+                          : "bg-card text-foreground hover:bg-secondary/10"
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{exercise.exerciseName}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {ru.common.labels.sets}: {exercise.sets} · {ru.common.labels.repsMin}/
+                          {ru.common.labels.repsMax}: {exercise.repsMin ?? ru.common.states.dash}/
+                          {exercise.repsMax ?? ru.common.states.dash} ·{" "}
+                          {ru.common.labels.restSeconds}:{" "}
+                          {exercise.restSeconds ?? ru.common.states.dash}
+                        </p>
+                      </div>
+                      <div className="ml-3 flex items-center gap-1 text-xs text-muted-foreground">
+                        <GripVertical className="h-4 w-4" />
+                        <span>{exercise.orderIndex + 1}</span>
+                      </div>
+                    </button>
+                  );
                 }}
               />
-            )}
-          />
+            </div>
+
+            <div className="lg:col-span-2">
+              <div className="sticky top-20 space-y-3 rounded-xl border border-border bg-sidebar/30 p-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {ru.workouts.exerciseSettingsTitle}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {ru.workouts.exerciseSettingsSubtitle}
+                  </p>
+                </div>
+                {selectedExercise ? (
+                  <WorkoutExerciseEditor
+                    exercise={selectedExercise}
+                    isSubmitting={updateExerciseMutation.isPending}
+                    isDeleting={deleteExerciseMutation.isPending}
+                    onSave={async (exerciseTemplateId, payload) => {
+                      await updateExerciseMutation.mutateAsync({ exerciseTemplateId, payload });
+                    }}
+                    onDelete={async (exerciseTemplateId) => {
+                      await deleteExerciseMutation.mutateAsync(exerciseTemplateId);
+                    }}
+                  />
+                ) : (
+                  <p className="rounded-md border border-dashed border-border bg-card px-3 py-4 text-sm text-muted-foreground">
+                    {ru.workouts.selectExerciseToEdit}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
