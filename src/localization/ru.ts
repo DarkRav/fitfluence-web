@@ -252,6 +252,7 @@ export const ru = {
     addExerciseDescription: "Найдите упражнение и задайте стартовые параметры.",
     fillTemplateParams: "Заполните базовые параметры шаблона тренировки.",
     unnamedWorkout: "Без названия",
+    workoutBreadcrumbFallback: "Тренировка",
     minSetsValidation: "Минимум 1 подход",
     dayOrderValidation: "Номер дня должен быть больше 0",
     max200Validation: "Максимум 200 символов",

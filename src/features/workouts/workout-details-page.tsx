@@ -256,7 +256,9 @@ export function WorkoutDetailsPage({
           {ru.common.labels.workouts}
         </Link>
         {" / "}
-        <span className="text-foreground">{ru.workouts.title}</span>
+        <span className="text-foreground">
+          {workout.title?.trim() || ru.workouts.workoutBreadcrumbFallback}
+        </span>
       </div>
 
       <PageHeader
