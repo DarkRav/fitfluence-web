@@ -18,26 +18,34 @@ import { ru } from "@/localization/ru";
 import { AppButton, AppInput, AppSelect } from "@/shared/ui";
 
 const typeOptions: { value: AdminProgressionPolicyType; label: string }[] = [
-  { value: "DOUBLE_PROGRESSION", label: "DOUBLE_PROGRESSION" },
-  { value: "LINEAR_LOAD", label: "LINEAR_LOAD" },
-  { value: "RPE_BASED", label: "RPE_BASED" },
+  { value: "DOUBLE_PROGRESSION", label: ru.progression.types.DOUBLE_PROGRESSION },
+  { value: "LINEAR_LOAD", label: ru.progression.types.LINEAR_LOAD },
+  { value: "RPE_BASED", label: ru.progression.types.RPE_BASED },
 ];
 
 const statusOptions: { value: AdminProgressionPolicyStatus; label: string }[] = [
-  { value: "ACTIVE", label: "ACTIVE" },
-  { value: "ARCHIVED", label: "ARCHIVED" },
+  { value: "ACTIVE", label: ru.progression.filters.active },
+  { value: "ARCHIVED", label: ru.progression.filters.archived },
 ];
 
 const ownerTypeOptions: { value: AdminProgressionPolicyOwnerType; label: string }[] = [
-  { value: "ADMIN", label: "ADMIN" },
-  { value: "INFLUENCER", label: "INFLUENCER" },
+  { value: "ADMIN", label: ru.progression.filters.admin },
+  { value: "INFLUENCER", label: ru.progression.filters.influencer },
 ];
 
 const formSchema = z
   .object({
-    code: z.string().trim().min(1, "Укажите code").max(120, "Максимум 120 символов"),
-    name: z.string().trim().min(1, "Укажите name").max(200, "Максимум 200 символов"),
-    description: z.string().trim().max(2000, "Максимум 2000 символов").optional(),
+    code: z
+      .string()
+      .trim()
+      .min(1, ru.progression.form.codeRequired)
+      .max(120, ru.progression.form.max120),
+    name: z
+      .string()
+      .trim()
+      .min(1, ru.progression.form.nameRequired)
+      .max(200, ru.progression.form.max200),
+    description: z.string().trim().max(2000, ru.progression.form.max2000).optional(),
     type: z.enum(["DOUBLE_PROGRESSION", "LINEAR_LOAD", "RPE_BASED"]),
     status: z.enum(["ACTIVE", "ARCHIVED"]).optional(),
     ownerType: z.enum(["ADMIN", "INFLUENCER"]).optional(),
@@ -52,7 +60,7 @@ const formSchema = z
       return true;
     },
     {
-      message: "ownerId обязателен для INFLUENCER ownerType",
+      message: ru.progression.form.ownerIdRequiredForInfluencer,
       path: ["ownerId"],
     },
   );
@@ -117,14 +125,14 @@ export function ProgressionFormDialog({
 
   const title = useMemo(() => {
     if (mode === "create") {
-      return "Создать policy";
+      return ru.progression.form.createTitle;
     }
 
     if (mode === "edit") {
-      return "Редактировать policy";
+      return ru.progression.form.editTitle;
     }
 
-    return "Policy details";
+    return ru.progression.form.viewTitle;
   }, [mode]);
 
   return (
@@ -136,7 +144,7 @@ export function ProgressionFormDialog({
             {title}
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-            Настройте параметры политики прогрессии в соответствии с OpenAPI схемой.
+            {ru.progression.form.description}
           </Dialog.Description>
 
           <form
@@ -174,7 +182,9 @@ export function ProgressionFormDialog({
           >
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Code</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.progression.form.codeLabel}
+                </label>
                 <AppInput {...form.register("code")} disabled={isReadOnly || isSubmitting} />
                 {form.formState.errors.code ? (
                   <p className="text-xs text-destructive">{form.formState.errors.code.message}</p>
@@ -182,7 +192,9 @@ export function ProgressionFormDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Name</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.progression.form.nameLabel}
+                </label>
                 <AppInput {...form.register("name")} disabled={isReadOnly || isSubmitting} />
                 {form.formState.errors.name ? (
                   <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
@@ -191,7 +203,9 @@ export function ProgressionFormDialog({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Description</label>
+              <label className="text-sm font-medium text-foreground">
+                {ru.progression.form.descriptionLabel}
+              </label>
               <textarea
                 {...form.register("description")}
                 disabled={isReadOnly || isSubmitting}
@@ -201,7 +215,9 @@ export function ProgressionFormDialog({
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Type</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.progression.form.typeLabel}
+                </label>
                 <Controller
                   control={form.control}
                   name="type"
@@ -210,14 +226,16 @@ export function ProgressionFormDialog({
                       value={field.value}
                       onValueChange={(value) => field.onChange(value as AdminProgressionPolicyType)}
                       options={typeOptions}
-                      placeholder="Выберите type"
+                      placeholder={ru.progression.form.typePlaceholder}
                     />
                   )}
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Status</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.progression.form.statusLabel}
+                </label>
                 <Controller
                   control={form.control}
                   name="status"
@@ -228,7 +246,7 @@ export function ProgressionFormDialog({
                         field.onChange(value as AdminProgressionPolicyStatus)
                       }
                       options={statusOptions}
-                      placeholder="Выберите status"
+                      placeholder={ru.progression.form.statusPlaceholder}
                     />
                   )}
                 />
@@ -238,7 +256,9 @@ export function ProgressionFormDialog({
             {mode === "create" ? (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-foreground">Owner type</label>
+                  <label className="text-sm font-medium text-foreground">
+                    {ru.progression.form.ownerTypeLabel}
+                  </label>
                   <Controller
                     control={form.control}
                     name="ownerType"
@@ -249,16 +269,18 @@ export function ProgressionFormDialog({
                           field.onChange(value as AdminProgressionPolicyOwnerType)
                         }
                         options={ownerTypeOptions}
-                        placeholder="Owner type"
+                        placeholder={ru.progression.form.ownerTypePlaceholder}
                       />
                     )}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-foreground">Owner id</label>
+                  <label className="text-sm font-medium text-foreground">
+                    {ru.progression.form.ownerIdLabel}
+                  </label>
                   <AppInput
                     {...form.register("ownerId")}
-                    placeholder="required for INFLUENCER"
+                    placeholder={ru.progression.form.ownerIdPlaceholder}
                     disabled={isReadOnly || isSubmitting}
                   />
                   {form.formState.errors.ownerId ? (

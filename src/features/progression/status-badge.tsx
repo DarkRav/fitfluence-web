@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { AdminProgressionPolicyStatus } from "@/api/adminProgression";
+import { ru } from "@/localization/ru";
 
 type ProgressionStatusBadgeProps = {
   status: AdminProgressionPolicyStatus;
@@ -14,6 +15,9 @@ function resolveStatusClassName(status: AdminProgressionPolicyStatus): string {
 }
 
 export function ProgressionStatusBadge({ status }: ProgressionStatusBadgeProps) {
+  const label =
+    status === "ACTIVE" ? ru.progression.filters.active : ru.progression.filters.archived;
+
   return (
     <span
       className={cn(
@@ -21,7 +25,7 @@ export function ProgressionStatusBadge({ status }: ProgressionStatusBadgeProps) 
         resolveStatusClassName(status),
       )}
     >
-      {status}
+      {label}
     </span>
   );
 }

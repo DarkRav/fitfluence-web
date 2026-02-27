@@ -10,9 +10,9 @@ import type { ProgressionScopeConfig } from "@/features/progression/types";
 
 export const adminProgressionScope: ProgressionScopeConfig = {
   scope: "admin",
-  title: "Progression",
-  subtitle: "Управление политиками прогрессии платформы.",
-  searchPlaceholder: "Поиск по code или названию",
+  title: ru.progression.title,
+  subtitle: ru.progression.subtitleAdmin,
+  searchPlaceholder: ru.progression.searchPlaceholder,
   createButtonLabel: ru.common.actions.create,
   queryKeyPrefix: ["progression", "admin"],
   capabilities: {

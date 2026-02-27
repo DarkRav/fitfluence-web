@@ -15,11 +15,26 @@ type ProgressionTableProps = {
 };
 
 function formatOwner(item: ProgressionRecord): string {
+  const ownerTypeLabel =
+    item.ownerType === "ADMIN" ? ru.progression.filters.admin : ru.progression.filters.influencer;
+
   if (!item.ownerId) {
-    return item.ownerType;
+    return ownerTypeLabel;
   }
 
-  return `${item.ownerType} · ${item.ownerId}`;
+  return `${ownerTypeLabel} · ${item.ownerId}`;
+}
+
+function formatType(type: ProgressionRecord["type"]): string {
+  if (type === "DOUBLE_PROGRESSION") {
+    return ru.progression.types.DOUBLE_PROGRESSION;
+  }
+
+  if (type === "LINEAR_LOAD") {
+    return ru.progression.types.LINEAR_LOAD;
+  }
+
+  return ru.progression.types.RPE_BASED;
 }
 
 export function ProgressionTable({
@@ -35,13 +50,15 @@ export function ProgressionTable({
       <table className="w-full text-left text-sm">
         <thead className="bg-sidebar/60 text-muted-foreground">
           <tr>
-            <th className="px-4 py-3 font-medium">Code</th>
-            <th className="px-4 py-3 font-medium">Name</th>
-            <th className="px-4 py-3 font-medium">Type</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            {showOwnerColumns ? <th className="px-4 py-3 font-medium">Owner</th> : null}
-            <th className="px-4 py-3 font-medium">Updated</th>
-            <th className="px-4 py-3 text-right font-medium">Actions</th>
+            <th className="px-4 py-3 font-medium">{ru.progression.table.code}</th>
+            <th className="px-4 py-3 font-medium">{ru.progression.table.name}</th>
+            <th className="px-4 py-3 font-medium">{ru.progression.table.type}</th>
+            <th className="px-4 py-3 font-medium">{ru.progression.table.status}</th>
+            {showOwnerColumns ? (
+              <th className="px-4 py-3 font-medium">{ru.progression.table.owner}</th>
+            ) : null}
+            <th className="px-4 py-3 font-medium">{ru.progression.table.updated}</th>
+            <th className="px-4 py-3 text-right font-medium">{ru.progression.table.actions}</th>
           </tr>
         </thead>
         <tbody>
@@ -57,7 +74,7 @@ export function ProgressionTable({
                   <p className="line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
                 ) : null}
               </td>
-              <td className="px-4 py-3 text-xs text-muted-foreground">{item.type}</td>
+              <td className="px-4 py-3 text-xs text-muted-foreground">{formatType(item.type)}</td>
               <td className="px-4 py-3">
                 <ProgressionStatusBadge status={item.status} />
               </td>

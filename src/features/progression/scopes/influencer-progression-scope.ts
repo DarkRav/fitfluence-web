@@ -7,9 +7,9 @@ import type { ProgressionScopeConfig } from "@/features/progression/types";
 
 export const influencerProgressionScope: ProgressionScopeConfig = {
   scope: "influencer",
-  title: "Progression",
-  subtitle: "Просматривайте доступные политики прогрессии для своих программ.",
-  searchPlaceholder: "Поиск по code или названию",
+  title: ru.progression.title,
+  subtitle: ru.progression.subtitleInfluencer,
+  searchPlaceholder: ru.progression.searchPlaceholder,
   createButtonLabel: ru.common.actions.create,
   queryKeyPrefix: ["progression", "influencer"],
   capabilities: {

@@ -29,28 +29,29 @@ import {
   PageHeader,
   useAppToast,
 } from "@/shared/ui";
+import { ru } from "@/localization/ru";
 
 type ProgressionCrudPageProps = {
   config: ProgressionScopeConfig;
 };
 
 const statusOptions: { value: "ALL" | AdminProgressionPolicyStatus; label: string }[] = [
-  { value: "ALL", label: "All statuses" },
-  { value: "ACTIVE", label: "ACTIVE" },
-  { value: "ARCHIVED", label: "ARCHIVED" },
+  { value: "ALL", label: ru.progression.filters.allStatuses },
+  { value: "ACTIVE", label: ru.progression.filters.active },
+  { value: "ARCHIVED", label: ru.progression.filters.archived },
 ];
 
 const typeOptions: { value: "ALL" | AdminProgressionPolicyType; label: string }[] = [
-  { value: "ALL", label: "All types" },
-  { value: "DOUBLE_PROGRESSION", label: "DOUBLE_PROGRESSION" },
-  { value: "LINEAR_LOAD", label: "LINEAR_LOAD" },
-  { value: "RPE_BASED", label: "RPE_BASED" },
+  { value: "ALL", label: ru.progression.filters.allTypes },
+  { value: "DOUBLE_PROGRESSION", label: ru.progression.types.DOUBLE_PROGRESSION },
+  { value: "LINEAR_LOAD", label: ru.progression.types.LINEAR_LOAD },
+  { value: "RPE_BASED", label: ru.progression.types.RPE_BASED },
 ];
 
 const ownerTypeOptions: { value: "ALL" | AdminProgressionPolicyOwnerType; label: string }[] = [
-  { value: "ALL", label: "All owners" },
-  { value: "ADMIN", label: "ADMIN" },
-  { value: "INFLUENCER", label: "INFLUENCER" },
+  { value: "ALL", label: ru.progression.filters.allOwners },
+  { value: "ADMIN", label: ru.progression.filters.admin },
+  { value: "INFLUENCER", label: ru.progression.filters.influencer },
 ];
 
 function isForbiddenMessage(message: string): boolean {
@@ -125,8 +126,8 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
     pushToast({
       kind: "error",
       title: isForbiddenMessage(listQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить политики",
+        ? ru.common.states.notPermitted
+        : ru.progression.loadError,
       description: listQuery.error.message,
     });
   }, [listQuery.error, listQuery.isError, pushToast]);
@@ -145,10 +146,12 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
       setIsDetailsOpen(true);
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось открыть policy";
+      const message = error instanceof Error ? error.message : ru.progression.openError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка загрузки",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.progression.loadError,
         description: message,
       });
     },
@@ -157,7 +160,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
   const createMutation = useMutation({
     mutationFn: async (payload: CreateAdminProgressionPolicyPayload) => {
       if (!config.api.create) {
-        throw new Error("Create operation is not supported");
+        throw new Error("Создание недоступно для текущей роли");
       }
 
       const result = await config.api.create(payload);
@@ -170,17 +173,19 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Policy создана",
-        description: "Новая политика прогрессии успешно сохранена.",
+        title: ru.progression.createSuccessTitle,
+        description: ru.progression.createSuccessDescription,
       });
       setIsCreateOpen(false);
       await queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось создать policy";
+      const message = error instanceof Error ? error.message : ru.progression.createError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка создания",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.progression.createError,
         description: message,
       });
     },
@@ -195,7 +200,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
       payload: UpdateAdminProgressionPolicyPayload;
     }) => {
       if (!config.api.update) {
-        throw new Error("Update operation is not supported");
+        throw new Error("Редактирование недоступно для текущей роли");
       }
 
       const result = await config.api.update(id, payload);
@@ -208,17 +213,19 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
     onSuccess: async (item) => {
       pushToast({
         kind: "success",
-        title: "Policy обновлена",
-        description: "Изменения сохранены.",
+        title: ru.progression.updateSuccessTitle,
+        description: ru.progression.updateSuccessDescription,
       });
       setSelectedItem(item);
       await queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось обновить policy";
+      const message = error instanceof Error ? error.message : ru.progression.updateError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.progression.updateError,
         description: message,
       });
     },
@@ -227,7 +234,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!config.api.remove) {
-        throw new Error("Delete operation is not supported");
+        throw new Error("Архивация недоступна для текущей роли");
       }
 
       const result = await config.api.remove(id);
@@ -238,17 +245,19 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Policy архивирована",
-        description: "Политика удалена из активного списка.",
+        title: ru.progression.archiveSuccessTitle,
+        description: ru.progression.archiveSuccessDescription,
       });
       setDeleteItem(null);
       await queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось архивировать policy";
+      const message = error instanceof Error ? error.message : ru.progression.archiveError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка удаления",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.progression.archiveError,
         description: message,
       });
     },
@@ -278,7 +287,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
                   setPage(0);
                 }}
                 options={typeOptions}
-                placeholder="Type"
+                placeholder={ru.progression.filters.typePlaceholder}
               />
             </div>
             <div className="w-[180px]">
@@ -289,7 +298,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
                   setPage(0);
                 }}
                 options={statusOptions}
-                placeholder="Status"
+                placeholder={ru.progression.filters.statusPlaceholder}
               />
             </div>
             {config.capabilities.canFilterOwnerType ? (
@@ -301,7 +310,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
                     setPage(0);
                   }}
                   options={ownerTypeOptions}
-                  placeholder="Owner"
+                  placeholder={ru.progression.filters.ownerPlaceholder}
                 />
               </div>
             ) : null}
@@ -315,11 +324,11 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
         }
       />
 
-      {listQuery.isLoading ? <LoadingState title="Загружаем progression policies..." /> : null}
+      {listQuery.isLoading ? <LoadingState title={ru.progression.loading} /> : null}
 
       {!listQuery.isLoading && listQuery.isError ? (
         <ErrorState
-          title="Не удалось загрузить progression policies"
+          title={ru.progression.loadError}
           description={listQuery.error.message}
           onRetry={() => void listQuery.refetch()}
         />
@@ -327,8 +336,12 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
 
       {!listQuery.isLoading && !listQuery.isError && (listQuery.data?.items.length ?? 0) === 0 ? (
         <EmptyState
-          title="Policies не найдены"
-          description={debouncedSearch ? "Измените поисковый запрос." : "Список пока пуст."}
+          title={ru.progression.emptyTitle}
+          description={
+            debouncedSearch
+              ? ru.progression.emptyDescriptionSearch
+              : ru.progression.emptyDescription
+          }
         />
       ) : null}
 
@@ -345,8 +358,9 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
 
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
-              Страница {listQuery.data.page + 1} / {Math.max(listQuery.data.totalPages, 1)} •{" "}
-              {listQuery.data.totalElements} элементов
+              {ru.common.labels.page} {listQuery.data.page + 1} /{" "}
+              {Math.max(listQuery.data.totalPages, 1)} • {listQuery.data.totalElements}{" "}
+              {ru.common.labels.elements}
             </p>
             <div className="flex items-center gap-2">
               <AppButton
@@ -355,7 +369,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
                 disabled={!hasPrev}
                 onClick={() => setPage((previous) => previous - 1)}
               >
-                Назад
+                {ru.common.actions.back}
               </AppButton>
               <AppButton
                 type="button"
@@ -363,7 +377,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
                 disabled={!hasNext}
                 onClick={() => setPage((previous) => previous + 1)}
               >
-                Вперед
+                {ru.common.actions.forward}
               </AppButton>
             </div>
           </div>
@@ -380,7 +394,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
             await createMutation.mutateAsync(payload);
           }}
           onSubmitUpdate={async () => {
-            throw new Error("Unexpected update call in create mode");
+            throw new Error("Некорректный вызов обновления в режиме создания");
           }}
         />
       ) : null}
@@ -392,7 +406,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
         isSubmitting={updateMutation.isPending}
         onOpenChange={setIsDetailsOpen}
         onSubmitCreate={async () => {
-          throw new Error("Unexpected create call in details mode");
+          throw new Error("Некорректный вызов создания в режиме деталей");
         }}
         onSubmitUpdate={async (id, payload) => {
           await updateMutation.mutateAsync({ id, payload });
@@ -401,10 +415,10 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
 
       <ConfirmDeleteDialog
         open={Boolean(deleteItem)}
-        title="Архивировать policy?"
+        title={ru.progression.archiveConfirmTitle}
         description={
           deleteItem
-            ? `Политика ${deleteItem.name} будет архивирована и станет недоступна в активном списке.`
+            ? ru.progression.archiveConfirmDescription.replace("{name}", deleteItem.name)
             : ""
         }
         isSubmitting={deleteMutation.isPending}
