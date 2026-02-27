@@ -43,7 +43,7 @@ const equipmentConfig: ReferenceCrudConfig<EquipmentRecord, EquipmentFormValues>
   queryKey: "equipment",
   title: "Справочник оборудования",
   subtitle: "Управление инвентарем и категориями оборудования.",
-  searchPlaceholder: "Поиск по коду или названию",
+  searchPlaceholder: "Поиск по названию",
   createButtonLabel: "Создать оборудование",
   createDialogTitle: "Создание оборудования",
   editDialogTitle: "Редактирование оборудования",
@@ -51,12 +51,6 @@ const equipmentConfig: ReferenceCrudConfig<EquipmentRecord, EquipmentFormValues>
   deleteDialogDescription: (item) =>
     `Оборудование «${item.name}» будет удалено без возможности восстановления.`,
   columns: [
-    {
-      key: "code",
-      label: "Код",
-      className: "font-mono text-xs",
-      render: (item) => item.code,
-    },
     {
       key: "name",
       label: "Название",

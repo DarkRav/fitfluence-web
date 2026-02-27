@@ -2,6 +2,12 @@
 
 import { AppButton } from "@/shared/ui";
 import type { ReferenceColumn } from "@/features/reference/reference-types";
+import {
+  TableContainer,
+  tableCellClassName,
+  tableHeadClassName,
+  tableRowClassName,
+} from "@/components/ui";
 
 type ReferenceTableProps<TItem extends { id: string }> = {
   items: TItem[];
@@ -17,34 +23,34 @@ export function ReferenceTable<TItem extends { id: string }>({
   onDelete,
 }: ReferenceTableProps<TItem>) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
+    <TableContainer>
       <table className="w-full text-left text-sm">
-        <thead className="bg-sidebar/60 text-muted-foreground">
+        <thead className={tableHeadClassName}>
           <tr>
             {columns.map((column) => (
-              <th key={column.key} className="px-4 py-3 font-medium">
+              <th key={column.key} className={`${tableCellClassName} font-medium`}>
                 {column.label}
               </th>
             ))}
-            <th className="px-4 py-3 text-right font-medium">Действия</th>
+            <th className={`${tableCellClassName} text-right font-medium`}>Действия</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
             <tr
               key={item.id}
-              className="border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
+              className={`${tableRowClassName} cursor-pointer`}
               onClick={() => onEdit(item)}
             >
               {columns.map((column) => (
                 <td
                   key={`${item.id}-${column.key}`}
-                  className={`px-4 py-3 ${column.className ?? ""}`}
+                  className={`${tableCellClassName} ${column.className ?? ""}`}
                 >
                   {column.render(item)}
                 </td>
               ))}
-              <td className="px-4 py-3">
+              <td className={tableCellClassName}>
                 <div className="flex items-center justify-end gap-2">
                   <AppButton
                     type="button"
@@ -74,6 +80,6 @@ export function ReferenceTable<TItem extends { id: string }>({
           ))}
         </tbody>
       </table>
-    </div>
+    </TableContainer>
   );
 }

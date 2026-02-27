@@ -167,7 +167,7 @@ export function ReferenceCrudPage<
               setDeleteItem(item);
             }}
           />
-          <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-card">
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
               Страница {listQuery.data.page + 1} / {Math.max(listQuery.data.totalPages, 1)} •{" "}
               {listQuery.data.totalElements} элементов

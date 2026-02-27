@@ -2,6 +2,12 @@
 
 import { AppButton } from "@/shared/ui";
 import type { ExerciseCrudItem } from "@/features/exercises/types";
+import {
+  TableContainer,
+  tableCellClassName,
+  tableHeadClassName,
+  tableRowClassName,
+} from "@/components/ui";
 
 function mapDifficultyLabel(value?: ExerciseCrudItem["difficultyLevel"]): string {
   if (value === "BEGINNER") {
@@ -52,49 +58,49 @@ type ExercisesTableProps = {
 
 export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: ExercisesTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
+    <TableContainer>
       <table className="w-full text-left text-sm">
-        <thead className="bg-sidebar/60 text-muted-foreground">
+        <thead className={tableHeadClassName}>
           <tr>
-            <th className="px-4 py-3 font-medium">Название</th>
-            <th className="px-4 py-3 font-medium">Паттерн</th>
-            <th className="px-4 py-3 font-medium">Сложность</th>
-            <th className="px-4 py-3 font-medium">Мышцы</th>
-            <th className="px-4 py-3 font-medium">Оборудование</th>
-            <th className="px-4 py-3 font-medium text-center">Медиа</th>
-            {!readOnly ? <th className="px-4 py-3 text-right font-medium">Действия</th> : null}
+            <th className={`${tableCellClassName} font-medium`}>Название</th>
+            <th className={`${tableCellClassName} font-medium`}>Паттерн</th>
+            <th className={`${tableCellClassName} font-medium`}>Сложность</th>
+            <th className={`${tableCellClassName} font-medium`}>Мышцы</th>
+            <th className={`${tableCellClassName} font-medium`}>Оборудование</th>
+            <th className={`${tableCellClassName} text-center font-medium`}>Медиа</th>
+            {!readOnly ? (
+              <th className={`${tableCellClassName} text-right font-medium`}>Действия</th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
             <tr
               key={item.id}
-              className={`border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10 ${
-                readOnly ? "" : "cursor-pointer"
-              }`}
+              className={`${tableRowClassName} ${readOnly ? "" : "cursor-pointer"}`}
               onClick={() => {
                 if (!readOnly) {
                   onEdit?.(item);
                 }
               }}
             >
-              <td className="px-4 py-3">
+              <td className={tableCellClassName}>
                 <p className="font-medium text-foreground">{item.name}</p>
                 {item.description ? (
                   <p className="line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
                 ) : null}
               </td>
-              <td className="px-4 py-3">{mapMovementLabel(item.movementPattern)}</td>
-              <td className="px-4 py-3">{mapDifficultyLabel(item.difficultyLevel)}</td>
-              <td className="px-4 py-3 text-xs text-muted-foreground">
+              <td className={tableCellClassName}>{mapMovementLabel(item.movementPattern)}</td>
+              <td className={tableCellClassName}>{mapDifficultyLabel(item.difficultyLevel)}</td>
+              <td className={`${tableCellClassName} text-xs text-muted-foreground`}>
                 {item.musclesLabel || "—"}
               </td>
-              <td className="px-4 py-3 text-xs text-muted-foreground">
+              <td className={`${tableCellClassName} text-xs text-muted-foreground`}>
                 {item.equipmentLabel || "—"}
               </td>
-              <td className="px-4 py-3 text-center">{item.mediaIds.length}</td>
+              <td className={`${tableCellClassName} text-center`}>{item.mediaIds.length}</td>
               {!readOnly ? (
-                <td className="px-4 py-3">
+                <td className={tableCellClassName}>
                   <div className="flex items-center justify-end gap-2">
                     <AppButton
                       type="button"
@@ -125,6 +131,6 @@ export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: Ex
           ))}
         </tbody>
       </table>
-    </div>
+    </TableContainer>
   );
 }

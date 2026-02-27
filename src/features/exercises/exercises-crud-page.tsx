@@ -207,7 +207,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
                     }}
                   />
                 ) : (
-                  <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
+                  <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
                     В этой категории пока нет упражнений.
                   </div>
                 )}
@@ -220,7 +220,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
                 {sharedItems.length > 0 ? (
                   <ExercisesTable items={sharedItems} readOnly />
                 ) : (
-                  <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
+                  <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
                     В общей библиотеке нет упражнений по текущему фильтру.
                   </div>
                 )}
@@ -239,7 +239,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
             />
           )}
 
-          <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-card">
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
               Страница {listQuery.data.page + 1} / {Math.max(listQuery.data.totalPages, 1)} •{" "}
               {listQuery.data.totalElements} элементов
