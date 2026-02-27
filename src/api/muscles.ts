@@ -100,10 +100,10 @@ export async function searchMuscles(
     ok: true,
     data: {
       items: (result.data.content ?? []).map(mapMuscle),
-      page: result.data.page,
-      size: result.data.size,
-      totalElements: result.data.totalElements,
-      totalPages: result.data.totalPages,
+      page: result.data.metadata.page,
+      size: result.data.metadata.size,
+      totalElements: result.data.metadata.totalElements,
+      totalPages: result.data.metadata.totalPages,
     },
   };
 }

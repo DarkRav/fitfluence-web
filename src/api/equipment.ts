@@ -94,10 +94,10 @@ export async function searchEquipment(
     ok: true,
     data: {
       items: (result.data.content ?? []).map(mapEquipment),
-      page: result.data.page,
-      size: result.data.size,
-      totalElements: result.data.totalElements,
-      totalPages: result.data.totalPages,
+      page: result.data.metadata.page,
+      size: result.data.metadata.size,
+      totalElements: result.data.metadata.totalElements,
+      totalPages: result.data.metadata.totalPages,
     },
   };
 }

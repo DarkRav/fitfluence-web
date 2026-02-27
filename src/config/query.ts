@@ -1,0 +1,2 @@
+export const REFERENCE_LIST_STALE_TIME_MS = 45_000;
+export const REFERENCE_LIST_PAGE_SIZE = 20;
