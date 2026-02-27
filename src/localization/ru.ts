@@ -101,7 +101,6 @@ export const ru = {
       equipment: "Оборудование",
       exercises: "Упражнения",
       programs: "Программы",
-      workouts: "Тренировки",
       progression: "Прогрессия",
     },
     influencer: {
@@ -109,7 +108,6 @@ export const ru = {
       media: "Медиафайлы",
       exercises: "Упражнения",
       programs: "Программы",
-      workouts: "Тренировки",
       progression: "Прогрессия",
       profile: "Профиль",
     },
