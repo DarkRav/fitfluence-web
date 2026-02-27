@@ -63,3 +63,23 @@ export type ExerciseReferenceLoaders = {
   loadMuscles: (search?: string) => Promise<ApiResult<ReferenceOption[]>>;
   loadEquipment: (search?: string) => Promise<ApiResult<ReferenceOption[]>>;
 };
+
+export type ExercisesCrudScopeConfig = {
+  scope: ExerciseCrudScope;
+  title: string;
+  subtitle: string;
+  searchPlaceholder: string;
+  createButtonLabel: string;
+  queryKeyPrefix: readonly [string, ExerciseCrudScope];
+  api: ExercisesCrudApi;
+  references: ExerciseReferenceLoaders;
+  messages: {
+    created: string;
+    updated: string;
+    deleted: string;
+  };
+  deleteDialog: {
+    title: string;
+    description: (item: ExerciseCrudItem) => string;
+  };
+};

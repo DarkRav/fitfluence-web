@@ -7,12 +7,7 @@ import { ConfirmDeleteDialog } from "@/features/reference/confirm-delete-dialog"
 import { ExerciseFormDialog } from "@/features/exercises/exercise-form-dialog";
 import { ExercisesTable } from "@/features/exercises/exercises-table";
 import { ExerciseToolbar } from "@/features/exercises/exercise-toolbar";
-import type {
-  ExerciseCrudItem,
-  ExerciseCrudScope,
-  ExerciseReferenceLoaders,
-  ExercisesCrudApi,
-} from "@/features/exercises/types";
+import type { ExerciseCrudItem, ExercisesCrudScopeConfig } from "@/features/exercises/types";
 import {
   AppButton,
   EmptyState,
@@ -23,26 +18,10 @@ import {
 } from "@/shared/ui";
 
 type ExercisesCrudPageProps = {
-  scope: ExerciseCrudScope;
-  title: string;
-  subtitle: string;
-  queryKey: string;
-  searchPlaceholder: string;
-  createButtonLabel: string;
-  api: ExercisesCrudApi;
-  references: ExerciseReferenceLoaders;
+  config: ExercisesCrudScopeConfig;
 };
 
-export function ExercisesCrudPage({
-  scope,
-  title,
-  subtitle,
-  queryKey,
-  searchPlaceholder,
-  createButtonLabel,
-  api,
-  references,
-}: ExercisesCrudPageProps) {
+export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -65,9 +44,9 @@ export function ExercisesCrudPage({
   }, [search]);
 
   const listQuery = useQuery({
-    queryKey: [queryKey, page, REFERENCE_LIST_PAGE_SIZE, debouncedSearch, filters],
+    queryKey: [...config.queryKeyPrefix, page, REFERENCE_LIST_PAGE_SIZE, debouncedSearch, filters],
     queryFn: async () => {
-      const result = await api.search({
+      const result = await config.api.search({
         page,
         size: REFERENCE_LIST_PAGE_SIZE,
         search: debouncedSearch,
@@ -84,9 +63,9 @@ export function ExercisesCrudPage({
   });
 
   const musclesQuery = useQuery({
-    queryKey: [queryKey, "muscle-options"],
+    queryKey: [...config.queryKeyPrefix, "muscle-options"],
     queryFn: async () => {
-      const result = await references.loadMuscles("");
+      const result = await config.references.loadMuscles("");
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -97,9 +76,9 @@ export function ExercisesCrudPage({
   });
 
   const equipmentQuery = useQuery({
-    queryKey: [queryKey, "equipment-options"],
+    queryKey: [...config.queryKeyPrefix, "equipment-options"],
     queryFn: async () => {
-      const result = await references.loadEquipment("");
+      const result = await config.references.loadEquipment("");
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -111,10 +90,10 @@ export function ExercisesCrudPage({
 
   const saveMutation = useMutation({
     mutationFn: async (
-      values: Parameters<typeof api.create>[0] | Parameters<typeof api.update>[1],
+      values: Parameters<typeof config.api.create>[0] | Parameters<typeof config.api.update>[1],
     ) => {
       if (editingItem) {
-        const result = await api.update(editingItem.id, values);
+        const result = await config.api.update(editingItem.id, values);
         if (!result.ok) {
           throw new Error(result.error.message);
         }
@@ -122,7 +101,7 @@ export function ExercisesCrudPage({
         return "updated" as const;
       }
 
-      const result = await api.create(values as Parameters<typeof api.create>[0]);
+      const result = await config.api.create(values as Parameters<typeof config.api.create>[0]);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -133,17 +112,17 @@ export function ExercisesCrudPage({
       pushToast({
         kind: "success",
         title: "Сохранено",
-        description: mode === "created" ? "Упражнение создано." : "Упражнение обновлено.",
+        description: mode === "created" ? config.messages.created : config.messages.updated,
       });
       setIsFormOpen(false);
       setEditingItem(null);
-      await queryClient.invalidateQueries({ queryKey: [queryKey] });
+      await queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const result = await api.remove(id);
+      const result = await config.api.remove(id);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -152,10 +131,10 @@ export function ExercisesCrudPage({
       pushToast({
         kind: "success",
         title: "Архивировано",
-        description: "Упражнение удалено из базовой библиотеки.",
+        description: config.messages.deleted,
       });
       setDeleteItem(null);
-      await queryClient.invalidateQueries({ queryKey: [queryKey] });
+      await queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix });
     },
   });
 
@@ -166,8 +145,8 @@ export function ExercisesCrudPage({
   const actions = (
     <ExerciseToolbar
       search={search}
-      searchPlaceholder={searchPlaceholder}
-      createButtonLabel={createButtonLabel}
+      searchPlaceholder={config.searchPlaceholder}
+      createButtonLabel={config.createButtonLabel}
       onSearchChange={setSearch}
       onCreateClick={() => {
         setEditingItem(null);
@@ -178,7 +157,7 @@ export function ExercisesCrudPage({
 
   return (
     <div>
-      <PageHeader title={title} subtitle={subtitle} actions={actions} />
+      <PageHeader title={config.title} subtitle={config.subtitle} actions={actions} />
 
       {listQuery.isLoading ? <LoadingState title="Загружаем упражнения..." /> : null}
 
@@ -241,7 +220,7 @@ export function ExercisesCrudPage({
       <ExerciseFormDialog
         open={isFormOpen}
         mode={editingItem ? "edit" : "create"}
-        scope={scope}
+        scope={config.scope}
         item={editingItem ?? undefined}
         muscleOptions={musclesQuery.data ?? []}
         equipmentOptions={equipmentQuery.data ?? []}
@@ -259,10 +238,8 @@ export function ExercisesCrudPage({
 
       <ConfirmDeleteDialog
         open={Boolean(deleteItem)}
-        title="Архивировать упражнение"
-        description={
-          deleteItem ? `Упражнение «${deleteItem.name}» будет удалено из базовой библиотеки.` : ""
-        }
+        title={config.deleteDialog.title}
+        description={deleteItem ? config.deleteDialog.description(deleteItem) : ""}
         isSubmitting={deleteMutation.isPending}
         onOpenChange={(open) => {
           if (!open) {

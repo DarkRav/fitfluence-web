@@ -1,4 +1,5 @@
 export { ExercisesCrudPage } from "@/features/exercises/exercises-crud-page";
+export { adminExerciseScope, influencerExerciseScope } from "@/features/exercises/scopes";
 export type {
   ExerciseCrudScope,
   ExerciseCrudItem,
@@ -7,4 +8,5 @@ export type {
   CreateExerciseCrudPayload,
   UpdateExerciseCrudPayload,
   ExercisesCrudApi,
+  ExercisesCrudScopeConfig,
 } from "@/features/exercises/types";
