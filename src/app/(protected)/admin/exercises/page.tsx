@@ -13,7 +13,7 @@ export default function AdminExercisesPage() {
   return (
     <ExercisesCrudPage
       scope="admin"
-      title="Exercises"
+      title="Упражнения"
       subtitle="Базовая библиотека упражнений, доступная для кастомных тренировок пользователей."
       queryKey="adminExercises"
       searchPlaceholder="Поиск по названию или коду"
