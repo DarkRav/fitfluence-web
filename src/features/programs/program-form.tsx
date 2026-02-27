@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import type { AdminProgramStatus } from "@/api/adminPrograms";
+import { searchInfluencerOptions } from "@/api/influencers";
 import { type ProgramCreatePayload, type ProgramUpdatePayload } from "@/features/programs/types";
 import { MediaPicker } from "@/features/media";
 import { AppButton, AppInput, AppSelect } from "@/shared/ui";
@@ -85,6 +87,9 @@ export function ProgramForm({
   onCancel,
   requireInfluencerId = false,
 }: ProgramFormProps) {
+  const [influencerSearch, setInfluencerSearch] = useState("");
+  const [debouncedInfluencerSearch, setDebouncedInfluencerSearch] = useState("");
+
   const form = useForm<ProgramFormValues>({
     resolver: zodResolver(programFormSchema),
     defaultValues: buildDefaultValues(initialValues),
@@ -93,6 +98,31 @@ export function ProgramForm({
   useEffect(() => {
     form.reset(buildDefaultValues(initialValues));
   }, [form, initialValues]);
+
+  useEffect(() => {
+    if (!requireInfluencerId || mode !== "create") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedInfluencerSearch(influencerSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [influencerSearch, mode, requireInfluencerId]);
+
+  const influencerOptionsQuery = useQuery({
+    queryKey: ["influencerOptions", debouncedInfluencerSearch],
+    enabled: requireInfluencerId && mode === "create",
+    queryFn: async () => {
+      const result = await searchInfluencerOptions({ search: debouncedInfluencerSearch });
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+  });
 
   return (
     <form
@@ -129,14 +159,37 @@ export function ProgramForm({
     >
       {mode === "create" && requireInfluencerId ? (
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Influencer ID</label>
+          <label className="text-sm font-medium text-foreground">Influencer</label>
           <AppInput
-            {...form.register("influencerId")}
-            placeholder="UUID инфлюэнсера"
+            value={influencerSearch}
+            onChange={(event) => setInfluencerSearch(event.target.value)}
+            placeholder="Поиск инфлюэнсера по имени"
             disabled={isSubmitting}
+          />
+          <Controller
+            control={form.control}
+            name="influencerId"
+            render={({ field }) => (
+              <AppSelect
+                value={field.value}
+                onValueChange={field.onChange}
+                options={(influencerOptionsQuery.data ?? []).map((item) => ({
+                  value: item.id,
+                  label: item.displayName,
+                }))}
+                placeholder={
+                  influencerOptionsQuery.isLoading
+                    ? "Загружаем инфлюэнсеров..."
+                    : "Выберите инфлюэнсера"
+                }
+              />
+            )}
           />
           {form.formState.errors.influencerId ? (
             <p className="text-xs text-destructive">{form.formState.errors.influencerId.message}</p>
+          ) : null}
+          {!influencerOptionsQuery.isLoading && (influencerOptionsQuery.data?.length ?? 0) === 0 ? (
+            <p className="text-xs text-muted-foreground">Инфлюэнсеры не найдены.</p>
           ) : null}
         </div>
       ) : null}
