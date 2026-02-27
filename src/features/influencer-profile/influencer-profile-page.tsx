@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { uploadMedia } from "@/api/media";
 import {
   createInfluencerProfile,
   getInfluencerProfile,
@@ -141,6 +142,33 @@ export function InfluencerProfilePage() {
     },
   });
 
+  const avatarUploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const result = await uploadMedia(file, { role: "INFLUENCER" });
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: (media) => {
+      form.setValue("avatarMediaId", media.id, { shouldDirty: true });
+      pushToast({
+        kind: "success",
+        title: "Аватар загружен",
+        description: "Медиа успешно загружено и выбрано для аватара.",
+      });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось загрузить файл";
+      pushToast({
+        kind: "error",
+        title: "Ошибка загрузки",
+        description: message,
+      });
+    },
+  });
+
   if (profileQuery.isLoading) {
     return <LoadingState title="Загружаем профиль инфлюэнсера..." />;
   }
@@ -158,7 +186,7 @@ export function InfluencerProfilePage() {
   return (
     <div>
       <PageHeader
-        title={onboardingMode ? "Create your influencer profile" : "Edit profile"}
+        title={onboardingMode ? "Создайте профиль инфлюэнсера" : "Редактирование профиля"}
         subtitle={
           onboardingMode
             ? "Заполните профиль, чтобы продолжить работу в кабинете инфлюэнсера."
@@ -180,7 +208,7 @@ export function InfluencerProfilePage() {
         ) : null}
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Display name</label>
+          <label className="text-sm font-medium text-foreground">Отображаемое имя</label>
           <AppInput
             {...form.register("displayName")}
             placeholder="Ваше отображаемое имя"
@@ -189,7 +217,7 @@ export function InfluencerProfilePage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Bio</label>
+          <label className="text-sm font-medium text-foreground">О себе</label>
           <textarea
             {...form.register("bio")}
             placeholder="Коротко о себе"
@@ -199,13 +227,36 @@ export function InfluencerProfilePage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Avatar</label>
+          <label className="text-sm font-medium text-foreground">Аватар</label>
           <MediaPicker
             value={avatarMediaId || undefined}
             onChange={(id) => {
               form.setValue("avatarMediaId", id, { shouldDirty: true });
             }}
           />
+          <div className="rounded-md border border-border/80 bg-sidebar/40 p-3">
+            <label className="mb-2 block text-xs text-muted-foreground">
+              Или загрузите файл с устройства
+            </label>
+            <input
+              type="file"
+              accept="image/*,video/*"
+              disabled={saveMutation.isPending || avatarUploadMutation.isPending}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) {
+                  return;
+                }
+
+                avatarUploadMutation.mutate(file);
+                event.currentTarget.value = "";
+              }}
+              className="block w-full rounded-md border border-border bg-card p-2 text-sm text-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary/15 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-secondary"
+            />
+            {avatarUploadMutation.isPending ? (
+              <p className="mt-2 text-xs text-muted-foreground">Загружаем файл...</p>
+            ) : null}
+          </div>
           {avatarMediaId ? (
             <AppButton
               type="button"
@@ -226,7 +277,7 @@ export function InfluencerProfilePage() {
 
         <div className="space-y-3 rounded-lg border border-border/80 bg-sidebar/40 p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">Social links</p>
+            <p className="text-sm font-medium text-foreground">Социальные ссылки</p>
             <AppButton
               type="button"
               variant="secondary"
@@ -248,7 +299,7 @@ export function InfluencerProfilePage() {
                 <div>
                   <AppInput
                     {...form.register(`socialLinks.${index}.type`)}
-                    placeholder="Type (instagram, youtube)"
+                    placeholder="Тип (instagram, youtube)"
                     disabled={saveMutation.isPending}
                   />
                   {form.formState.errors.socialLinks?.[index]?.type ? (
@@ -260,7 +311,7 @@ export function InfluencerProfilePage() {
                 <div>
                   <AppInput
                     {...form.register(`socialLinks.${index}.url`)}
-                    placeholder="https://example.com/profile"
+                    placeholder="https://example.com/profil"
                     disabled={saveMutation.isPending}
                   />
                   {form.formState.errors.socialLinks?.[index]?.url ? (
