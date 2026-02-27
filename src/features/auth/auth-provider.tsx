@@ -4,6 +4,7 @@ import { createContext, useCallback, useEffect, useMemo, useState } from "react"
 import { api } from "@/api";
 import { setApiAccessToken } from "@/api/auth-token";
 import { oidcUserManager } from "@/features/auth/oidc";
+import { normalizeRoles } from "@/features/auth/roles";
 import type { AuthState, AppRole } from "@/features/auth/types";
 
 type AuthContextValue = AuthState & {
@@ -30,11 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const meResult = await api.me.get();
 
     if (meResult.ok) {
+      const roles = normalizeRoles(meResult.data.roles);
       setState((prev) => ({
         ...prev,
         status: "authenticated",
         me: meResult.data,
-        roles: meResult.data.roles,
+        roles,
       }));
       return;
     }
@@ -97,13 +99,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return [];
     }
 
+    const roles = normalizeRoles(meResult.data.roles);
     setState((prev) => ({
       ...prev,
       status: "authenticated",
       me: meResult.data,
-      roles: meResult.data.roles,
+      roles,
     }));
-    return meResult.data.roles;
+    return roles;
   }, []);
 
   const logout = useCallback(async () => {
