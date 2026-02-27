@@ -57,7 +57,6 @@ export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: Ex
         <thead className="bg-sidebar/60 text-muted-foreground">
           <tr>
             <th className="px-4 py-3 font-medium">Название</th>
-            <th className="px-4 py-3 font-medium">Код</th>
             <th className="px-4 py-3 font-medium">Паттерн</th>
             <th className="px-4 py-3 font-medium">Сложность</th>
             <th className="px-4 py-3 font-medium">Мышцы</th>
@@ -85,7 +84,6 @@ export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: Ex
                   <p className="line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
                 ) : null}
               </td>
-              <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{item.code}</td>
               <td className="px-4 py-3">{mapMovementLabel(item.movementPattern)}</td>
               <td className="px-4 py-3">{mapDifficultyLabel(item.difficultyLevel)}</td>
               <td className="px-4 py-3 text-xs text-muted-foreground">

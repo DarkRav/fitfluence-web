@@ -66,12 +66,6 @@ const musclesConfig: ReferenceCrudConfig<MuscleRecord, MuscleFormValues> = {
     `Мышца «${item.name}» будет удалена без возможности восстановления.`,
   columns: [
     {
-      key: "code",
-      label: "Код",
-      className: "font-mono text-xs",
-      render: (item) => item.code,
-    },
-    {
       key: "name",
       label: "Название",
       render: (item) => item.name,
