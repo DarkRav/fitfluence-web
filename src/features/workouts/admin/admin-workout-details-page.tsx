@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  type AdminWorkoutExerciseRecord,
   addExerciseToAdminWorkout,
   deleteAdminWorkoutExercise,
   getAdminWorkout,
+  reorderAdminWorkoutExercises,
   updateAdminWorkoutExercise,
 } from "@/api/adminWorkouts";
 import { AddExerciseDialog } from "@/features/workouts/admin/add-exercise-dialog";
+import { ReorderableExercisesList } from "@/features/workouts/admin/reorderable-exercises-list";
 import { WorkoutExerciseEditor } from "@/features/workouts/admin/workout-exercise-editor";
 import { AppButton, ErrorState, LoadingState, PageHeader, useAppToast } from "@/shared/ui";
 
@@ -33,6 +36,7 @@ export function AdminWorkoutDetailsPage({
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
+  const [localExercises, setLocalExercises] = useState<AdminWorkoutExerciseRecord[]>([]);
 
   const detailsQuery = useQuery({
     queryKey: ["adminWorkout", workoutTemplateId],
@@ -135,6 +139,39 @@ export function AdminWorkoutDetailsPage({
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: async ({
+      nextExercises,
+    }: {
+      nextExercises: AdminWorkoutExerciseRecord[];
+      previousExercises: AdminWorkoutExerciseRecord[];
+    }) => {
+      const result = await reorderAdminWorkoutExercises(
+        workoutTemplateId,
+        nextExercises.map((item, index) => ({
+          exerciseTemplateId: item.id,
+          orderIndex: index,
+        })),
+      );
+
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["adminWorkout", workoutTemplateId] });
+    },
+    onError: (error, variables) => {
+      setLocalExercises(variables.previousExercises);
+      const message = error instanceof Error ? error.message : "Не удалось сохранить порядок";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка reorder",
+        description: message,
+      });
+    },
+  });
+
   useEffect(() => {
     if (!detailsQuery.isError) {
       return;
@@ -148,6 +185,16 @@ export function AdminWorkoutDetailsPage({
       description: detailsQuery.error.message,
     });
   }, [detailsQuery.error, detailsQuery.isError, pushToast]);
+
+  useEffect(() => {
+    if (!detailsQuery.data) {
+      return;
+    }
+
+    setLocalExercises(
+      [...detailsQuery.data.exercises].sort((left, right) => left.orderIndex - right.orderIndex),
+    );
+  }, [detailsQuery.data]);
 
   if (detailsQuery.isLoading) {
     return <LoadingState title="Загружаем workout..." />;
@@ -215,8 +262,15 @@ export function AdminWorkoutDetailsPage({
             В этом workout пока нет упражнений.
           </p>
         ) : (
-          <div className="space-y-3">
-            {workout.exercises.map((exercise) => (
+          <ReorderableExercisesList
+            exercises={localExercises}
+            isReordering={reorderMutation.isPending}
+            onReorder={(nextExercises) => {
+              const previousExercises = localExercises;
+              setLocalExercises(nextExercises);
+              reorderMutation.mutate({ nextExercises, previousExercises });
+            }}
+            renderExercise={(exercise) => (
               <WorkoutExerciseEditor
                 key={exercise.id}
                 exercise={exercise}
@@ -229,8 +283,8 @@ export function AdminWorkoutDetailsPage({
                   await deleteExerciseMutation.mutateAsync(exerciseTemplateId);
                 }}
               />
-            ))}
-          </div>
+            )}
+          />
         )}
       </div>
 
