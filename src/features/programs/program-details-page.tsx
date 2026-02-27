@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProgramForm } from "@/features/programs/program-form";
@@ -130,7 +130,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     });
   }, [pushToast, versionsQuery.error, versionsQuery.isError]);
 
-  const versions = versionsQuery.data?.items ?? [];
+  const versions = useMemo(() => versionsQuery.data?.items ?? [], [versionsQuery.data?.items]);
 
   const selectedVersionId = useMemo(() => {
     if (versions.length === 0) {
@@ -149,18 +149,21 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     [selectedVersionId, versions],
   );
 
-  const replaceQuery = (updates: { tab?: ProgramTopTabId; version?: string }) => {
-    const nextParams = new URLSearchParams(searchParams.toString());
+  const replaceQuery = useCallback(
+    (updates: { tab?: ProgramTopTabId; version?: string }) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
 
-    if (updates.tab) {
-      nextParams.set("tab", updates.tab);
-    }
-    if (updates.version) {
-      nextParams.set("version", updates.version);
-    }
+      if (updates.tab) {
+        nextParams.set("tab", updates.tab);
+      }
+      if (updates.version) {
+        nextParams.set("version", updates.version);
+      }
 
-    router.replace(`${pathname}?${nextParams.toString()}`);
-  };
+      router.replace(`${pathname}?${nextParams.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
 
   useEffect(() => {
     if (!selectedVersionId || selectedVersionId === queryVersionId) {
@@ -168,7 +171,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     }
 
     replaceQuery({ version: selectedVersionId, tab: activeTab });
-  }, [activeTab, queryVersionId, selectedVersionId]);
+  }, [activeTab, queryVersionId, replaceQuery, selectedVersionId]);
 
   const updateMutation = useMutation({
     mutationFn: async (payload: ProgramUpdatePayload) => {
