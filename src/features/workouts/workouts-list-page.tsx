@@ -312,7 +312,12 @@ export function WorkoutsListPage({
                 {listQuery.data.items.map((workout) => (
                   <tr
                     key={workout.id}
-                    className="border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
+                    className="cursor-pointer border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
+                    onClick={() =>
+                      router.push(
+                        scope.routes.workoutDetails(programId, programVersionId, workout.id),
+                      )
+                    }
                   >
                     <td className="px-4 py-3 font-medium">
                       {ru.common.labels.dayOrder} {workout.dayOrder}
@@ -328,11 +333,12 @@ export function WorkoutsListPage({
                           type="button"
                           variant="secondary"
                           className="h-9 px-3 text-xs"
-                          onClick={() =>
+                          onClick={(event) => {
+                            event.stopPropagation();
                             router.push(
                               scope.routes.workoutDetails(programId, programVersionId, workout.id),
-                            )
-                          }
+                            );
+                          }}
                         >
                           {ru.common.actions.open}
                         </AppButton>
@@ -341,7 +347,10 @@ export function WorkoutsListPage({
                             type="button"
                             variant="secondary"
                             className="h-9 px-3 text-xs"
-                            onClick={() => setEditingWorkout(workout)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setEditingWorkout(workout);
+                            }}
                           >
                             {ru.common.actions.edit}
                           </AppButton>
@@ -351,7 +360,10 @@ export function WorkoutsListPage({
                             type="button"
                             variant="destructive"
                             className="h-9 px-3 text-xs"
-                            onClick={() => setDeleteWorkout(workout)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setDeleteWorkout(workout);
+                            }}
                           >
                             {ru.common.actions.delete}
                           </AppButton>
