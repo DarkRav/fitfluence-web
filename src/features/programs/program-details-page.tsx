@@ -335,6 +335,15 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                   items={versionsQuery.data.items}
                   canPublish={config.capabilities.canPublish}
                   isPublishing={publishMutation.isPending}
+                  onOpenWorkouts={
+                    config.scope === "admin"
+                      ? (version) => {
+                          router.push(
+                            `/admin/programs/${program.id}/versions/${version.id}/workouts`,
+                          );
+                        }
+                      : undefined
+                  }
                   onPublish={(version: ProgramVersionRecord) => {
                     setPublishTarget(version);
                   }}

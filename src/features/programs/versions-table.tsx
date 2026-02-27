@@ -9,9 +9,16 @@ type VersionsTableProps = {
   canPublish: boolean;
   isPublishing: boolean;
   onPublish?: (item: ProgramVersionRecord) => void;
+  onOpenWorkouts?: (item: ProgramVersionRecord) => void;
 };
 
-export function VersionsTable({ items, canPublish, isPublishing, onPublish }: VersionsTableProps) {
+export function VersionsTable({
+  items,
+  canPublish,
+  isPublishing,
+  onPublish,
+  onOpenWorkouts,
+}: VersionsTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <table className="w-full text-left text-sm">
@@ -45,7 +52,17 @@ export function VersionsTable({ items, canPublish, isPublishing, onPublish }: Ve
                 {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "—"}
               </td>
               <td className="px-4 py-3">
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                  {onOpenWorkouts ? (
+                    <AppButton
+                      type="button"
+                      variant="secondary"
+                      className="h-9 px-3 text-xs"
+                      onClick={() => onOpenWorkouts(item)}
+                    >
+                      Workouts
+                    </AppButton>
+                  ) : null}
                   {canPublish && item.status === "DRAFT" ? (
                     <AppButton
                       type="button"
