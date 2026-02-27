@@ -1,60 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProgramForm } from "@/features/programs/program-form";
 import { ProgramHeader } from "@/features/programs/program-header";
+import { ProgramPageLayout } from "@/features/programs/program-page-layout";
 import { PublishVersionDialog } from "@/features/programs/publish-version-dialog";
-import { ProgramTabs, type ProgramTabId } from "@/features/programs/program-tabs";
-import { ProgramVersionsTab } from "@/features/programs/program-versions-tab";
-import { VersionsTable } from "@/features/programs/versions-table";
-import {
-  AppButton,
-  AppInput,
-  AppSelect,
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  useAppToast,
-} from "@/shared/ui";
-import { ru } from "@/localization/ru";
+import { ProgramVersionFormDialog } from "@/features/programs/program-version-form-dialog";
+import { type ProgramTopTabId } from "@/features/programs/program-tabs";
+import { VersionPicker } from "@/features/programs/version-picker";
 import type {
-  ProgramVersionRecord,
   ProgramRecord,
   ProgramUpdatePayload,
+  ProgramVersionRecord,
   ProgramVersionsPageResult,
   ProgramsScopeConfig,
 } from "@/features/programs/types";
+import { WorkoutsListPage } from "@/features/workouts/workouts-list-page";
+import { ru } from "@/localization/ru";
+import { AppButton, EmptyState, ErrorState, LoadingState, useAppToast } from "@/shared/ui";
 
 type ProgramDetailsPageProps = {
   programId: string;
   config: ProgramsScopeConfig;
 };
 
-const statusFilterOptions = [
-  { value: "ALL", label: ru.common.status.ALL },
-  { value: "DRAFT", label: ru.common.status.DRAFT },
-  { value: "PUBLISHED", label: ru.common.status.PUBLISHED },
-  { value: "ARCHIVED", label: ru.common.status.ARCHIVED },
-] as const;
-
 function isForbiddenMessage(message: string): boolean {
   const normalized = message.toLowerCase();
   return normalized.includes("forbidden") || normalized.includes("недостаточно прав");
 }
 
+function parseTab(value: string | null): ProgramTopTabId {
+  if (value === "workouts" || value === "settings" || value === "info") {
+    return value;
+  }
+
+  return "info";
+}
+
+function pickPreferredVersion(versions: ProgramVersionRecord[]): ProgramVersionRecord | undefined {
+  if (versions.length === 0) {
+    return undefined;
+  }
+
+  return (
+    versions.find((item) => item.status === "DRAFT") ??
+    versions.find((item) => item.status === "PUBLISHED") ??
+    versions[0]
+  );
+}
+
 export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
-  const [activeTab, setActiveTab] = useState<ProgramTabId>("details");
-  const [versionsSearch, setVersionsSearch] = useState("");
-  const [debouncedVersionsSearch, setDebouncedVersionsSearch] = useState("");
-  const [versionsPage, setVersionsPage] = useState(0);
-  const [versionsStatusFilter, setVersionsStatusFilter] =
-    useState<(typeof statusFilterOptions)[number]["value"]>("ALL");
   const [publishTarget, setPublishTarget] = useState<ProgramVersionRecord | null>(null);
+  const [isCreateVersionOpen, setIsCreateVersionOpen] = useState(false);
+
+  const activeTab = parseTab(searchParams.get("tab"));
+  const queryVersionId = searchParams.get("version");
 
   const detailsQuery = useQuery<ProgramRecord, Error>({
     queryKey: [...config.queryKeyPrefix, "details", programId],
@@ -81,6 +88,87 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       description: detailsQuery.error.message,
     });
   }, [detailsQuery.error, detailsQuery.isError, pushToast]);
+
+  const versionsQuery = useQuery<ProgramVersionsPageResult, Error>({
+    queryKey: [...config.queryKeyPrefix, "versions-picker", programId],
+    enabled: Boolean(config.api.searchVersions),
+    queryFn: async () => {
+      if (!config.api.searchVersions) {
+        throw new Error(ru.programs.details.versionsApiUnavailable);
+      }
+
+      const result = await config.api.searchVersions({
+        programId,
+        page: 0,
+        size: 200,
+      });
+
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return {
+        ...result.data,
+        items: [...result.data.items].sort(
+          (left, right) => right.versionNumber - left.versionNumber,
+        ),
+      };
+    },
+  });
+
+  useEffect(() => {
+    if (!versionsQuery.isError) {
+      return;
+    }
+
+    pushToast({
+      kind: "error",
+      title: isForbiddenMessage(versionsQuery.error.message)
+        ? ru.common.states.notPermitted
+        : ru.programs.versions.loadError,
+      description: versionsQuery.error.message,
+    });
+  }, [pushToast, versionsQuery.error, versionsQuery.isError]);
+
+  const versions = versionsQuery.data?.items ?? [];
+
+  const selectedVersionId = useMemo(() => {
+    if (versions.length === 0) {
+      return undefined;
+    }
+
+    if (queryVersionId && versions.some((item) => item.id === queryVersionId)) {
+      return queryVersionId;
+    }
+
+    return pickPreferredVersion(versions)?.id;
+  }, [queryVersionId, versions]);
+
+  const selectedVersion = useMemo(
+    () => versions.find((item) => item.id === selectedVersionId),
+    [selectedVersionId, versions],
+  );
+
+  const replaceQuery = (updates: { tab?: ProgramTopTabId; version?: string }) => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+
+    if (updates.tab) {
+      nextParams.set("tab", updates.tab);
+    }
+    if (updates.version) {
+      nextParams.set("version", updates.version);
+    }
+
+    router.replace(`${pathname}?${nextParams.toString()}`);
+  };
+
+  useEffect(() => {
+    if (!selectedVersionId || selectedVersionId === queryVersionId) {
+      return;
+    }
+
+    replaceQuery({ version: selectedVersionId, tab: activeTab });
+  }, [activeTab, queryVersionId, selectedVersionId]);
 
   const updateMutation = useMutation({
     mutationFn: async (payload: ProgramUpdatePayload) => {
@@ -120,59 +208,46 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     },
   });
 
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedVersionsSearch(versionsSearch);
-      setVersionsPage(0);
-    }, 300);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [versionsSearch]);
-
-  const versionsQuery = useQuery<ProgramVersionsPageResult, Error>({
-    queryKey: [
-      ...config.queryKeyPrefix,
-      "versions",
-      programId,
-      versionsPage,
-      debouncedVersionsSearch,
-      { status: versionsStatusFilter },
-    ],
-    enabled: activeTab === "versions" && Boolean(config.api.searchVersions),
-    queryFn: async () => {
-      if (!config.api.searchVersions) {
-        throw new Error(ru.programs.details.versionsApiUnavailable);
+  const createVersionMutation = useMutation({
+    mutationFn: async (payload: {
+      versionNumber: number;
+      level?: string;
+      frequencyPerWeek?: number;
+    }) => {
+      if (!config.api.createVersion) {
+        throw new Error(ru.programs.details.createNotSupported);
       }
 
-      const result = await config.api.searchVersions({
-        programId,
-        page: versionsPage,
-        size: 20,
-        search: debouncedVersionsSearch,
-        status: versionsStatusFilter === "ALL" ? undefined : versionsStatusFilter,
-      });
-
+      const result = await config.api.createVersion(programId, payload);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
 
       return result.data;
     },
+    onSuccess: async (version) => {
+      setIsCreateVersionOpen(false);
+      pushToast({
+        kind: "success",
+        title: ru.programs.versions.createSuccess,
+        description: ru.common.status.DRAFT,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: [...config.queryKeyPrefix, "versions-picker", programId],
+      });
+      replaceQuery({ tab: "workouts", version: version.id });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : ru.programs.versions.createError;
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.programs.versions.createError,
+        description: message,
+      });
+    },
   });
-
-  useEffect(() => {
-    if (!versionsQuery.isError) {
-      return;
-    }
-
-    pushToast({
-      kind: "error",
-      title: isForbiddenMessage(versionsQuery.error.message)
-        ? ru.common.states.notPermitted
-        : ru.programs.versions.loadError,
-      description: versionsQuery.error.message,
-    });
-  }, [pushToast, versionsQuery.error, versionsQuery.isError]);
 
   const publishMutation = useMutation({
     mutationFn: async (programVersionId: string) => {
@@ -196,7 +271,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       });
       await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: [...config.queryKeyPrefix, "versions", programId],
+          queryKey: [...config.queryKeyPrefix, "versions-picker", programId],
         }),
         queryClient.invalidateQueries({
           queryKey: [...config.queryKeyPrefix, "details", programId],
@@ -242,161 +317,111 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
   }
 
   return (
-    <div className="space-y-4">
-      <ProgramHeader program={program} onBack={() => router.push(config.routes.list)} />
-
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <ProgramTabs activeTab={activeTab} onChange={setActiveTab} />
-          <div className="flex items-center gap-2">
-            {config.scope === "influencer" && program.currentPublishedVersionId ? (
-              <AppButton
-                type="button"
-                variant="secondary"
-                onClick={() =>
-                  router.push(
-                    `/influencer/workouts?programId=${program.id}&programVersionId=${program.currentPublishedVersionId}`,
-                  )
-                }
-              >
-                {ru.programs.versions.table.openWorkouts}
-              </AppButton>
-            ) : null}
-            <AppButton
-              type="button"
-              variant="ghost"
-              onClick={() => router.push(config.routes.list)}
-            >
-              {ru.common.labels.programs}
-            </AppButton>
-          </div>
-        </div>
-
-        {activeTab === "details" && config.capabilities.canEdit && config.api.update ? (
-          <ProgramForm
-            mode="edit"
-            initialValues={{
-              title: program.title,
-              description: program.description ?? "",
-              goals: program.goals,
-              coverMediaId: program.coverMediaId ?? "",
-              status: program.status,
-            }}
-            isSubmitting={updateMutation.isPending}
-            submitLabel={ru.common.actions.save}
-            onSubmit={async (payload) => {
-              await updateMutation.mutateAsync(payload);
-            }}
-          />
-        ) : activeTab === "details" ? (
-          <div className="rounded-xl border border-border bg-sidebar/40 p-6">
-            <p className="text-sm font-medium text-foreground">
-              {ru.programs.details.readOnlyTitle}
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {ru.programs.details.readOnlyDescription}
-            </p>
-          </div>
-        ) : config.capabilities.showVersions && config.scope === "influencer" ? (
-          <ProgramVersionsTab programId={programId} config={config} />
-        ) : config.capabilities.showVersions ? (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <AppInput
-                value={versionsSearch}
-                onChange={(event) => setVersionsSearch(event.target.value)}
-                placeholder={ru.common.placeholders.searchVersions}
-              />
-              <div className="w-[190px]">
-                <AppSelect
-                  value={versionsStatusFilter}
-                  onValueChange={(value) => {
-                    setVersionsStatusFilter(value as (typeof statusFilterOptions)[number]["value"]);
-                    setVersionsPage(0);
-                  }}
-                  options={statusFilterOptions.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                  placeholder={ru.common.labels.status}
+    <>
+      <ProgramPageLayout
+        header={
+          <ProgramHeader
+            program={program}
+            onBack={() => router.push(config.routes.list)}
+            controls={
+              <>
+                <VersionPicker
+                  versions={versions}
+                  selectedVersionId={selectedVersionId}
+                  onChange={(versionId) => replaceQuery({ version: versionId, tab: activeTab })}
+                  onCreate={
+                    config.scope === "influencer" && config.api.createVersion
+                      ? () => setIsCreateVersionOpen(true)
+                      : undefined
+                  }
+                  isCreating={createVersionMutation.isPending}
+                  disabled={versionsQuery.isLoading || versionsQuery.isError}
                 />
+                {config.capabilities.canPublish && selectedVersion?.status === "DRAFT" ? (
+                  <AppButton
+                    type="button"
+                    disabled={publishMutation.isPending}
+                    onClick={() => setPublishTarget(selectedVersion)}
+                  >
+                    {ru.common.actions.publish}
+                  </AppButton>
+                ) : null}
+              </>
+            }
+          />
+        }
+        tabs={{
+          active: activeTab,
+          onChange: (tab) => replaceQuery({ tab, version: selectedVersionId }),
+        }}
+        content={
+          activeTab === "info" ? (
+            config.capabilities.canEdit && config.api.update ? (
+              <ProgramForm
+                mode="edit"
+                initialValues={{
+                  title: program.title,
+                  description: program.description ?? "",
+                  goals: program.goals,
+                  coverMediaId: program.coverMediaId ?? "",
+                  status: program.status,
+                }}
+                isSubmitting={updateMutation.isPending}
+                submitLabel={ru.common.actions.save}
+                onSubmit={async (payload) => {
+                  await updateMutation.mutateAsync(payload);
+                }}
+              />
+            ) : (
+              <div className="rounded-xl border border-border bg-sidebar/40 p-6">
+                <p className="text-sm font-medium text-foreground">
+                  {ru.programs.details.readOnlyTitle}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {ru.programs.details.readOnlyDescription}
+                </p>
               </div>
-            </div>
-
-            {versionsQuery.isLoading ? <LoadingState title={ru.programs.versions.loading} /> : null}
-
-            {!versionsQuery.isLoading && versionsQuery.isError ? (
+            )
+          ) : activeTab === "workouts" ? (
+            versionsQuery.isLoading ? (
+              <LoadingState title={ru.programs.versions.loading} />
+            ) : versionsQuery.isError ? (
               <ErrorState
                 title={ru.programs.versions.loadError}
                 description={versionsQuery.error.message}
                 onRetry={() => void versionsQuery.refetch()}
               />
-            ) : null}
-
-            {!versionsQuery.isLoading &&
-            !versionsQuery.isError &&
-            (versionsQuery.data?.items.length ?? 0) === 0 ? (
-              <EmptyState
-                title={ru.programs.versions.emptyTitle}
-                description={ru.programs.versions.emptyDescription}
+            ) : selectedVersionId ? (
+              <WorkoutsListPage
+                programId={programId}
+                programVersionId={selectedVersionId}
+                scopeName={config.scope}
+                embedded
+                canManage={config.scope === "influencer"}
               />
-            ) : null}
+            ) : (
+              <EmptyState
+                title={ru.programs.versionPicker.noVersionsTitle}
+                description={ru.programs.versionPicker.noVersionsDescription}
+              />
+            )
+          ) : (
+            <div className="rounded-xl border border-border bg-sidebar/40 p-6">
+              <p className="text-sm text-muted-foreground">{ru.programs.settingsPlaceholder}</p>
+            </div>
+          )
+        }
+      />
 
-            {!versionsQuery.isLoading && !versionsQuery.isError && versionsQuery.data ? (
-              <div className="space-y-4">
-                <VersionsTable
-                  items={versionsQuery.data.items}
-                  canPublish={config.capabilities.canPublish}
-                  isPublishing={publishMutation.isPending}
-                  onOpenWorkouts={
-                    config.scope === "admin"
-                      ? (version) => {
-                          router.push(
-                            `/admin/programs/${program.id}/versions/${version.id}/workouts`,
-                          );
-                        }
-                      : undefined
-                  }
-                  onPublish={(version: ProgramVersionRecord) => {
-                    setPublishTarget(version);
-                  }}
-                />
-                <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
-                  <p className="text-muted-foreground">
-                    {ru.common.labels.page} {versionsQuery.data.page + 1} /{" "}
-                    {Math.max(versionsQuery.data.totalPages, 1)} •{" "}
-                    {versionsQuery.data.totalElements} {ru.common.labels.elements}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <AppButton
-                      type="button"
-                      variant="secondary"
-                      disabled={versionsPage === 0}
-                      onClick={() => setVersionsPage((prev) => prev - 1)}
-                    >
-                      {ru.common.actions.back}
-                    </AppButton>
-                    <AppButton
-                      type="button"
-                      variant="secondary"
-                      disabled={versionsPage + 1 >= (versionsQuery.data.totalPages ?? 0)}
-                      onClick={() => setVersionsPage((prev) => prev + 1)}
-                    >
-                      {ru.common.actions.forward}
-                    </AppButton>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-border bg-sidebar/40 p-6">
-            <p className="text-sm font-medium text-foreground">
-              {ru.programs.details.versionsUnavailable}
-            </p>
-          </div>
-        )}
-      </div>
+      <ProgramVersionFormDialog
+        open={isCreateVersionOpen}
+        mode="create"
+        isSubmitting={createVersionMutation.isPending}
+        onOpenChange={setIsCreateVersionOpen}
+        onCreate={async (payload) => {
+          await createVersionMutation.mutateAsync(payload);
+        }}
+      />
 
       <PublishVersionDialog
         open={Boolean(publishTarget)}
@@ -415,6 +440,6 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
           await publishMutation.mutateAsync(publishTarget.id);
         }}
       />
-    </div>
+    </>
   );
 }
