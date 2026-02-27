@@ -1,6 +1,7 @@
 import { configureOpenApiClient, toApiResult, type ApiResult } from "@/api/httpClient";
 import {
   ProfilesService,
+  type ContentMediaType,
   type CreateInfluencerProfileRequest,
   type InfluencerProfile,
   type SocialLink,
@@ -20,6 +21,7 @@ export type InfluencerProfileRecord = {
   bio?: string;
   avatarMediaId?: string;
   avatarUrl?: string;
+  avatarType?: ContentMediaType;
   socialLinks: InfluencerSocialLink[];
   createdAt?: string;
   updatedAt?: string;
@@ -31,6 +33,24 @@ export type UpsertInfluencerProfilePayload = {
   avatarMediaId?: string;
   socialLinks?: InfluencerSocialLink[];
 };
+
+function resolveBaseUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  return baseUrl && baseUrl.length > 0 ? baseUrl : "http://localhost:9876";
+}
+
+function resolveAvatarUrl(url?: string): string | undefined {
+  if (!url) {
+    return undefined;
+  }
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  const normalizedPath = url.startsWith("/") ? url : `/${url}`;
+  return `${resolveBaseUrl()}${normalizedPath}`;
+}
 
 function normalizeSocialLinks(links?: InfluencerSocialLink[]): SocialLink[] | undefined {
   if (!links || links.length === 0) {
@@ -53,7 +73,8 @@ function mapProfile(profile: InfluencerProfile): InfluencerProfileRecord {
     displayName: profile.displayName,
     bio: profile.bio,
     avatarMediaId: profile.avatar?.id,
-    avatarUrl: profile.avatar?.url,
+    avatarUrl: resolveAvatarUrl(profile.avatar?.url),
+    avatarType: profile.avatar?.type,
     socialLinks: profile.socialLinks ?? [],
     createdAt: profile.createdAt,
     updatedAt: profile.updatedAt,

@@ -4,7 +4,10 @@ import {
   searchInfluencerExercises,
   updateInfluencerExercise,
 } from "@/api/influencerExercises";
-import { listEquipmentOptions, listMuscleOptions } from "@/api/referenceData";
+import {
+  listInfluencerEquipmentOptions,
+  listInfluencerMuscleOptions,
+} from "@/api/influencerReferenceData";
 import type { ExercisesCrudScopeConfig } from "@/features/exercises/types";
 
 export const influencerExerciseScope: ExercisesCrudScopeConfig = {
@@ -21,8 +24,8 @@ export const influencerExerciseScope: ExercisesCrudScopeConfig = {
     remove: deleteInfluencerExercise,
   },
   references: {
-    loadMuscles: listMuscleOptions,
-    loadEquipment: listEquipmentOptions,
+    loadMuscles: listInfluencerMuscleOptions,
+    loadEquipment: listInfluencerEquipmentOptions,
   },
   messages: {
     created: "Упражнение создано.",
