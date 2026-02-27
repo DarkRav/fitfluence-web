@@ -10,6 +10,7 @@ import {
   Repeat2,
   ShieldCheck,
   Target,
+  UserCircle2,
   Wrench,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/use-auth";
@@ -34,6 +35,7 @@ const influencerItems = [
   { label: ru.sidebar.influencer.programs, href: "/influencer/programs", icon: ClipboardList },
   { label: ru.sidebar.influencer.workouts, href: "/influencer/workouts", icon: ShieldCheck },
   { label: ru.sidebar.influencer.progression, href: "/influencer/progression", icon: Repeat2 },
+  { label: ru.sidebar.influencer.profile, href: "/influencer/profile", icon: UserCircle2 },
 ];
 
 export function SidebarNav() {

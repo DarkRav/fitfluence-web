@@ -110,6 +110,7 @@ export const ru = {
       programs: "Программы",
       workouts: "Тренировки",
       progression: "Прогрессия",
+      profile: "Профиль",
     },
   },
   programs: {
@@ -249,6 +250,12 @@ export const ru = {
     dayOrderValidation: "Номер дня должен быть больше 0",
     max200Validation: "Максимум 200 символов",
     max2000Validation: "Максимум 2000 символов",
+    dragToReorderHint: "Перетащите для изменения порядка",
+  },
+  layout: {
+    topbarTitle: "Панель управления Fitfluence",
+    userFallback: "Пользователь",
+    logout: "Выйти",
   },
   profile: {
     titleCreate: "Создание профиля",

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { GripVertical } from "lucide-react";
 import type { WorkoutExerciseRecord } from "@/features/workouts/types";
+import { ru } from "@/localization/ru";
 
 type ReorderableExercisesListProps = {
   exercises: WorkoutExerciseRecord[];
@@ -80,7 +81,7 @@ export function ReorderableExercisesList({
         >
           <div className="mb-1 flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
             <GripVertical className="h-4 w-4" />
-            <span>Drag to reorder</span>
+            <span>{ru.workouts.dragToReorderHint}</span>
           </div>
           {renderExercise(exercise)}
         </div>
