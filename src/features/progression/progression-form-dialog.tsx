@@ -14,6 +14,7 @@ import type {
   UpdateAdminProgressionPolicyPayload,
 } from "@/api/adminProgression";
 import type { ProgressionRecord } from "@/features/progression/types";
+import { ru } from "@/localization/ru";
 import { AppButton, AppInput, AppSelect } from "@/shared/ui";
 
 const typeOptions: { value: AdminProgressionPolicyType; label: string }[] = [
@@ -276,11 +277,15 @@ export function ProgressionFormDialog({
                 disabled={isSubmitting}
                 onClick={() => onOpenChange(false)}
               >
-                {isReadOnly ? "Close" : "Cancel"}
+                {isReadOnly ? ru.common.actions.close : ru.common.actions.cancel}
               </AppButton>
               {!isReadOnly ? (
                 <AppButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : mode === "create" ? "Create" : "Save"}
+                  {isSubmitting
+                    ? `${ru.common.actions.save}...`
+                    : mode === "create"
+                      ? ru.common.actions.create
+                      : ru.common.actions.save}
                 </AppButton>
               ) : null}
             </div>

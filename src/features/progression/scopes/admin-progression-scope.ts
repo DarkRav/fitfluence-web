@@ -5,6 +5,7 @@ import {
   searchAdminProgressionPolicies,
   updateAdminProgressionPolicy,
 } from "@/api/adminProgression";
+import { ru } from "@/localization/ru";
 import type { ProgressionScopeConfig } from "@/features/progression/types";
 
 export const adminProgressionScope: ProgressionScopeConfig = {
@@ -12,7 +13,7 @@ export const adminProgressionScope: ProgressionScopeConfig = {
   title: "Progression",
   subtitle: "Управление политиками прогрессии платформы.",
   searchPlaceholder: "Поиск по code или названию",
-  createButtonLabel: "Create Policy",
+  createButtonLabel: ru.common.actions.create,
   queryKeyPrefix: ["progression", "admin"],
   capabilities: {
     canCreate: true,

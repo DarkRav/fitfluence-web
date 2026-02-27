@@ -4,6 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { AppButton } from "@/shared/ui";
 import type { ProgramVersionRecord } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 
 type PublishVersionDialogProps = {
   open: boolean;
@@ -26,10 +27,10 @@ export function PublishVersionDialog({
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card p-6 shadow-card focus:outline-none">
           <Dialog.Title className="text-lg font-semibold text-card-foreground">
-            Publish Version
+            {ru.common.actions.publish}
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-            Publish this version? It will become publicly available.
+            {ru.programs.publishDialogDescription}
           </Dialog.Description>
 
           {version ? (
@@ -45,7 +46,7 @@ export function PublishVersionDialog({
               disabled={isSubmitting}
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {ru.common.actions.cancel}
             </AppButton>
             <AppButton
               type="button"
@@ -54,7 +55,7 @@ export function PublishVersionDialog({
                 await onConfirm();
               }}
             >
-              {isSubmitting ? "Publishing..." : "Publish"}
+              {isSubmitting ? ru.programs.publishing : ru.common.actions.publish}
             </AppButton>
           </div>
 

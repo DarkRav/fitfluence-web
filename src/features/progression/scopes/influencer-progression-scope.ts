@@ -2,6 +2,7 @@ import {
   getInfluencerProgressionPolicy,
   searchInfluencerProgressionPolicies,
 } from "@/api/influencerProgression";
+import { ru } from "@/localization/ru";
 import type { ProgressionScopeConfig } from "@/features/progression/types";
 
 export const influencerProgressionScope: ProgressionScopeConfig = {
@@ -9,7 +10,7 @@ export const influencerProgressionScope: ProgressionScopeConfig = {
   title: "Progression",
   subtitle: "Просматривайте доступные политики прогрессии для своих программ.",
   searchPlaceholder: "Поиск по code или названию",
-  createButtonLabel: "Create Policy",
+  createButtonLabel: ru.common.actions.create,
   queryKeyPrefix: ["progression", "influencer"],
   capabilities: {
     canCreate: false,

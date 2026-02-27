@@ -3,6 +3,7 @@
 import { AppButton } from "@/shared/ui";
 import { StatusBadge } from "@/features/programs/status-badge";
 import type { ProgramRecord } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 
 type ProgramsTableProps = {
   items: ProgramRecord[];
@@ -88,7 +89,7 @@ export function ProgramsTable({ items, showOwner = false, onOpen }: ProgramsTabl
                       onOpen(item);
                     }}
                   >
-                    Open/Edit
+                    {ru.common.actions.open} / {ru.common.actions.edit}
                   </AppButton>
                 </div>
               </td>

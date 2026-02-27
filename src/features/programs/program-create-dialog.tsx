@@ -4,6 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { ProgramForm } from "@/features/programs/program-form";
 import type { ProgramCreatePayload } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 
 type ProgramCreateDialogProps = {
   open: boolean;
@@ -45,7 +46,7 @@ export function ProgramCreateDialog({
               }}
               requireInfluencerId={requireInfluencerId}
               isSubmitting={isSubmitting}
-              submitLabel="Create Program"
+              submitLabel={ru.programs.createProgram}
               onSubmit={onSubmit}
               onCancel={() => onOpenChange(false)}
             />

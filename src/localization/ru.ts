@@ -19,6 +19,7 @@ export const ru = {
       clearAvatar: "Очистить аватар",
       addLink: "Добавить ссылку",
       saveProfile: "Сохранить профиль",
+      close: "Закрыть",
     },
     labels: {
       status: "Статус",
@@ -122,6 +123,9 @@ export const ru = {
     createProgram: "Создать программу",
     versionWorkouts: "Тренировки версии",
     publishByAdmin: "Публикация версии выполняется администратором.",
+    publishDialogDescription:
+      "Опубликовать эту версию? После публикации она будет доступна пользователям.",
+    publishing: "Публикация...",
     page: {
       loading: "Загружаем программы...",
       loadError: "Не удалось загрузить программы",
