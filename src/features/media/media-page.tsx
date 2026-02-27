@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   searchAdminMedia,
@@ -41,15 +40,10 @@ const ownerTypeOptions = [
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: MediaPageProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [search, setSearch] = useState(searchParams.get("search") ?? "");
-  const [page, setPage] = useState(Number(searchParams.get("page") ?? "0") || 0);
-  const [ownerType, setOwnerType] = useState<(typeof ownerTypeOptions)[number]["value"]>(
-    (searchParams.get("ownerType") as (typeof ownerTypeOptions)[number]["value"]) ?? "ALL",
-  );
-  const [ownerId, setOwnerId] = useState(searchParams.get("ownerId") ?? "");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [ownerType, setOwnerType] = useState<(typeof ownerTypeOptions)[number]["value"]>("ALL");
+  const [ownerId, setOwnerId] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const isAdmin = role === "ADMIN";
@@ -59,27 +53,6 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
   const effectiveOwnerType: MediaOwnerType | undefined =
     isAdmin && ownerType !== "ALL" ? ownerType : undefined;
   const effectiveOwnerId = isAdmin ? ownerIdNormalized || undefined : undefined;
-
-  useEffect(() => {
-    const nextParams = new URLSearchParams();
-    if (search.trim()) {
-      nextParams.set("search", search.trim());
-    }
-    if (page > 0) {
-      nextParams.set("page", String(page));
-    }
-    if (isAdmin && ownerType !== "ALL") {
-      nextParams.set("ownerType", ownerType);
-    }
-    if (isAdmin && ownerIdNormalized) {
-      nextParams.set("ownerId", ownerIdNormalized);
-    }
-    const nextQuery = nextParams.toString();
-    const currentQuery = searchParams.toString();
-    if (nextQuery !== currentQuery) {
-      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
-    }
-  }, [isAdmin, ownerIdNormalized, ownerType, page, pathname, router, search, searchParams]);
 
   const query = useQuery<MediaPageResult, Error>({
     queryKey: ["media", role, page, search, effectiveOwnerType, effectiveOwnerId],
