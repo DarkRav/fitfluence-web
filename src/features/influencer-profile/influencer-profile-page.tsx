@@ -13,7 +13,6 @@ import {
   updateInfluencerProfile,
   type InfluencerProfileRecord,
 } from "@/api/influencerProfile";
-import { MediaPicker } from "@/features/media";
 import {
   AppButton,
   AppInput,
@@ -228,15 +227,9 @@ export function InfluencerProfilePage() {
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-foreground">Аватар</label>
-          <MediaPicker
-            value={avatarMediaId || undefined}
-            onChange={(id) => {
-              form.setValue("avatarMediaId", id, { shouldDirty: true });
-            }}
-          />
           <div className="rounded-md border border-border/80 bg-sidebar/40 p-3">
             <label className="mb-2 block text-xs text-muted-foreground">
-              Или загрузите файл с устройства
+              Загрузите файл с устройства
             </label>
             <input
               type="file"
@@ -255,6 +248,11 @@ export function InfluencerProfilePage() {
             />
             {avatarUploadMutation.isPending ? (
               <p className="mt-2 text-xs text-muted-foreground">Загружаем файл...</p>
+            ) : null}
+            {avatarMediaId ? (
+              <p className="mt-2 font-mono text-xs text-muted-foreground">
+                Выбранный mediaId: {avatarMediaId}
+              </p>
             ) : null}
           </div>
           {avatarMediaId ? (
