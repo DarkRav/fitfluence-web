@@ -51,6 +51,25 @@ export type UpdateMusclePayload = {
 };
 
 const DEFAULT_PAGE_SIZE = 20;
+const MIN_PAGE_SIZE = 1;
+const MAX_PAGE_SIZE = 100;
+
+function normalizePageSize(value?: number): number {
+  if (value === undefined || !Number.isFinite(value)) {
+    return DEFAULT_PAGE_SIZE;
+  }
+
+  const rounded = Math.trunc(value);
+  return Math.min(MAX_PAGE_SIZE, Math.max(MIN_PAGE_SIZE, rounded));
+}
+
+function normalizePage(value?: number): number {
+  if (value === undefined || !Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.trunc(value));
+}
 
 function mapMuscle(item: Muscle): MuscleRecord {
   return {
@@ -94,8 +113,8 @@ export async function searchMuscles(
               search: params.search.trim(),
             }
           : undefined,
-        page: params.page ?? 0,
-        size: params.size ?? DEFAULT_PAGE_SIZE,
+        page: normalizePage(params.page),
+        size: normalizePageSize(params.size),
       },
     }),
   );
