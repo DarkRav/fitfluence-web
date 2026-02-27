@@ -91,12 +91,14 @@ export function AdminWorkoutsHubPage() {
         title="Workouts"
         subtitle="Выберите программу и откройте её версии для редактирования workouts."
         actions={
-          <div className="flex w-full max-w-4xl items-center gap-2">
-            <AppInput
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search programs"
-            />
+          <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
+            <div className="min-w-[220px] flex-1">
+              <AppInput
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search programs"
+              />
+            </div>
             <AppButton
               type="button"
               variant="secondary"
@@ -158,7 +160,21 @@ export function AdminWorkoutsHubPage() {
                         : "-"}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-2">
+                        {program.currentPublishedVersionId ? (
+                          <AppButton
+                            type="button"
+                            variant="secondary"
+                            className="h-9 px-3 text-xs"
+                            onClick={() =>
+                              router.push(
+                                `/admin/programs/${program.id}/versions/${program.currentPublishedVersionId}/workouts`,
+                              )
+                            }
+                          >
+                            Open Workouts
+                          </AppButton>
+                        ) : null}
                         <AppButton
                           type="button"
                           variant="secondary"

@@ -190,12 +190,14 @@ export function AdminWorkoutsListPage({ programId, programVersionId }: AdminWork
         title="Version Workouts"
         subtitle="Управление workout templates для выбранной версии программы."
         actions={
-          <div className="flex w-full max-w-4xl items-center gap-2">
-            <AppInput
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search workouts"
-            />
+          <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
+            <div className="min-w-[220px] flex-1">
+              <AppInput
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search workouts"
+              />
+            </div>
             <AppButton
               type="button"
               variant="secondary"
