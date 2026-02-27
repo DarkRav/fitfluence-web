@@ -42,10 +42,6 @@ const createSchema = z.object({
   mediaIds: z.array(z.string().uuid()),
 });
 
-const updateSchema = createSchema.extend({
-  code: z.string().optional(),
-});
-
 type ExerciseFormValues = z.infer<typeof createSchema>;
 
 type ExerciseFormDialogProps = {
@@ -101,9 +97,8 @@ export function ExerciseFormDialog({
   onOpenChange,
   onSubmit,
 }: ExerciseFormDialogProps) {
-  const schema = mode === "create" ? createSchema : updateSchema;
   const form = useForm<ExerciseFormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(createSchema),
     defaultValues: buildDefaultValues(item),
   });
 
