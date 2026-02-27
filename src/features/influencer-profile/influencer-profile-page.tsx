@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import {
   createInfluencerProfile,
@@ -98,6 +98,10 @@ export function InfluencerProfilePage() {
   const socialLinks = useFieldArray({
     control: form.control,
     name: "socialLinks",
+  });
+  const avatarMediaId = useWatch({
+    control: form.control,
+    name: "avatarMediaId",
   });
 
   const saveMutation = useMutation({
@@ -197,12 +201,12 @@ export function InfluencerProfilePage() {
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-foreground">Avatar</label>
           <MediaPicker
-            value={form.watch("avatarMediaId") || undefined}
+            value={avatarMediaId || undefined}
             onChange={(id) => {
               form.setValue("avatarMediaId", id, { shouldDirty: true });
             }}
           />
-          {form.watch("avatarMediaId") ? (
+          {avatarMediaId ? (
             <AppButton
               type="button"
               variant="secondary"
