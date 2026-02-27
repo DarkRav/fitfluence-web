@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ConfirmDeleteDialog } from "@/features/reference/confirm-delete-dialog";
 import { ProgramVersionFormDialog } from "@/features/programs/program-version-form-dialog";
@@ -38,6 +39,7 @@ type ProgramVersionsTabProps = {
 };
 
 export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProps) {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [versionsSearch, setVersionsSearch] = useState("");
@@ -275,6 +277,9 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
             items={versionsQuery.data.items}
             onEdit={setEditingVersion}
             onArchive={setArchivingVersion}
+            onOpenWorkouts={(item) =>
+              router.push(`/influencer/programs/${programId}/versions/${item.id}/workouts`)
+            }
           />
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">

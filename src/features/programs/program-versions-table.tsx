@@ -8,9 +8,15 @@ type ProgramVersionsTableProps = {
   items: ProgramVersionRecord[];
   onEdit?: (item: ProgramVersionRecord) => void;
   onArchive?: (item: ProgramVersionRecord) => void;
+  onOpenWorkouts?: (item: ProgramVersionRecord) => void;
 };
 
-export function ProgramVersionsTable({ items, onEdit, onArchive }: ProgramVersionsTableProps) {
+export function ProgramVersionsTable({
+  items,
+  onEdit,
+  onArchive,
+  onOpenWorkouts,
+}: ProgramVersionsTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <table className="w-full text-left text-sm">
@@ -67,9 +73,10 @@ export function ProgramVersionsTable({ items, onEdit, onArchive }: ProgramVersio
                     type="button"
                     variant="secondary"
                     className="h-9 px-3 text-xs"
-                    disabled
+                    disabled={!onOpenWorkouts}
+                    onClick={() => onOpenWorkouts?.(item)}
                   >
-                    Workouts (Next step)
+                    Workouts
                   </AppButton>
                 </div>
               </td>
