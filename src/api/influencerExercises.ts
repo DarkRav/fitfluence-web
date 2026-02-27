@@ -28,6 +28,7 @@ export type InfluencerExerciseRecord = {
   mediaIds: string[];
   musclesLabel: string;
   equipmentLabel: string;
+  createdByInfluencerId?: string;
 };
 
 export type InfluencerExercisesPageResult = {
@@ -95,6 +96,7 @@ function mapExercise(item: Exercise): InfluencerExerciseRecord {
     mediaIds: (item.media ?? []).map((media) => media.id),
     musclesLabel: muscles.map((muscle) => muscle.name).join(", "),
     equipmentLabel: equipment.map((eq) => eq.name).join(", "),
+    createdByInfluencerId: item.createdByInfluencerId,
   };
 }
 

@@ -141,6 +141,14 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
   const totalPages = listQuery.data?.totalPages ?? 0;
   const hasPrev = page > 0;
   const hasNext = page + 1 < totalPages;
+  const ownItems =
+    config.scope === "influencer"
+      ? (listQuery.data?.items ?? []).filter((item) => Boolean(item.createdByInfluencerId))
+      : (listQuery.data?.items ?? []);
+  const sharedItems =
+    config.scope === "influencer"
+      ? (listQuery.data?.items ?? []).filter((item) => !item.createdByInfluencerId)
+      : [];
 
   const actions = (
     <ExerciseToolbar
@@ -181,16 +189,55 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
       listQuery.data &&
       listQuery.data.items.length > 0 ? (
         <div className="space-y-4">
-          <ExercisesTable
-            items={listQuery.data.items}
-            onEdit={(item) => {
-              setEditingItem(item);
-              setIsFormOpen(true);
-            }}
-            onDelete={(item) => {
-              setDeleteItem(item);
-            }}
-          />
+          {config.scope === "influencer" ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Мои упражнения
+                </h3>
+                {ownItems.length > 0 ? (
+                  <ExercisesTable
+                    items={ownItems}
+                    onEdit={(item) => {
+                      setEditingItem(item);
+                      setIsFormOpen(true);
+                    }}
+                    onDelete={(item) => {
+                      setDeleteItem(item);
+                    }}
+                  />
+                ) : (
+                  <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
+                    В этой категории пока нет упражнений.
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Общая библиотека
+                </h3>
+                {sharedItems.length > 0 ? (
+                  <ExercisesTable items={sharedItems} readOnly />
+                ) : (
+                  <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
+                    В общей библиотеке нет упражнений по текущему фильтру.
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <ExercisesTable
+              items={listQuery.data.items}
+              onEdit={(item) => {
+                setEditingItem(item);
+                setIsFormOpen(true);
+              }}
+              onDelete={(item) => {
+                setDeleteItem(item);
+              }}
+            />
+          )}
 
           <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">

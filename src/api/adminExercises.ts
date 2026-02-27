@@ -27,6 +27,7 @@ export type AdminExerciseRecord = {
   mediaIds: string[];
   musclesLabel: string;
   equipmentLabel: string;
+  createdByInfluencerId?: string;
 };
 
 export type AdminExercisesPageResult = {
@@ -94,6 +95,7 @@ function mapExercise(item: Exercise): AdminExerciseRecord {
     mediaIds: (item.media ?? []).map((media) => media.id),
     musclesLabel: muscles.map((muscle) => muscle.name).join(", "),
     equipmentLabel: equipment.map((eq) => eq.name).join(", "),
+    createdByInfluencerId: item.createdByInfluencerId,
   };
 }
 

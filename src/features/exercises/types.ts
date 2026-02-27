@@ -21,6 +21,7 @@ export type ExerciseCrudItem = {
   mediaIds: string[];
   musclesLabel: string;
   equipmentLabel: string;
+  createdByInfluencerId?: string;
 };
 
 export type ExerciseCrudPageResult = {

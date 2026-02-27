@@ -45,11 +45,12 @@ function mapMovementLabel(value?: ExerciseCrudItem["movementPattern"]): string {
 
 type ExercisesTableProps = {
   items: ExerciseCrudItem[];
-  onEdit: (item: ExerciseCrudItem) => void;
-  onDelete: (item: ExerciseCrudItem) => void;
+  onEdit?: (item: ExerciseCrudItem) => void;
+  onDelete?: (item: ExerciseCrudItem) => void;
+  readOnly?: boolean;
 };
 
-export function ExercisesTable({ items, onEdit, onDelete }: ExercisesTableProps) {
+export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: ExercisesTableProps) {
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
       <table className="w-full text-left text-sm">
@@ -62,15 +63,21 @@ export function ExercisesTable({ items, onEdit, onDelete }: ExercisesTableProps)
             <th className="px-4 py-3 font-medium">Мышцы</th>
             <th className="px-4 py-3 font-medium">Оборудование</th>
             <th className="px-4 py-3 font-medium text-center">Медиа</th>
-            <th className="px-4 py-3 text-right font-medium">Действия</th>
+            {!readOnly ? <th className="px-4 py-3 text-right font-medium">Действия</th> : null}
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
             <tr
               key={item.id}
-              className="cursor-pointer border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
-              onClick={() => onEdit(item)}
+              className={`border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10 ${
+                readOnly ? "" : "cursor-pointer"
+              }`}
+              onClick={() => {
+                if (!readOnly) {
+                  onEdit?.(item);
+                }
+              }}
             >
               <td className="px-4 py-3">
                 <p className="font-medium text-foreground">{item.name}</p>
@@ -88,32 +95,34 @@ export function ExercisesTable({ items, onEdit, onDelete }: ExercisesTableProps)
                 {item.equipmentLabel || "—"}
               </td>
               <td className="px-4 py-3 text-center">{item.mediaIds.length}</td>
-              <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-2">
-                  <AppButton
-                    type="button"
-                    variant="secondary"
-                    className="h-9 px-3 text-xs"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onEdit(item);
-                    }}
-                  >
-                    Изменить
-                  </AppButton>
-                  <AppButton
-                    type="button"
-                    variant="destructive"
-                    className="h-9 px-3 text-xs"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onDelete(item);
-                    }}
-                  >
-                    Архивировать
-                  </AppButton>
-                </div>
-              </td>
+              {!readOnly ? (
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-2">
+                    <AppButton
+                      type="button"
+                      variant="secondary"
+                      className="h-9 px-3 text-xs"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onEdit?.(item);
+                      }}
+                    >
+                      Изменить
+                    </AppButton>
+                    <AppButton
+                      type="button"
+                      variant="destructive"
+                      className="h-9 px-3 text-xs"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDelete?.(item);
+                      }}
+                    >
+                      Архивировать
+                    </AppButton>
+                  </div>
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>
