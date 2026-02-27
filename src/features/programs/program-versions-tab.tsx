@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ProgramVersionFormDialog } from "@/features/programs/program-version-form-dialog";
 import { ProgramVersionsTable } from "@/features/programs/program-versions-table";
 import {
   AppButton,
@@ -12,7 +13,11 @@ import {
   LoadingState,
   useAppToast,
 } from "@/shared/ui";
-import type { ProgramVersionsPageResult, ProgramsScopeConfig } from "@/features/programs/types";
+import type {
+  ProgramVersionRecord,
+  ProgramVersionsPageResult,
+  ProgramsScopeConfig,
+} from "@/features/programs/types";
 
 const statusFilterOptions = [
   { value: "ALL", label: "All statuses" },
@@ -32,12 +37,15 @@ type ProgramVersionsTabProps = {
 };
 
 export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProps) {
+  const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [versionsSearch, setVersionsSearch] = useState("");
   const [debouncedVersionsSearch, setDebouncedVersionsSearch] = useState("");
   const [versionsPage, setVersionsPage] = useState(0);
   const [versionsStatusFilter, setVersionsStatusFilter] =
     useState<(typeof statusFilterOptions)[number]["value"]>("ALL");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [editingVersion, setEditingVersion] = useState<ProgramVersionRecord | null>(null);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -93,28 +101,116 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
     });
   }, [pushToast, versionsQuery.error, versionsQuery.isError]);
 
+  const createVersionMutation = useMutation({
+    mutationFn: async (payload: {
+      versionNumber: number;
+      level?: string;
+      frequencyPerWeek?: number;
+    }) => {
+      if (!config.api.createVersion) {
+        throw new Error("Create version operation is not supported");
+      }
+
+      const result = await config.api.createVersion(programId, payload);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      setIsCreateDialogOpen(false);
+      pushToast({
+        kind: "success",
+        title: "Версия создана",
+        description: "Новая версия программы добавлена в статусе DRAFT.",
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["influencerProgramVersions", programId],
+      });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось создать версию";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка создания",
+        description: message,
+      });
+    },
+  });
+
+  const updateVersionMutation = useMutation({
+    mutationFn: async (payload: {
+      programVersionId: string;
+      level?: string;
+      frequencyPerWeek?: number;
+    }) => {
+      if (!config.api.updateVersion) {
+        throw new Error("Update version operation is not supported");
+      }
+
+      const result = await config.api.updateVersion(payload.programVersionId, {
+        level: payload.level,
+        frequencyPerWeek: payload.frequencyPerWeek,
+      });
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      setEditingVersion(null);
+      pushToast({
+        kind: "success",
+        title: "Версия обновлена",
+        description: "Изменения метаданных версии сохранены.",
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["influencerProgramVersions", programId],
+      });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось обновить версию";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        description: message,
+      });
+    },
+  });
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <AppInput
-          value={versionsSearch}
-          onChange={(event) => setVersionsSearch(event.target.value)}
-          placeholder="Search versions"
-        />
-        <div className="w-[190px]">
-          <AppSelect
-            value={versionsStatusFilter}
-            onValueChange={(value) => {
-              setVersionsStatusFilter(value as (typeof statusFilterOptions)[number]["value"]);
-              setVersionsPage(0);
-            }}
-            options={statusFilterOptions.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-            placeholder="Status"
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-1 items-center gap-2">
+          <AppInput
+            value={versionsSearch}
+            onChange={(event) => setVersionsSearch(event.target.value)}
+            placeholder="Search versions"
           />
+          <div className="w-[190px]">
+            <AppSelect
+              value={versionsStatusFilter}
+              onValueChange={(value) => {
+                setVersionsStatusFilter(value as (typeof statusFilterOptions)[number]["value"]);
+                setVersionsPage(0);
+              }}
+              options={statusFilterOptions.map((option) => ({
+                value: option.value,
+                label: option.label,
+              }))}
+              placeholder="Status"
+            />
+          </div>
         </div>
+        <AppButton
+          type="button"
+          disabled={!config.api.createVersion}
+          onClick={() => setIsCreateDialogOpen(true)}
+        >
+          Create version
+        </AppButton>
       </div>
 
       {versionsQuery.isLoading ? <LoadingState title="Загружаем версии..." /> : null}
@@ -135,7 +231,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
 
       {!versionsQuery.isLoading && !versionsQuery.isError && versionsQuery.data ? (
         <div className="space-y-4">
-          <ProgramVersionsTable items={versionsQuery.data.items} />
+          <ProgramVersionsTable items={versionsQuery.data.items} onEdit={setEditingVersion} />
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
               Страница {versionsQuery.data.page + 1} / {Math.max(versionsQuery.data.totalPages, 1)}{" "}
@@ -162,6 +258,35 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
           </div>
         </div>
       ) : null}
+
+      <ProgramVersionFormDialog
+        open={isCreateDialogOpen}
+        mode="create"
+        isSubmitting={createVersionMutation.isPending}
+        onOpenChange={setIsCreateDialogOpen}
+        onCreate={async (payload) => {
+          await createVersionMutation.mutateAsync(payload);
+        }}
+      />
+
+      <ProgramVersionFormDialog
+        open={Boolean(editingVersion)}
+        mode="edit"
+        version={editingVersion ?? undefined}
+        isSubmitting={updateVersionMutation.isPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingVersion(null);
+          }
+        }}
+        onUpdate={async (programVersionId, payload) => {
+          await updateVersionMutation.mutateAsync({
+            programVersionId,
+            level: payload.level,
+            frequencyPerWeek: payload.frequencyPerWeek,
+          });
+        }}
+      />
     </div>
   );
 }

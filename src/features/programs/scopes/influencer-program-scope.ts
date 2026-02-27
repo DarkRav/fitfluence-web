@@ -5,7 +5,10 @@ import {
   updateInfluencerProgram,
 } from "@/api/influencerPrograms";
 import {
+  createInfluencerProgramVersion,
+  deleteInfluencerProgramVersion,
   searchInfluencerProgramVersions,
+  updateInfluencerProgramVersion,
   type InfluencerProgramVersionsSearchParams,
 } from "@/api/influencerProgramVersions";
 import type { ProgramsScopeConfig } from "@/features/programs/types";
@@ -53,5 +56,8 @@ export const influencerProgramScope: ProgramsScopeConfig = {
 
       return searchInfluencerProgramVersions(params);
     },
+    createVersion: createInfluencerProgramVersion,
+    updateVersion: updateInfluencerProgramVersion,
+    deleteVersion: deleteInfluencerProgramVersion,
   },
 };

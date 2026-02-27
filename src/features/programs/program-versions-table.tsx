@@ -6,9 +6,10 @@ import type { ProgramVersionRecord } from "@/features/programs/types";
 
 type ProgramVersionsTableProps = {
   items: ProgramVersionRecord[];
+  onEdit?: (item: ProgramVersionRecord) => void;
 };
 
-export function ProgramVersionsTable({ items }: ProgramVersionsTableProps) {
+export function ProgramVersionsTable({ items, onEdit }: ProgramVersionsTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <table className="w-full text-left text-sm">
@@ -42,7 +43,16 @@ export function ProgramVersionsTable({ items }: ProgramVersionsTableProps) {
                 {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "—"}
               </td>
               <td className="px-4 py-3">
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                  <AppButton
+                    type="button"
+                    variant="secondary"
+                    className="h-9 px-3 text-xs"
+                    disabled={!onEdit || item.status === "ARCHIVED"}
+                    onClick={() => onEdit?.(item)}
+                  >
+                    Edit
+                  </AppButton>
                   <AppButton
                     type="button"
                     variant="secondary"
