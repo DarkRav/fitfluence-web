@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 const adminItems = [
   { label: "Дашборд", href: "/admin", icon: BarChart3 },
   { label: "Медиа", href: "/admin/media", icon: ImageIcon },
-  { label: "Muscles", href: "/admin/muscles", icon: Target },
-  { label: "Equipment", href: "/admin/equipment", icon: Wrench },
+  { label: "Мышцы", href: "/admin/muscles", icon: Target },
+  { label: "Оборудование", href: "/admin/equipment", icon: Wrench },
   { label: "Упражнения", href: "/admin/exercises", icon: Dumbbell },
   { label: "Программы", href: "/admin/programs", icon: ClipboardList },
   { label: "Тренировки", href: "/admin/workouts", icon: ShieldCheck },
