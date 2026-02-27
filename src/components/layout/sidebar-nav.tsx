@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, ClipboardList, Dumbbell, ImageIcon, Repeat2, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/features/auth/use-auth";
 import { cn } from "@/lib/utils";
 
-const items = [
+const adminItems = [
   { label: "Dashboard", href: "/admin", icon: BarChart3 },
   { label: "Media", href: "/admin/media", icon: ImageIcon },
   { label: "Exercises", href: "/admin/exercises", icon: Dumbbell },
@@ -14,8 +15,12 @@ const items = [
   { label: "Progression", href: "/admin/progression", icon: Repeat2 },
 ];
 
+const influencerItems = [{ label: "Media", href: "/influencer/media", icon: ImageIcon }];
+
 export function SidebarNav() {
   const pathname = usePathname();
+  const auth = useAuth();
+  const items = auth.hasRole("ADMIN") ? adminItems : influencerItems;
 
   return (
     <nav className="space-y-1">
