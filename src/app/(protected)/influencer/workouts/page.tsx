@@ -1,16 +1,5 @@
-import { EmptyState, PageHeader } from "@/shared/ui";
+import { InfluencerWorkoutsHubPage } from "@/features/workouts/influencer-workouts-hub-page";
 
 export default function InfluencerWorkoutsPage() {
-  return (
-    <div>
-      <PageHeader
-        title="Workouts"
-        subtitle="Секция подготовки структуры тренировок для программ."
-      />
-      <EmptyState
-        title="Раздел в разработке"
-        description="Здесь появится конструктор тренировок."
-      />
-    </div>
-  );
+  return <InfluencerWorkoutsHubPage />;
 }
