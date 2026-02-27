@@ -31,7 +31,6 @@ const influencerItems = [
   { label: "Медиа", href: "/influencer/media", icon: ImageIcon },
   { label: "Упражнения", href: "/influencer/exercises", icon: Dumbbell },
   { label: "Programs", href: "/influencer/programs", icon: ClipboardList },
-  { label: "Workouts", href: "/influencer/workouts", icon: ShieldCheck },
   { label: "Progression", href: "/influencer/progression", icon: Repeat2 },
 ];
 
