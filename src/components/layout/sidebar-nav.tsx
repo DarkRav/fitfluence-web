@@ -10,7 +10,6 @@ import {
   Repeat2,
   ShieldCheck,
   Target,
-  UserRound,
   Wrench,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/use-auth";
@@ -28,9 +27,12 @@ const adminItems = [
 ];
 
 const influencerItems = [
+  { label: "Dashboard", href: "/influencer", icon: BarChart3 },
   { label: "Медиа", href: "/influencer/media", icon: ImageIcon },
   { label: "Упражнения", href: "/influencer/exercises", icon: Dumbbell },
-  { label: "Профиль", href: "/influencer/profile", icon: UserRound },
+  { label: "Programs", href: "/influencer/programs", icon: ClipboardList },
+  { label: "Workouts", href: "/influencer/workouts", icon: ShieldCheck },
+  { label: "Progression", href: "/influencer/progression", icon: Repeat2 },
 ];
 
 export function SidebarNav() {

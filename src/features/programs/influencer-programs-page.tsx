@@ -81,7 +81,7 @@ export function InfluencerProgramsPage() {
 
       return result.data;
     },
-    onSuccess: async () => {
+    onSuccess: async (program) => {
       pushToast({
         kind: "success",
         title: "Программа создана",
@@ -89,6 +89,7 @@ export function InfluencerProgramsPage() {
       });
       setIsCreateOpen(false);
       await queryClient.invalidateQueries({ queryKey: ["influencerPrograms"] });
+      router.push(`/influencer/programs/${program.id}`);
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Не удалось создать программу";
