@@ -45,6 +45,7 @@ export type MediaSearchParams = {
 
 export type UploadMediaOptions = {
   role: MediaRole;
+  tags?: string[];
   onProgress?: (percent: number) => void;
 };
 
@@ -157,6 +158,9 @@ export async function uploadMedia(
   return new Promise((resolve) => {
     const formData = new FormData();
     formData.append("file", file);
+    const normalizedTags = Array.from(
+      new Set((options.tags ?? []).map((tag) => tag.trim()).filter((tag) => tag.length > 0)),
+    );
 
     if (options.role === "ADMIN") {
       formData.append("type", inferMediaType(file));
@@ -164,6 +168,10 @@ export async function uploadMedia(
         formData.append("mimeType", file.type);
       }
     }
+
+    normalizedTags.forEach((tag) => {
+      formData.append("tags", tag);
+    });
 
     const request = new XMLHttpRequest();
     request.open(

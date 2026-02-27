@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Upload, X } from "lucide-react";
+import { Plus, Upload, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadMedia, type MediaRole } from "@/api/media";
-import { AppButton, useAppToast } from "@/shared/ui";
+import { AppButton, AppInput, useAppToast } from "@/shared/ui";
 
 type MediaUploadDialogProps = {
   role: MediaRole;
@@ -14,14 +14,17 @@ type MediaUploadDialogProps = {
 export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
 
   const uploadMutation = useMutation({
-    mutationFn: async (candidate: File) => {
-      const result = await uploadMedia(candidate, {
+    mutationFn: async (payload: { file: File; tags: string[] }) => {
+      const result = await uploadMedia(payload.file, {
         role,
+        tags: payload.tags,
         onProgress: (value) => setProgress(value),
       });
 
@@ -38,6 +41,8 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
         description: "Медиа успешно добавлено.",
       });
       setFile(null);
+      setTagInput("");
+      setTags([]);
       setProgress(0);
       setOpen(false);
       await queryClient.invalidateQueries({ queryKey: ["media", role] });
@@ -59,6 +64,8 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
           setOpen(nextOpen);
           if (!nextOpen) {
             setFile(null);
+            setTagInput("");
+            setTags([]);
             setProgress(0);
           }
         }
@@ -92,6 +99,69 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
               className="block w-full rounded-md border border-border bg-card p-3 text-sm text-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-secondary"
             />
 
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Теги</p>
+              <div className="flex gap-2">
+                <AppInput
+                  value={tagInput}
+                  onChange={(event) => setTagInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter") {
+                      return;
+                    }
+                    event.preventDefault();
+                    const normalized = tagInput.trim();
+                    if (!normalized || tags.includes(normalized)) {
+                      return;
+                    }
+                    setTags((previous) => [...previous, normalized]);
+                    setTagInput("");
+                  }}
+                  disabled={uploadMutation.isPending}
+                  placeholder="Введите тег"
+                />
+                <AppButton
+                  type="button"
+                  variant="secondary"
+                  disabled={uploadMutation.isPending || tagInput.trim().length === 0}
+                  onClick={() => {
+                    const normalized = tagInput.trim();
+                    if (!normalized || tags.includes(normalized)) {
+                      return;
+                    }
+                    setTags((previous) => [...previous, normalized]);
+                    setTagInput("");
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                </AppButton>
+              </div>
+
+              {tags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-md border border-border bg-secondary/10 px-2 py-1 text-xs text-foreground"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setTags((previous) => previous.filter((value) => value !== tag))
+                        }
+                        disabled={uploadMutation.isPending}
+                        className="rounded-sm p-0.5 text-muted-foreground transition hover:bg-card hover:text-foreground"
+                        aria-label={`Удалить тег ${tag}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
             {uploadMutation.isPending ? (
               <div>
                 <p className="text-xs text-muted-foreground">Загрузка: {progress}%</p>
@@ -110,7 +180,7 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
               onClick={() => {
                 if (file) {
                   setProgress(0);
-                  uploadMutation.mutate(file);
+                  uploadMutation.mutate({ file, tags });
                 }
               }}
             >
