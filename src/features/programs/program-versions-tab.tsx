@@ -278,7 +278,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
             onEdit={setEditingVersion}
             onArchive={setArchivingVersion}
             onOpenWorkouts={(item) =>
-              router.push(`/influencer/programs/${programId}/versions/${item.id}/workouts`)
+              router.push(`/influencer/workouts?programId=${programId}&programVersionId=${item.id}`)
             }
           />
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">

@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { searchInfluencerPrograms } from "@/api/influencerPrograms";
+import { searchInfluencerProgramVersions } from "@/api/influencerProgramVersions";
 import { REFERENCE_LIST_PAGE_SIZE, REFERENCE_LIST_STALE_TIME_MS } from "@/config/query";
+import { WorkoutsListPage } from "@/features/workouts/workouts-list-page";
 import {
   AppButton,
   AppInput,
+  AppSelect,
   EmptyState,
   ErrorState,
   LoadingState,
@@ -22,10 +25,15 @@ function isForbiddenMessage(message: string): boolean {
 
 export function InfluencerWorkoutsHubPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { pushToast } = useAppToast();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
+  const [selectedProgramId, setSelectedProgramId] = useState(searchParams.get("programId") ?? "");
+  const [selectedProgramVersionId, setSelectedProgramVersionId] = useState(
+    searchParams.get("programVersionId") ?? "",
+  );
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -35,6 +43,26 @@ export function InfluencerWorkoutsHubPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [search]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (selectedProgramId) {
+      params.set("programId", selectedProgramId);
+    }
+    if (selectedProgramVersionId) {
+      params.set("programVersionId", selectedProgramVersionId);
+    }
+    const query = params.toString();
+    const nextUrl = query ? `/influencer/workouts?${query}` : "/influencer/workouts";
+    const currentQuery = searchParams.toString();
+    const currentUrl = currentQuery
+      ? `/influencer/workouts?${currentQuery}`
+      : "/influencer/workouts";
+
+    if (nextUrl !== currentUrl) {
+      router.replace(nextUrl);
+    }
+  }, [router, searchParams, selectedProgramId, selectedProgramVersionId]);
 
   const programsQuery = useQuery({
     queryKey: ["influencerWorkoutsHub", page, REFERENCE_LIST_PAGE_SIZE, debouncedSearch],
@@ -55,6 +83,23 @@ export function InfluencerWorkoutsHubPage() {
     placeholderData: (previousData) => previousData,
   });
 
+  const versionsQuery = useQuery({
+    queryKey: ["influencerWorkoutsVersions", selectedProgramId],
+    enabled: Boolean(selectedProgramId),
+    queryFn: async () => {
+      const result = await searchInfluencerProgramVersions({
+        programId: selectedProgramId,
+        page: 0,
+        size: 100,
+      });
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+  });
+
   useEffect(() => {
     if (!programsQuery.isError) {
       return;
@@ -69,20 +114,71 @@ export function InfluencerWorkoutsHubPage() {
     });
   }, [programsQuery.error, programsQuery.isError, pushToast]);
 
+  useEffect(() => {
+    if (!versionsQuery.isError) {
+      return;
+    }
+
+    pushToast({
+      kind: "error",
+      title: isForbiddenMessage(versionsQuery.error.message)
+        ? "Not permitted"
+        : "Не удалось загрузить версии",
+      description: versionsQuery.error.message,
+    });
+  }, [pushToast, versionsQuery.error, versionsQuery.isError]);
+
+  const programOptions = useMemo(
+    () =>
+      (programsQuery.data?.items ?? []).map((item) => ({
+        value: item.id,
+        label: item.title,
+      })),
+    [programsQuery.data?.items],
+  );
+
+  const versionOptions = useMemo(
+    () =>
+      (versionsQuery.data?.items ?? []).map((version) => ({
+        value: version.id,
+        label: `v${version.versionNumber} · ${version.status}`,
+      })),
+    [versionsQuery.data?.items],
+  );
+
   const totalPages = programsQuery.data?.totalPages ?? 0;
 
   return (
-    <div>
+    <div className="space-y-4">
       <PageHeader
         title="Workouts"
-        subtitle="Выберите программу и откройте её Versions, чтобы перейти к workouts версии."
+        subtitle="Быстрый доступ к тренировкам по выбранной программе и версии."
         actions={
-          <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
+          <div className="flex w-full max-w-5xl flex-wrap items-center gap-2">
             <div className="min-w-[220px] flex-1">
               <AppInput
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search programs"
+              />
+            </div>
+            <div className="min-w-[250px] flex-1">
+              <AppSelect
+                value={selectedProgramId}
+                onValueChange={(value) => {
+                  setSelectedProgramId(value);
+                  setSelectedProgramVersionId("");
+                }}
+                options={programOptions}
+                placeholder="Select program"
+              />
+            </div>
+            <div className="min-w-[250px] flex-1">
+              <AppSelect
+                value={selectedProgramVersionId}
+                onValueChange={setSelectedProgramVersionId}
+                options={versionOptions}
+                placeholder={selectedProgramId ? "Select version" : "Select program first"}
               />
             </div>
             <AppButton
@@ -111,91 +207,61 @@ export function InfluencerWorkoutsHubPage() {
       (programsQuery.data?.items.length ?? 0) === 0 ? (
         <EmptyState
           title="Программы не найдены"
-          description="Создайте или найдите нужную программу."
+          description="Попробуйте изменить поисковый запрос."
         />
       ) : null}
 
-      {!programsQuery.isLoading && !programsQuery.isError && programsQuery.data ? (
-        <div className="space-y-4">
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-sidebar/60 text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Title</th>
-                  <th className="px-4 py-3 font-medium">Published Version</th>
-                  <th className="px-4 py-3 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {programsQuery.data.items.map((program) => (
-                  <tr
-                    key={program.id}
-                    className="border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
-                  >
-                    <td className="px-4 py-3">
-                      <p className="font-medium">{program.title}</p>
-                      <p className="text-xs text-muted-foreground">{program.description ?? "-"}</p>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {program.currentPublishedVersionNumber
-                        ? `v${program.currentPublishedVersionNumber}`
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        {program.currentPublishedVersionId ? (
-                          <AppButton
-                            type="button"
-                            variant="secondary"
-                            className="h-9 px-3 text-xs"
-                            onClick={() =>
-                              router.push(
-                                `/influencer/programs/${program.id}/versions/${program.currentPublishedVersionId}/workouts`,
-                              )
-                            }
-                          >
-                            Open Workouts
-                          </AppButton>
-                        ) : null}
-                        <AppButton
-                          type="button"
-                          variant="secondary"
-                          className="h-9 px-3 text-xs"
-                          onClick={() => router.push(`/influencer/programs/${program.id}`)}
-                        >
-                          Open Versions
-                        </AppButton>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {!programsQuery.isLoading &&
+      !programsQuery.isError &&
+      !selectedProgramId &&
+      (programsQuery.data?.items.length ?? 0) > 0 ? (
+        <EmptyState
+          title="Выберите программу"
+          description="Выберите Program и Version сверху, чтобы открыть editor workouts."
+        />
+      ) : null}
 
-          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
-            <p className="text-muted-foreground">
-              Страница {programsQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
-              {programsQuery.data.totalElements} элементов
-            </p>
-            <div className="flex items-center gap-2">
-              <AppButton
-                type="button"
-                variant="secondary"
-                disabled={page === 0}
-                onClick={() => setPage((previous) => previous - 1)}
-              >
-                Назад
-              </AppButton>
-              <AppButton
-                type="button"
-                variant="secondary"
-                disabled={page + 1 >= totalPages}
-                onClick={() => setPage((previous) => previous + 1)}
-              >
-                Вперед
-              </AppButton>
-            </div>
+      {!programsQuery.isLoading &&
+      !programsQuery.isError &&
+      selectedProgramId &&
+      !selectedProgramVersionId ? (
+        <EmptyState
+          title="Выберите версию"
+          description="После выбора версии откроется список workouts и кнопка Create workout."
+        />
+      ) : null}
+
+      {selectedProgramId && selectedProgramVersionId ? (
+        <WorkoutsListPage
+          programId={selectedProgramId}
+          programVersionId={selectedProgramVersionId}
+          scopeName="influencer"
+        />
+      ) : null}
+
+      {programsQuery.data && programsQuery.data.totalPages > 1 ? (
+        <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
+          <p className="text-muted-foreground">
+            Страница {programsQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
+            {programsQuery.data.totalElements} элементов
+          </p>
+          <div className="flex items-center gap-2">
+            <AppButton
+              type="button"
+              variant="secondary"
+              disabled={page === 0}
+              onClick={() => setPage((previous) => previous - 1)}
+            >
+              Назад
+            </AppButton>
+            <AppButton
+              type="button"
+              variant="secondary"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage((previous) => previous + 1)}
+            >
+              Вперед
+            </AppButton>
           </div>
         </div>
       ) : null}

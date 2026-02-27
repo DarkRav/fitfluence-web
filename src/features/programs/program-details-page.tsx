@@ -250,7 +250,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                 variant="secondary"
                 onClick={() =>
                   router.push(
-                    `/influencer/programs/${program.id}/versions/${program.currentPublishedVersionId}/workouts`,
+                    `/influencer/workouts?programId=${program.id}&programVersionId=${program.currentPublishedVersionId}`,
                   )
                 }
               >
