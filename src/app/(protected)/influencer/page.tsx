@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { InfluencerProgramsPage } from "@/features/programs";
 
 export default function InfluencerPage() {
-  redirect("/influencer/programs");
+  return <InfluencerProgramsPage />;
 }

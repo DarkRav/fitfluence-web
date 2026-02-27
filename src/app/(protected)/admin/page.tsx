@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { AdminProgramsPage } from "@/features/programs";
 
 export default function AdminPage() {
-  redirect("/admin/programs");
+  return <AdminProgramsPage />;
 }
