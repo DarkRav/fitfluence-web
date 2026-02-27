@@ -1,4 +1,5 @@
-:root {
+:root,
+.dark {
   --background: 15 17 21;
   --foreground: 243 244 246;
   --card: 21 24 33;
@@ -27,4 +28,32 @@
 
   --radius-card: 16px;
   --radius-control: 12px;
+}
+
+.light {
+  --background: 245 247 250;
+  --foreground: 17 24 39;
+  --card: 255 255 255;
+  --card-foreground: 17 24 39;
+  --sidebar: 236 241 246;
+  --sidebar-foreground: 17 24 39;
+
+  --primary: 245 198 70;
+  --primary-hover: 234 179 8;
+  --primary-foreground: 17 17 17;
+
+  --secondary: 13 148 136;
+  --secondary-hover: 15 118 110;
+  --secondary-foreground: 255 255 255;
+
+  --muted: 100 116 139;
+  --muted-foreground: 71 85 105;
+
+  --border: 203 213 225;
+  --ring: 13 148 136;
+
+  --destructive: 220 38 38;
+  --success: 5 150 105;
+  --warning: 202 138 4;
+  --info: 37 99 235;
 }

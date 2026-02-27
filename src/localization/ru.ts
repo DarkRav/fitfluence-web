@@ -340,6 +340,9 @@ export const ru = {
   layout: {
     topbarTitle: "Панель управления Fitfluence",
     userFallback: "Пользователь",
+    preferences: "Параметры",
+    themeLight: "Светлая",
+    themeDark: "Тёмная",
     logout: "Выйти",
   },
   profile: {
