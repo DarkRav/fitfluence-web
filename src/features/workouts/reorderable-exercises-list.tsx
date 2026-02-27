@@ -2,18 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { GripVertical } from "lucide-react";
-import type { InfluencerWorkoutExerciseRecord } from "@/api/influencerWorkouts";
+import type { WorkoutExerciseRecord } from "@/features/workouts/types";
 
 type ReorderableExercisesListProps = {
-  exercises: InfluencerWorkoutExerciseRecord[];
+  exercises: WorkoutExerciseRecord[];
   isReordering: boolean;
-  onReorder: (nextExercises: InfluencerWorkoutExerciseRecord[]) => void;
-  renderExercise: (exercise: InfluencerWorkoutExerciseRecord) => React.ReactNode;
+  onReorder: (nextExercises: WorkoutExerciseRecord[]) => void;
+  renderExercise: (exercise: WorkoutExerciseRecord) => React.ReactNode;
 };
 
-function withOrderIndex(
-  exercises: InfluencerWorkoutExerciseRecord[],
-): InfluencerWorkoutExerciseRecord[] {
+function withOrderIndex(exercises: WorkoutExerciseRecord[]): WorkoutExerciseRecord[] {
   return exercises.map((exercise, index) => ({
     ...exercise,
     orderIndex: index,
@@ -21,10 +19,10 @@ function withOrderIndex(
 }
 
 function moveItem(
-  exercises: InfluencerWorkoutExerciseRecord[],
+  exercises: WorkoutExerciseRecord[],
   sourceId: string,
   targetId: string,
-): InfluencerWorkoutExerciseRecord[] {
+): WorkoutExerciseRecord[] {
   if (sourceId === targetId) {
     return exercises;
   }

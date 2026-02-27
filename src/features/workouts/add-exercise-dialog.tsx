@@ -8,10 +8,10 @@ import { useForm, useWatch } from "react-hook-form";
 import { X } from "lucide-react";
 import { z } from "zod";
 import {
-  type AddInfluencerWorkoutExercisePayload,
-  type InfluencerWorkoutExerciseRecord,
-} from "@/api/influencerWorkouts";
-import { searchInfluencerExercises } from "@/api/influencerExercises";
+  type AddWorkoutExercisePayload,
+  type WorkoutExerciseRecord,
+  type WorkoutsScopeConfig,
+} from "@/features/workouts/types";
 import { AppButton, AppInput } from "@/shared/ui";
 
 const addExerciseSchema = z.object({
@@ -27,16 +27,16 @@ const addExerciseSchema = z.object({
 type AddExerciseValues = z.infer<typeof addExerciseSchema>;
 
 type AddExerciseDialogProps = {
+  scope: WorkoutsScopeConfig;
   open: boolean;
   isSubmitting: boolean;
   existingExerciseIds: string[];
   onOpenChange: (open: boolean) => void;
-  onSubmit: (
-    payload: AddInfluencerWorkoutExercisePayload,
-  ) => Promise<InfluencerWorkoutExerciseRecord>;
+  onSubmit: (payload: AddWorkoutExercisePayload) => Promise<WorkoutExerciseRecord>;
 };
 
 export function AddExerciseDialog({
+  scope,
   open,
   isSubmitting,
   existingExerciseIds,
@@ -55,10 +55,10 @@ export function AddExerciseDialog({
   }, [search]);
 
   const exercisesQuery = useQuery({
-    queryKey: ["workout-add-exercise", debouncedSearch],
+    queryKey: [...scope.queryKeys.addExercise, debouncedSearch],
     enabled: open,
     queryFn: async () => {
-      const result = await searchInfluencerExercises({
+      const result = await scope.api.searchExercises({
         page: 0,
         size: 30,
         search: debouncedSearch,
@@ -173,7 +173,11 @@ export function AddExerciseDialog({
                           <p className="font-medium text-foreground">{exercise.name}</p>
                           <p className="text-xs text-muted-foreground">
                             {exercise.code}
-                            {exercise.createdByInfluencerId ? " · My" : " · Base"}
+                            {exercise.createdByInfluencerId
+                              ? scope.scope === "influencer"
+                                ? " · My"
+                                : " · Influencer"
+                              : " · Base"}
                           </p>
                         </button>
                       );

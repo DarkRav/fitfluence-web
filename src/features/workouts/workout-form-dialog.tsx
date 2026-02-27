@@ -7,10 +7,10 @@ import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { z } from "zod";
 import type {
-  CreateInfluencerWorkoutTemplatePayload,
-  InfluencerWorkoutTemplateRecord,
-  UpdateInfluencerWorkoutTemplatePayload,
-} from "@/api/influencerWorkouts";
+  CreateWorkoutPayload,
+  UpdateWorkoutPayload,
+  WorkoutTemplateRecord,
+} from "@/features/workouts/types";
 import { AppButton, AppInput } from "@/shared/ui";
 
 const workoutFormSchema = z.object({
@@ -24,17 +24,14 @@ type WorkoutFormValues = z.infer<typeof workoutFormSchema>;
 type WorkoutFormDialogProps = {
   open: boolean;
   mode: "create" | "edit";
-  workout?: InfluencerWorkoutTemplateRecord;
+  workout?: WorkoutTemplateRecord;
   isSubmitting: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (payload: CreateInfluencerWorkoutTemplatePayload) => Promise<void>;
-  onUpdate: (
-    workoutTemplateId: string,
-    payload: UpdateInfluencerWorkoutTemplatePayload,
-  ) => Promise<void>;
+  onCreate?: (payload: CreateWorkoutPayload) => Promise<void>;
+  onUpdate?: (workoutTemplateId: string, payload: UpdateWorkoutPayload) => Promise<void>;
 };
 
-function buildDefaultValues(workout?: InfluencerWorkoutTemplateRecord): WorkoutFormValues {
+function buildDefaultValues(workout?: WorkoutTemplateRecord): WorkoutFormValues {
   return {
     dayOrder: workout?.dayOrder ?? 1,
     title: workout?.title ?? "",
@@ -84,6 +81,9 @@ export function WorkoutFormDialog({
             className="mt-4 space-y-4"
             onSubmit={form.handleSubmit(async (values) => {
               if (mode === "create") {
+                if (!onCreate) {
+                  return;
+                }
                 await onCreate({
                   dayOrder: values.dayOrder,
                   title: values.title?.trim() || undefined,
@@ -93,6 +93,9 @@ export function WorkoutFormDialog({
               }
 
               if (!workout) {
+                return;
+              }
+              if (!onUpdate) {
                 return;
               }
 

@@ -1,19 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import {
-  createInfluencerWorkoutTemplate,
-  deleteInfluencerWorkoutTemplate,
-  searchInfluencerWorkoutTemplates,
-  updateInfluencerWorkoutTemplate,
-  type InfluencerWorkoutTemplateRecord,
-} from "@/api/influencerWorkouts";
 import { REFERENCE_LIST_PAGE_SIZE, REFERENCE_LIST_STALE_TIME_MS } from "@/config/query";
 import { ConfirmDeleteDialog } from "@/features/reference/confirm-delete-dialog";
 import { WorkoutFormDialog } from "@/features/workouts/workout-form-dialog";
+import type { WorkoutTemplateRecord, WorkoutsScopeConfig } from "@/features/workouts/types";
 import {
   AppButton,
   AppInput,
@@ -27,6 +22,7 @@ import {
 type WorkoutsListPageProps = {
   programId: string;
   programVersionId: string;
+  scope: WorkoutsScopeConfig;
 };
 
 function isForbiddenMessage(message: string): boolean {
@@ -34,7 +30,7 @@ function isForbiddenMessage(message: string): boolean {
   return normalized.includes("forbidden") || normalized.includes("недостаточно прав");
 }
 
-export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPageProps) {
+export function WorkoutsListPage({ programId, programVersionId, scope }: WorkoutsListPageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
@@ -42,10 +38,8 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
   const [createOpen, setCreateOpen] = useState(false);
-  const [editingWorkout, setEditingWorkout] = useState<InfluencerWorkoutTemplateRecord | null>(
-    null,
-  );
-  const [deleteWorkout, setDeleteWorkout] = useState<InfluencerWorkoutTemplateRecord | null>(null);
+  const [editingWorkout, setEditingWorkout] = useState<WorkoutTemplateRecord | null>(null);
+  const [deleteWorkout, setDeleteWorkout] = useState<WorkoutTemplateRecord | null>(null);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -57,14 +51,21 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
   }, [search]);
 
   const queryKey = useMemo(
-    () => ["workouts", programVersionId, page, REFERENCE_LIST_PAGE_SIZE, debouncedSearch] as const,
-    [debouncedSearch, page, programVersionId],
+    () =>
+      [
+        ...scope.queryKeys.list,
+        programVersionId,
+        page,
+        REFERENCE_LIST_PAGE_SIZE,
+        debouncedSearch,
+      ] as const,
+    [debouncedSearch, page, programVersionId, scope.queryKeys.list],
   );
 
   const listQuery = useQuery({
     queryKey,
     queryFn: async () => {
-      const result = await searchInfluencerWorkoutTemplates({
+      const result = await scope.api.listWorkouts({
         programVersionId,
         page,
         size: REFERENCE_LIST_PAGE_SIZE,
@@ -96,8 +97,8 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
   }, [listQuery.error, listQuery.isError, pushToast]);
 
   const createMutation = useMutation({
-    mutationFn: async (payload: Parameters<typeof createInfluencerWorkoutTemplate>[1]) => {
-      const result = await createInfluencerWorkoutTemplate(programVersionId, payload);
+    mutationFn: async (payload: Parameters<WorkoutsScopeConfig["api"]["createWorkout"]>[1]) => {
+      const result = await scope.api.createWorkout(programVersionId, payload);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -111,7 +112,9 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
         description: "Template успешно добавлен в версию программы.",
       });
       setCreateOpen(false);
-      await queryClient.invalidateQueries({ queryKey: ["workouts", programVersionId] });
+      await queryClient.invalidateQueries({
+        queryKey: [...scope.queryKeys.list, programVersionId],
+      });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Не удалось создать workout";
@@ -129,9 +132,9 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
       payload,
     }: {
       workoutTemplateId: string;
-      payload: Parameters<typeof updateInfluencerWorkoutTemplate>[1];
+      payload: Parameters<WorkoutsScopeConfig["api"]["updateWorkout"]>[1];
     }) => {
-      const result = await updateInfluencerWorkoutTemplate(workoutTemplateId, payload);
+      const result = await scope.api.updateWorkout(workoutTemplateId, payload);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -145,7 +148,9 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
         description: "Изменения сохранены.",
       });
       setEditingWorkout(null);
-      await queryClient.invalidateQueries({ queryKey: ["workouts", programVersionId] });
+      await queryClient.invalidateQueries({
+        queryKey: [...scope.queryKeys.list, programVersionId],
+      });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Не удалось обновить workout";
@@ -159,7 +164,7 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
 
   const deleteMutation = useMutation({
     mutationFn: async (workoutTemplateId: string) => {
-      const result = await deleteInfluencerWorkoutTemplate(workoutTemplateId);
+      const result = await scope.api.deleteWorkout(workoutTemplateId);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -171,7 +176,9 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
         description: "Template удален из версии программы.",
       });
       setDeleteWorkout(null);
-      await queryClient.invalidateQueries({ queryKey: ["workouts", programVersionId] });
+      await queryClient.invalidateQueries({
+        queryKey: [...scope.queryKeys.list, programVersionId],
+      });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Не удалось удалить workout";
@@ -187,16 +194,39 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
 
   return (
     <div>
+      <div className="mb-2 text-sm text-muted-foreground">
+        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
+          Programs
+        </Link>
+        {" / "}
+        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
+          Program
+        </Link>
+        {" / "}
+        <span>Version</span>
+        {" / "}
+        <span className="text-foreground">Workouts</span>
+      </div>
+
       <PageHeader
-        title="Workouts"
-        subtitle="Управление workout templates внутри версии программы."
+        title="Version Workouts"
+        subtitle="Управление workout templates для выбранной версии программы."
         actions={
-          <div className="flex w-full max-w-4xl items-center gap-2">
-            <AppInput
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search workouts"
-            />
+          <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
+            <div className="min-w-[220px] flex-1">
+              <AppInput
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search workouts"
+              />
+            </div>
+            <AppButton
+              type="button"
+              variant="secondary"
+              onClick={() => router.push(scope.routes.programDetails(programId))}
+            >
+              Back to Program
+            </AppButton>
             <AppButton type="button" onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Create workout
@@ -255,7 +285,7 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
                           className="h-9 px-3 text-xs"
                           onClick={() =>
                             router.push(
-                              `/influencer/programs/${programId}/versions/${programVersionId}/workouts/${workout.id}`,
+                              scope.routes.workoutDetails(programId, programVersionId, workout.id),
                             )
                           }
                         >
@@ -320,9 +350,6 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
         onCreate={async (payload) => {
           await createMutation.mutateAsync(payload);
         }}
-        onUpdate={async () => {
-          throw new Error("Unexpected update in create mode");
-        }}
       />
 
       <WorkoutFormDialog
@@ -334,9 +361,6 @@ export function WorkoutsListPage({ programId, programVersionId }: WorkoutsListPa
           if (!open) {
             setEditingWorkout(null);
           }
-        }}
-        onCreate={async () => {
-          throw new Error("Unexpected create in edit mode");
         }}
         onUpdate={async (workoutTemplateId, payload) => {
           await updateMutation.mutateAsync({ workoutTemplateId, payload });

@@ -5,9 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type {
-  InfluencerWorkoutExerciseRecord,
-  UpdateInfluencerWorkoutExercisePayload,
-} from "@/api/influencerWorkouts";
+  UpdateWorkoutExercisePayload,
+  WorkoutExerciseRecord,
+} from "@/features/workouts/types";
 import { AppButton, AppInput } from "@/shared/ui";
 
 const exerciseEditorSchema = z.object({
@@ -22,17 +22,14 @@ const exerciseEditorSchema = z.object({
 type ExerciseEditorValues = z.infer<typeof exerciseEditorSchema>;
 
 type WorkoutExerciseEditorProps = {
-  exercise: InfluencerWorkoutExerciseRecord;
+  exercise: WorkoutExerciseRecord;
   isSubmitting: boolean;
   isDeleting: boolean;
-  onSave: (
-    exerciseTemplateId: string,
-    payload: UpdateInfluencerWorkoutExercisePayload,
-  ) => Promise<void>;
+  onSave: (exerciseTemplateId: string, payload: UpdateWorkoutExercisePayload) => Promise<void>;
   onDelete: (exerciseTemplateId: string) => Promise<void>;
 };
 
-function buildDefaultValues(exercise: InfluencerWorkoutExerciseRecord): ExerciseEditorValues {
+function buildDefaultValues(exercise: WorkoutExerciseRecord): ExerciseEditorValues {
   return {
     sets: exercise.sets,
     repsMin: exercise.repsMin,

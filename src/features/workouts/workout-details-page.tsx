@@ -1,16 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import {
-  addInfluencerWorkoutExercise,
-  deleteInfluencerWorkoutExercise,
-  getInfluencerWorkoutTemplate,
-  reorderInfluencerWorkoutExercises,
-  type InfluencerWorkoutExerciseRecord,
-  updateInfluencerWorkoutExercise,
-} from "@/api/influencerWorkouts";
+import { type WorkoutExerciseRecord, type WorkoutsScopeConfig } from "@/features/workouts/types";
 import { AddExerciseDialog } from "@/features/workouts/add-exercise-dialog";
 import { ReorderableExercisesList } from "@/features/workouts/reorderable-exercises-list";
 import { WorkoutExerciseEditor } from "@/features/workouts/workout-exercise-editor";
@@ -20,6 +14,7 @@ type WorkoutDetailsPageProps = {
   programId: string;
   programVersionId: string;
   workoutTemplateId: string;
+  scope: WorkoutsScopeConfig;
 };
 
 function isForbiddenMessage(message: string): boolean {
@@ -31,17 +26,18 @@ export function WorkoutDetailsPage({
   programId,
   programVersionId,
   workoutTemplateId,
+  scope,
 }: WorkoutDetailsPageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
-  const [localExercises, setLocalExercises] = useState<InfluencerWorkoutExerciseRecord[]>([]);
+  const [localExercises, setLocalExercises] = useState<WorkoutExerciseRecord[]>([]);
 
   const detailsQuery = useQuery({
-    queryKey: ["workout", workoutTemplateId],
+    queryKey: [...scope.queryKeys.details, workoutTemplateId],
     queryFn: async () => {
-      const result = await getInfluencerWorkoutTemplate(programVersionId, workoutTemplateId);
+      const result = await scope.api.getWorkout(programVersionId, workoutTemplateId);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -51,8 +47,8 @@ export function WorkoutDetailsPage({
   });
 
   const addExerciseMutation = useMutation({
-    mutationFn: async (payload: Parameters<typeof addInfluencerWorkoutExercise>[1]) => {
-      const result = await addInfluencerWorkoutExercise(workoutTemplateId, payload);
+    mutationFn: async (payload: Parameters<WorkoutsScopeConfig["api"]["addExercise"]>[1]) => {
+      const result = await scope.api.addExercise(workoutTemplateId, payload);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -67,8 +63,10 @@ export function WorkoutDetailsPage({
       });
       setAddExerciseOpen(false);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] }),
-        queryClient.invalidateQueries({ queryKey: ["workouts", programVersionId] }),
+        queryClient.invalidateQueries({
+          queryKey: [...scope.queryKeys.details, workoutTemplateId],
+        }),
+        queryClient.invalidateQueries({ queryKey: [...scope.queryKeys.list, programVersionId] }),
       ]);
     },
     onError: (error) => {
@@ -88,7 +86,7 @@ export function WorkoutDetailsPage({
       nextExercises: ReturnType<typeof getSortedExercisesForState>;
       previousExercises: ReturnType<typeof getSortedExercisesForState>;
     }) => {
-      const result = await reorderInfluencerWorkoutExercises(
+      const result = await scope.api.reorderExercises(
         workoutTemplateId,
         nextExercises.map((item, index) => ({
           exerciseTemplateId: item.id,
@@ -100,7 +98,9 @@ export function WorkoutDetailsPage({
       }
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] });
+      await queryClient.invalidateQueries({
+        queryKey: [...scope.queryKeys.details, workoutTemplateId],
+      });
     },
     onError: (error, variables) => {
       setLocalExercises(variables.previousExercises);
@@ -119,9 +119,9 @@ export function WorkoutDetailsPage({
       payload,
     }: {
       exerciseTemplateId: string;
-      payload: Parameters<typeof updateInfluencerWorkoutExercise>[1];
+      payload: Parameters<WorkoutsScopeConfig["api"]["updateExercise"]>[1];
     }) => {
-      const result = await updateInfluencerWorkoutExercise(exerciseTemplateId, payload);
+      const result = await scope.api.updateExercise(exerciseTemplateId, payload);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -134,7 +134,9 @@ export function WorkoutDetailsPage({
         title: "Exercise updated",
         description: "Параметры упражнения сохранены.",
       });
-      await queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] });
+      await queryClient.invalidateQueries({
+        queryKey: [...scope.queryKeys.details, workoutTemplateId],
+      });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Не удалось сохранить упражнение";
@@ -148,7 +150,7 @@ export function WorkoutDetailsPage({
 
   const deleteExerciseMutation = useMutation({
     mutationFn: async (exerciseTemplateId: string) => {
-      const result = await deleteInfluencerWorkoutExercise(exerciseTemplateId);
+      const result = await scope.api.deleteExercise(exerciseTemplateId);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -159,7 +161,9 @@ export function WorkoutDetailsPage({
         title: "Exercise removed",
         description: "Упражнение удалено из workout.",
       });
-      await queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] });
+      await queryClient.invalidateQueries({
+        queryKey: [...scope.queryKeys.details, workoutTemplateId],
+      });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Не удалось удалить упражнение";
@@ -214,6 +218,25 @@ export function WorkoutDetailsPage({
 
   return (
     <div className="space-y-4">
+      <div className="mb-2 text-sm text-muted-foreground">
+        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
+          Programs
+        </Link>
+        {" / "}
+        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
+          Program
+        </Link>
+        {" / "}
+        <Link
+          className="hover:text-secondary"
+          href={scope.routes.workoutsList(programId, programVersionId)}
+        >
+          Workouts
+        </Link>
+        {" / "}
+        <span className="text-foreground">Workout</span>
+      </div>
+
       <PageHeader
         title={workout.title ?? `Workout day ${workout.dayOrder}`}
         subtitle={`Program ${programId} · Version ${programVersionId}`}
@@ -221,9 +244,7 @@ export function WorkoutDetailsPage({
           <AppButton
             type="button"
             variant="secondary"
-            onClick={() =>
-              router.push(`/influencer/programs/${programId}/versions/${programVersionId}/workouts`)
-            }
+            onClick={() => router.push(scope.routes.workoutsList(programId, programVersionId))}
           >
             Back to Workouts
           </AppButton>
@@ -286,6 +307,7 @@ export function WorkoutDetailsPage({
       </div>
 
       <AddExerciseDialog
+        scope={scope}
         open={addExerciseOpen}
         isSubmitting={addExerciseMutation.isPending}
         existingExerciseIds={workout.exercises.map((item) => item.exerciseId)}
@@ -296,8 +318,6 @@ export function WorkoutDetailsPage({
   );
 }
 
-function getSortedExercisesForState(
-  exercises: InfluencerWorkoutExerciseRecord[],
-): InfluencerWorkoutExerciseRecord[] {
+function getSortedExercisesForState(exercises: WorkoutExerciseRecord[]): WorkoutExerciseRecord[] {
   return [...exercises].sort((left, right) => left.orderIndex - right.orderIndex);
 }
