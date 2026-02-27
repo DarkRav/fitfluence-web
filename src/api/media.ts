@@ -10,6 +10,7 @@ import {
   MediaService,
   type ContentMediaType,
   type Media,
+  type MediaOwnerType,
   type MediaSearchRequest,
 } from "@/api/gen";
 
@@ -24,7 +25,9 @@ export type MediaRecord = {
   mimeType?: string;
   tags: string[];
   createdAt?: string;
-  owner?: string;
+  ownerType: MediaOwnerType;
+  ownerId: string;
+  ownerDisplayName?: string;
 };
 
 export type MediaPageResult = {
@@ -38,6 +41,8 @@ export type MediaPageResult = {
 export type MediaSearchParams = {
   search?: string;
   type?: ContentMediaType;
+  ownerType?: MediaOwnerType;
+  ownerId?: string;
   tags?: string[];
   page?: number;
   size?: number;
@@ -73,6 +78,9 @@ function mapMedia(media: Media): MediaRecord {
     mimeType: media.mimeType,
     tags: media.tags ?? [],
     createdAt: media.createdAt,
+    ownerType: media.ownerType,
+    ownerId: media.ownerId,
+    ownerDisplayName: media.ownerDisplayName,
   };
 }
 
@@ -97,10 +105,16 @@ function mapMediaPage(result: {
 function buildSearchRequest(params: MediaSearchParams): MediaSearchRequest {
   return {
     filter:
-      params.search || params.type || (params.tags && params.tags.length > 0)
+      params.search ||
+      params.type ||
+      params.ownerType ||
+      params.ownerId ||
+      (params.tags && params.tags.length > 0)
         ? {
             search: params.search,
             type: params.type,
+            ownerType: params.ownerType,
+            ownerId: params.ownerId,
             tags: params.tags,
           }
         : undefined,

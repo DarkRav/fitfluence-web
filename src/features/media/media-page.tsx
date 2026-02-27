@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   searchAdminMedia,
@@ -9,7 +10,16 @@ import {
   type MediaPageResult,
   type MediaRole,
 } from "@/api/media";
-import { AppButton, AppInput, EmptyState, ErrorState, LoadingState, PageHeader } from "@/shared/ui";
+import { type MediaOwnerType } from "@/api/gen";
+import {
+  AppButton,
+  AppInput,
+  AppSelect,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  PageHeader,
+} from "@/shared/ui";
 import { MediaDetailsDialog } from "@/features/media/media-details-dialog";
 import { MediaTable } from "@/features/media/media-table";
 import { MediaUploadDialog } from "@/features/media/media-upload-dialog";
@@ -23,19 +33,67 @@ type MediaPageProps = {
 };
 
 const PAGE_SIZE = 20;
+const ownerTypeOptions = [
+  { value: "ALL", label: "Все владельцы" },
+  { value: "ADMIN", label: "Администратор" },
+  { value: "INFLUENCER", label: "Инфлюэнсер" },
+] as const;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: MediaPageProps) {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(0);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const [page, setPage] = useState(Number(searchParams.get("page") ?? "0") || 0);
+  const [ownerType, setOwnerType] = useState<(typeof ownerTypeOptions)[number]["value"]>(
+    (searchParams.get("ownerType") as (typeof ownerTypeOptions)[number]["value"]) ?? "ALL",
+  );
+  const [ownerId, setOwnerId] = useState(searchParams.get("ownerId") ?? "");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
+  const isAdmin = role === "ADMIN";
+  const ownerIdNormalized = ownerId.trim();
+  const isOwnerIdInvalid = ownerIdNormalized.length > 0 && !UUID_REGEX.test(ownerIdNormalized);
+
+  const effectiveOwnerType: MediaOwnerType | undefined =
+    isAdmin && ownerType !== "ALL" ? ownerType : undefined;
+  const effectiveOwnerId = isAdmin ? ownerIdNormalized || undefined : undefined;
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+    if (search.trim()) {
+      nextParams.set("search", search.trim());
+    }
+    if (page > 0) {
+      nextParams.set("page", String(page));
+    }
+    if (isAdmin && ownerType !== "ALL") {
+      nextParams.set("ownerType", ownerType);
+    }
+    if (isAdmin && ownerIdNormalized) {
+      nextParams.set("ownerId", ownerIdNormalized);
+    }
+    const nextQuery = nextParams.toString();
+    const currentQuery = searchParams.toString();
+    if (nextQuery !== currentQuery) {
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+    }
+  }, [isAdmin, ownerIdNormalized, ownerType, page, pathname, router, search, searchParams]);
 
   const query = useQuery<MediaPageResult, Error>({
-    queryKey: ["media", role, page, search],
+    queryKey: ["media", role, page, search, effectiveOwnerType, effectiveOwnerId],
+    enabled: !isOwnerIdInvalid,
     queryFn: async () => {
       const response =
         role === "ADMIN"
-          ? await searchAdminMedia({ page, size: PAGE_SIZE, search })
+          ? await searchAdminMedia({
+              page,
+              size: PAGE_SIZE,
+              search,
+              ownerType: effectiveOwnerType,
+              ownerId: effectiveOwnerId,
+            })
           : await searchInfluencerMedia({ page, size: PAGE_SIZE, search });
 
       if (!response.ok) {
@@ -56,28 +114,65 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
 
   const actions = useMemo(
     () => (
-      <div className="flex w-full flex-wrap items-center gap-2">
-        <AppInput
-          value={search}
-          onChange={(event) => {
-            setSearch(event.target.value);
-            setPage(0);
-          }}
-          placeholder="Поиск по ID или тегу"
-        />
+      <div className="flex w-full flex-wrap items-start gap-2">
+        <div className="min-w-[220px] flex-1">
+          <AppInput
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(0);
+            }}
+            placeholder="Поиск по ID или тегу"
+          />
+        </div>
+        {isAdmin ? (
+          <>
+            <div className="w-[210px]">
+              <AppSelect
+                value={ownerType}
+                onValueChange={(value) => {
+                  setOwnerType(value as (typeof ownerTypeOptions)[number]["value"]);
+                  setPage(0);
+                }}
+                options={ownerTypeOptions.map((option) => ({
+                  value: option.value,
+                  label: option.label,
+                }))}
+                placeholder="Тип владельца"
+              />
+            </div>
+            <div className="w-[300px]">
+              <AppInput
+                value={ownerId}
+                onChange={(event) => {
+                  setOwnerId(event.target.value);
+                  setPage(0);
+                }}
+                placeholder="ID владельца (UUID)"
+              />
+              {isOwnerIdInvalid ? (
+                <p className="mt-1 text-xs text-destructive">Укажите корректный UUID.</p>
+              ) : null}
+            </div>
+          </>
+        ) : null}
         <MediaUploadDialog role={role} />
       </div>
     ),
-    [role, search],
+    [isAdmin, isOwnerIdInvalid, ownerId, ownerType, role, search],
   );
 
   return (
     <div>
       <PageHeader title={title} subtitle={subtitle} actions={actions} />
 
-      {query.isLoading ? <LoadingState title="Загружаем медиа..." /> : null}
+      {isOwnerIdInvalid ? (
+        <ErrorState title="Некорректный фильтр" description="Укажите корректный UUID владельца." />
+      ) : null}
 
-      {!query.isLoading && query.isError ? (
+      {!isOwnerIdInvalid && query.isLoading ? <LoadingState title="Загружаем медиа..." /> : null}
+
+      {!isOwnerIdInvalid && !query.isLoading && query.isError ? (
         <ErrorState
           title="Не удалось загрузить медиа"
           description={query.error.message}
@@ -85,14 +180,22 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
         />
       ) : null}
 
-      {!query.isLoading && !query.isError && query.data && query.data.items.length === 0 ? (
+      {!isOwnerIdInvalid &&
+      !query.isLoading &&
+      !query.isError &&
+      query.data &&
+      query.data.items.length === 0 ? (
         <EmptyState
           title="Ничего не найдено"
           description={search ? "Попробуйте изменить поисковый запрос." : "Список медиа пока пуст."}
         />
       ) : null}
 
-      {!query.isLoading && !query.isError && query.data && query.data.items.length > 0 ? (
+      {!isOwnerIdInvalid &&
+      !query.isLoading &&
+      !query.isError &&
+      query.data &&
+      query.data.items.length > 0 ? (
         <div className="space-y-4">
           <MediaTable
             items={query.data.items}

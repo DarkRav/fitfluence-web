@@ -14,6 +14,21 @@ type MediaTableProps = {
   pickMode?: boolean;
 };
 
+function formatOwner(item: MediaRecord): { label: string; tooltip?: string } {
+  if (item.ownerDisplayName?.trim()) {
+    return {
+      label: item.ownerDisplayName.trim(),
+      tooltip: `${item.ownerType} · ${item.ownerId}`,
+    };
+  }
+
+  const shortId = item.ownerId.length > 8 ? `${item.ownerId.slice(0, 8)}…` : item.ownerId;
+  return {
+    label: `${item.ownerType} · ${shortId}`,
+    tooltip: `${item.ownerType} · ${item.ownerId}`,
+  };
+}
+
 function renderPreview(item: MediaRecord) {
   if (item.type === "VIDEO") {
     return (
@@ -92,7 +107,16 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
               <td className={tableCellClassName}>
                 {item.createdAt ? new Date(item.createdAt).toLocaleString() : "-"}
               </td>
-              <td className={tableCellClassName}>{item.owner ?? "-"}</td>
+              <td className={`${tableCellClassName} text-xs text-muted-foreground`}>
+                {(() => {
+                  const owner = formatOwner(item);
+                  return (
+                    <span title={owner.tooltip} className="cursor-help">
+                      {owner.label}
+                    </span>
+                  );
+                })()}
+              </td>
               {(onOpenDetails || pickMode) && (
                 <td className={tableCellClassName}>
                   {pickMode ? (
