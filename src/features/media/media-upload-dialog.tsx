@@ -9,9 +9,17 @@ import { AppButton, AppInput, useAppToast } from "@/shared/ui";
 
 type MediaUploadDialogProps = {
   role: MediaRole;
+  triggerLabel?: string;
+  triggerVariant?: "primary" | "secondary" | "ghost";
+  onUploaded?: (mediaId: string) => void;
 };
 
-export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
+export function MediaUploadDialog({
+  role,
+  triggerLabel = "Загрузить",
+  triggerVariant = "primary",
+  onUploaded,
+}: MediaUploadDialogProps) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [tagInput, setTagInput] = useState("");
@@ -34,18 +42,21 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
 
       return result.data;
     },
-    onSuccess: async () => {
+    onSuccess: async (uploadedMedia) => {
       pushToast({
         kind: "success",
         title: "Файл загружен",
         description: "Медиа успешно добавлено.",
       });
+      if (uploadedMedia?.id) {
+        onUploaded?.(uploadedMedia.id);
+      }
       setFile(null);
       setTagInput("");
       setTags([]);
       setProgress(0);
       setOpen(false);
-      await queryClient.invalidateQueries({ queryKey: ["media", role] });
+      await queryClient.invalidateQueries({ queryKey: ["media"] });
     },
     onError: (error) => {
       pushToast({
@@ -72,9 +83,12 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
       }}
     >
       <Dialog.Trigger asChild>
-        <AppButton className="shadow-glow">
+        <AppButton
+          variant={triggerVariant}
+          className={triggerVariant === "primary" ? "shadow-glow" : ""}
+        >
           <Upload className="mr-2 h-4 w-4" />
-          Загрузить
+          {triggerLabel}
         </AppButton>
       </Dialog.Trigger>
       <Dialog.Portal>

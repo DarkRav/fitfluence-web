@@ -12,6 +12,7 @@ import {
 } from "@/api/media";
 import { AppButton, AppInput, EmptyState, ErrorState, LoadingState } from "@/shared/ui";
 import { MediaTable } from "@/features/media/media-table";
+import { MediaUploadDialog } from "@/features/media/media-upload-dialog";
 
 type MediaPickerDialogProps = {
   role: MediaRole;
@@ -56,14 +57,27 @@ export function MediaPickerDialog({ role, open, onOpenChange, onSelect }: MediaP
           </Dialog.Description>
 
           <div className="mt-4 space-y-4">
-            <AppInput
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(0);
-              }}
-              placeholder="Поиск по ID или тегу"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="min-w-[240px] flex-1">
+                <AppInput
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setPage(0);
+                  }}
+                  placeholder="Поиск по ID или тегу"
+                />
+              </div>
+              <MediaUploadDialog
+                role={role}
+                triggerVariant="secondary"
+                triggerLabel="Загрузить файл"
+                onUploaded={(mediaId) => {
+                  onSelect(mediaId);
+                  onOpenChange(false);
+                }}
+              />
+            </div>
 
             {mediaQuery.isLoading ? <LoadingState title="Загружаем медиа..." /> : null}
             {mediaQuery.isError ? (
