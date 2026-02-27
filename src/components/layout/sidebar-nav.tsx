@@ -26,7 +26,10 @@ const adminItems = [
   { label: "Прогрессия", href: "/admin/progression", icon: Repeat2 },
 ];
 
-const influencerItems = [{ label: "Медиа", href: "/influencer/media", icon: ImageIcon }];
+const influencerItems = [
+  { label: "Медиа", href: "/influencer/media", icon: ImageIcon },
+  { label: "Exercises", href: "/influencer/exercises", icon: Dumbbell },
+];
 
 export function SidebarNav() {
   const pathname = usePathname();
