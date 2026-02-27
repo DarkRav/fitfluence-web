@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { AppProviders } from "@/app/providers";
 import { AuthProvider } from "@/features/auth/auth-provider";
 import "./globals.css";
 
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ru" className="dark">
       <body className={`${geist.variable} min-h-screen`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AppProviders>
+          <AuthProvider>{children}</AuthProvider>
+        </AppProviders>
       </body>
     </html>
   );
