@@ -7,9 +7,12 @@ import {
   addInfluencerWorkoutExercise,
   deleteInfluencerWorkoutExercise,
   getInfluencerWorkoutTemplate,
+  reorderInfluencerWorkoutExercises,
+  type InfluencerWorkoutExerciseRecord,
   updateInfluencerWorkoutExercise,
 } from "@/api/influencerWorkouts";
 import { AddExerciseDialog } from "@/features/workouts/add-exercise-dialog";
+import { ReorderableExercisesList } from "@/features/workouts/reorderable-exercises-list";
 import { WorkoutExerciseEditor } from "@/features/workouts/workout-exercise-editor";
 import { AppButton, ErrorState, LoadingState, PageHeader, useAppToast } from "@/shared/ui";
 
@@ -33,6 +36,7 @@ export function WorkoutDetailsPage({
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
+  const [localExercises, setLocalExercises] = useState<InfluencerWorkoutExerciseRecord[]>([]);
 
   const detailsQuery = useQuery({
     queryKey: ["workout", workoutTemplateId],
@@ -72,6 +76,38 @@ export function WorkoutDetailsPage({
       pushToast({
         kind: "error",
         title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка добавления",
+        description: message,
+      });
+    },
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: async ({
+      nextExercises,
+    }: {
+      nextExercises: ReturnType<typeof getSortedExercisesForState>;
+      previousExercises: ReturnType<typeof getSortedExercisesForState>;
+    }) => {
+      const result = await reorderInfluencerWorkoutExercises(
+        workoutTemplateId,
+        nextExercises.map((item, index) => ({
+          exerciseTemplateId: item.id,
+          orderIndex: index,
+        })),
+      );
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] });
+    },
+    onError: (error, variables) => {
+      setLocalExercises(variables.previousExercises);
+      const message = error instanceof Error ? error.message : "Не удалось сохранить порядок";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка reorder",
         description: message,
       });
     },
@@ -149,6 +185,14 @@ export function WorkoutDetailsPage({
     });
   }, [detailsQuery.error, detailsQuery.isError, pushToast]);
 
+  useEffect(() => {
+    if (!detailsQuery.data) {
+      return;
+    }
+
+    setLocalExercises(getSortedExercisesForState(detailsQuery.data.exercises));
+  }, [detailsQuery.data]);
+
   if (detailsQuery.isLoading) {
     return <LoadingState title="Загружаем workout..." />;
   }
@@ -215,8 +259,15 @@ export function WorkoutDetailsPage({
             В этом workout пока нет упражнений.
           </p>
         ) : (
-          <div className="space-y-3">
-            {workout.exercises.map((exercise) => (
+          <ReorderableExercisesList
+            exercises={localExercises}
+            isReordering={reorderMutation.isPending}
+            onReorder={(nextExercises) => {
+              const previousExercises = localExercises;
+              setLocalExercises(nextExercises);
+              reorderMutation.mutate({ nextExercises, previousExercises });
+            }}
+            renderExercise={(exercise) => (
               <WorkoutExerciseEditor
                 key={exercise.id}
                 exercise={exercise}
@@ -229,8 +280,8 @@ export function WorkoutDetailsPage({
                   await deleteExerciseMutation.mutateAsync(exerciseTemplateId);
                 }}
               />
-            ))}
-          </div>
+            )}
+          />
         )}
       </div>
 
@@ -243,4 +294,10 @@ export function WorkoutDetailsPage({
       />
     </div>
   );
+}
+
+function getSortedExercisesForState(
+  exercises: InfluencerWorkoutExerciseRecord[],
+): InfluencerWorkoutExerciseRecord[] {
+  return [...exercises].sort((left, right) => left.orderIndex - right.orderIndex);
 }
