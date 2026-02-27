@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { X } from "lucide-react";
+import { MediaPicker } from "@/features/media";
 import { AppButton, AppInput, AppSelect } from "@/shared/ui";
 import type { ReferenceFormField } from "@/features/reference/reference-types";
 import type { z } from "zod";
@@ -83,6 +84,40 @@ export function ReferenceFormDialog<TValues extends Record<string, string>>({
                           options={field.options}
                           placeholder={field.placeholder}
                         />
+                      )}
+                    />
+                    {errorMessage ? (
+                      <p className="text-xs text-destructive">{String(errorMessage)}</p>
+                    ) : null}
+                  </div>
+                );
+              }
+
+              if (field.type === "media") {
+                return (
+                  <div key={field.name} className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">{field.label}</label>
+                    <Controller
+                      control={form.control}
+                      name={field.name as never}
+                      render={({ field: controlledField }) => (
+                        <div className="space-y-2">
+                          <MediaPicker
+                            value={controlledField.value || undefined}
+                            onChange={controlledField.onChange}
+                          />
+                          {controlledField.value ? (
+                            <AppButton
+                              type="button"
+                              variant="secondary"
+                              className="h-9 px-3 text-xs"
+                              onClick={() => controlledField.onChange("")}
+                              disabled={isSubmitting}
+                            >
+                              Очистить выбор
+                            </AppButton>
+                          ) : null}
+                        </div>
                       )}
                     />
                     {errorMessage ? (

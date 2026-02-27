@@ -16,6 +16,7 @@ export type MuscleRecord = {
   muscleGroup?: MuscleGroup;
   description?: string;
   mediaCount: number;
+  mediaIds: string[];
 };
 
 export type MuscleGroupValue = MuscleGroup;
@@ -39,12 +40,14 @@ export type CreateMusclePayload = {
   name: string;
   muscleGroup?: MuscleGroup;
   description?: string;
+  mediaIds?: string[];
 };
 
 export type UpdateMusclePayload = {
   name?: string;
   muscleGroup?: MuscleGroup;
   description?: string;
+  mediaIds?: string[];
 };
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -57,6 +60,7 @@ function mapMuscle(item: Muscle): MuscleRecord {
     muscleGroup: item.muscleGroup,
     description: item.description,
     mediaCount: item.media?.length ?? 0,
+    mediaIds: (item.media ?? []).map((media) => media.id),
   };
 }
 
@@ -66,6 +70,7 @@ function normalizeCreatePayload(payload: CreateMusclePayload): CreateMuscleReque
     name: payload.name.trim(),
     muscleGroup: payload.muscleGroup,
     description: payload.description?.trim() || undefined,
+    mediaIds: payload.mediaIds,
   };
 }
 
@@ -74,6 +79,7 @@ function normalizeUpdatePayload(payload: UpdateMusclePayload): UpdateMuscleReque
     name: payload.name?.trim() || undefined,
     muscleGroup: payload.muscleGroup,
     description: payload.description?.trim() || undefined,
+    mediaIds: payload.mediaIds,
   };
 }
 

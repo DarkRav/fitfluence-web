@@ -15,6 +15,7 @@ export type EquipmentRecord = {
   name: string;
   category: EquipmentCategory;
   mediaCount: number;
+  mediaIds: string[];
 };
 
 export type EquipmentCategoryValue = EquipmentCategory;
@@ -37,11 +38,13 @@ export type CreateEquipmentPayload = {
   code: string;
   name: string;
   category: EquipmentCategory;
+  mediaIds?: string[];
 };
 
 export type UpdateEquipmentPayload = {
   name?: string;
   category?: EquipmentCategory;
+  mediaIds?: string[];
 };
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -53,6 +56,7 @@ function mapEquipment(item: Equipment): EquipmentRecord {
     name: item.name,
     category: item.category,
     mediaCount: item.media?.length ?? 0,
+    mediaIds: (item.media ?? []).map((media) => media.id),
   };
 }
 
@@ -61,6 +65,7 @@ function normalizeCreatePayload(payload: CreateEquipmentPayload): CreateEquipmen
     code: payload.code.trim(),
     name: payload.name.trim(),
     category: payload.category,
+    mediaIds: payload.mediaIds,
   };
 }
 
@@ -68,6 +73,7 @@ function normalizeUpdatePayload(payload: UpdateEquipmentPayload): UpdateEquipmen
   return {
     name: payload.name?.trim() || undefined,
     category: payload.category,
+    mediaIds: payload.mediaIds,
   };
 }
 

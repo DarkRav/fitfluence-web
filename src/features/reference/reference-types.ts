@@ -36,9 +36,14 @@ export type ReferenceSelectField<TValues extends Record<string, string>> = BaseF
   }>;
 };
 
+export type ReferenceMediaField<TValues extends Record<string, string>> = BaseField<TValues> & {
+  type: "media";
+};
+
 export type ReferenceFormField<TValues extends Record<string, string>> =
   | ReferenceTextField<TValues>
-  | ReferenceSelectField<TValues>;
+  | ReferenceSelectField<TValues>
+  | ReferenceMediaField<TValues>;
 
 export type ReferenceCrudConfig<
   TItem extends { id: string },

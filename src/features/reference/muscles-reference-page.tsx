@@ -16,6 +16,7 @@ type MuscleFormValues = {
   name: string;
   muscleGroup: string;
   description: string;
+  mediaId: string;
 };
 
 const NO_MUSCLE_GROUP_VALUE = "__NONE__";
@@ -39,6 +40,7 @@ const muscleFormSchema = z.object({
   name: z.string().trim().min(1, "Укажите название"),
   muscleGroup: muscleGroupSchema,
   description: z.string(),
+  mediaId: z.string(),
 });
 
 function toMuscleGroupValue(value: string): MuscleGroupValue | undefined {
@@ -126,18 +128,25 @@ const musclesConfig: ReferenceCrudConfig<MuscleRecord, MuscleFormValues> = {
       label: "Описание",
       placeholder: "Краткое описание мышцы",
     },
+    {
+      type: "media",
+      name: "mediaId",
+      label: "Медиа",
+    },
   ],
   createDefaultValues: () => ({
     code: "",
     name: "",
     muscleGroup: NO_MUSCLE_GROUP_VALUE,
     description: "",
+    mediaId: "",
   }),
   mapItemToValues: (item) => ({
     code: item.code,
     name: item.name,
     muscleGroup: item.muscleGroup ?? NO_MUSCLE_GROUP_VALUE,
     description: item.description ?? "",
+    mediaId: item.mediaIds[0] ?? "",
   }),
   search: ({ page, size, search }) => searchMuscles({ page, size, search }),
   create: (values) =>
@@ -146,12 +155,14 @@ const musclesConfig: ReferenceCrudConfig<MuscleRecord, MuscleFormValues> = {
       name: values.name,
       muscleGroup: toMuscleGroupValue(values.muscleGroup),
       description: values.description || undefined,
+      mediaIds: values.mediaId ? [values.mediaId] : [],
     }),
   update: (id, values) =>
     updateMuscle(id, {
       name: values.name,
       muscleGroup: toMuscleGroupValue(values.muscleGroup),
       description: values.description || undefined,
+      mediaIds: values.mediaId ? [values.mediaId] : [],
     }),
   remove: (id) => deleteMuscle(id),
   getCreatedMessage: () => "Мышца успешно создана.",

@@ -15,6 +15,7 @@ type EquipmentFormValues = {
   code: string;
   name: string;
   category: string;
+  mediaId: string;
 };
 
 const EQUIPMENT_CATEGORY_OPTIONS: Array<{ value: EquipmentCategoryValue; label: string }> = [
@@ -31,6 +32,7 @@ const equipmentFormSchema = z.object({
   code: z.string().trim().min(1, "Укажите код"),
   name: z.string().trim().min(1, "Укажите название"),
   category: equipmentCategorySchema,
+  mediaId: z.string(),
 });
 
 function renderCategory(value: EquipmentCategoryValue): string {
@@ -97,16 +99,23 @@ const equipmentConfig: ReferenceCrudConfig<EquipmentRecord, EquipmentFormValues>
         label: option.label,
       })),
     },
+    {
+      type: "media",
+      name: "mediaId",
+      label: "Медиа",
+    },
   ],
   createDefaultValues: () => ({
     code: "",
     name: "",
     category: "FREE_WEIGHT",
+    mediaId: "",
   }),
   mapItemToValues: (item) => ({
     code: item.code,
     name: item.name,
     category: item.category,
+    mediaId: item.mediaIds[0] ?? "",
   }),
   search: ({ page, size, search }) => searchEquipment({ page, size, search }),
   create: (values) =>
@@ -114,11 +123,13 @@ const equipmentConfig: ReferenceCrudConfig<EquipmentRecord, EquipmentFormValues>
       code: values.code,
       name: values.name,
       category: values.category as EquipmentCategoryValue,
+      mediaIds: values.mediaId ? [values.mediaId] : [],
     }),
   update: (id, values) =>
     updateEquipment(id, {
       name: values.name,
       category: values.category as EquipmentCategoryValue,
+      mediaIds: values.mediaId ? [values.mediaId] : [],
     }),
   remove: (id) => deleteEquipment(id),
   getCreatedMessage: () => "Оборудование успешно создано.",
