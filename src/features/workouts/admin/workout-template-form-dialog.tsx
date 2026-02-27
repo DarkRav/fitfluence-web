@@ -11,12 +11,13 @@ import type {
   CreateAdminWorkoutTemplatePayload,
   UpdateAdminWorkoutTemplatePayload,
 } from "@/api/adminWorkouts";
+import { ru } from "@/localization/ru";
 import { AppButton, AppInput } from "@/shared/ui";
 
 const workoutFormSchema = z.object({
-  dayOrder: z.number().int().min(1, "Day order должен быть больше 0"),
-  title: z.string().trim().max(200, "Максимум 200 символов").optional(),
-  coachNote: z.string().trim().max(2000, "Максимум 2000 символов").optional(),
+  dayOrder: z.number().int().min(1, ru.workouts.dayOrderValidation),
+  title: z.string().trim().max(200, ru.workouts.max200Validation).optional(),
+  coachNote: z.string().trim().max(2000, ru.workouts.max2000Validation).optional(),
 });
 
 type WorkoutFormValues = z.infer<typeof workoutFormSchema>;
@@ -60,7 +61,10 @@ export function WorkoutTemplateFormDialog({
     form.reset(buildDefaultValues(workout));
   }, [form, workout]);
 
-  const title = useMemo(() => (mode === "create" ? "Create workout" : "Edit workout"), [mode]);
+  const title = useMemo(
+    () => (mode === "create" ? ru.workouts.createWorkout : ru.common.actions.edit),
+    [mode],
+  );
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -71,7 +75,7 @@ export function WorkoutTemplateFormDialog({
             {title}
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-            Заполните базовые параметры workout template.
+            {ru.workouts.fillTemplateParams}
           </Dialog.Description>
 
           <form
@@ -98,7 +102,9 @@ export function WorkoutTemplateFormDialog({
             })}
           >
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Day order</label>
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.labels.dayOrder}
+              </label>
               <AppInput
                 type="number"
                 min={1}
@@ -110,12 +116,19 @@ export function WorkoutTemplateFormDialog({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Title</label>
-              <AppInput placeholder="Upper Body A" {...form.register("title")} />
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.labels.title}
+              </label>
+              <AppInput
+                placeholder={ru.common.placeholders.workoutTitle}
+                {...form.register("title")}
+              />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Coach note</label>
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.labels.coachNote}
+              </label>
               <textarea
                 {...form.register("coachNote")}
                 className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
@@ -129,10 +142,14 @@ export function WorkoutTemplateFormDialog({
                 disabled={isSubmitting}
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {ru.common.actions.cancel}
               </AppButton>
               <AppButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : mode === "create" ? "Create" : "Save"}
+                {isSubmitting
+                  ? `${ru.common.actions.save}...`
+                  : mode === "create"
+                    ? ru.common.actions.create
+                    : ru.common.actions.save}
               </AppButton>
             </div>
           </form>

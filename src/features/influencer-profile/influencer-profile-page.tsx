@@ -21,20 +21,25 @@ import {
   PageHeader,
   useAppToast,
 } from "@/shared/ui";
+import { ru } from "@/localization/ru";
 
 const socialLinkSchema = z.object({
-  type: z.string().trim().min(1, "Укажите тип ссылки"),
-  url: z.string().trim().url("Введите корректный URL"),
+  type: z.string().trim().min(1, ru.profile.linkTypeRequired),
+  url: z.string().trim().url(ru.profile.linkUrlInvalid),
 });
 
 const profileFormSchema = z.object({
   displayName: z.string(),
   bio: z.string(),
-  avatarMediaId: z.union([z.literal(""), z.string().uuid("Некорректный ID медиа")]),
+  avatarMediaId: z.union([z.literal(""), z.string().uuid(ru.profile.avatarIdInvalid)]),
   socialLinks: z.array(socialLinkSchema),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type AvatarPreview = {
+  url: string;
+  type?: "IMAGE" | "VIDEO";
+};
 
 function buildDefaultValues(profile: InfluencerProfileRecord | null): ProfileFormValues {
   return {
@@ -64,6 +69,7 @@ export function InfluencerProfilePage() {
   const returnTo = searchParams.get("returnTo");
   const { pushToast } = useAppToast();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<AvatarPreview | null>(null);
 
   const profileQuery = useQuery<InfluencerProfileRecord | null, Error>({
     queryKey: ["influencerProfile"],
@@ -95,6 +101,18 @@ export function InfluencerProfilePage() {
     form.reset(defaultValues);
   }, [defaultValues, form]);
 
+  useEffect(() => {
+    if (!profileQuery.data?.avatarUrl) {
+      setAvatarPreview(null);
+      return;
+    }
+
+    setAvatarPreview({
+      url: profileQuery.data.avatarUrl,
+      type: profileQuery.data.avatarType,
+    });
+  }, [profileQuery.data?.avatarType, profileQuery.data?.avatarUrl]);
+
   const socialLinks = useFieldArray({
     control: form.control,
     name: "socialLinks",
@@ -125,17 +143,17 @@ export function InfluencerProfilePage() {
     onSuccess: () => {
       pushToast({
         kind: "success",
-        title: "Профиль сохранен",
-        description: "Данные профиля инфлюэнсера обновлены.",
+        title: ru.profile.saveSuccessTitle,
+        description: ru.profile.saveSuccessDescription,
       });
       router.replace(resolveReturnPath(returnTo));
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось сохранить профиль";
+      const message = error instanceof Error ? error.message : ru.profile.saveErrorDescription;
       setSubmitError(message);
       pushToast({
         kind: "error",
-        title: "Ошибка сохранения",
+        title: ru.profile.saveErrorTitle,
         description: message,
       });
     },
@@ -152,30 +170,34 @@ export function InfluencerProfilePage() {
     },
     onSuccess: (media) => {
       form.setValue("avatarMediaId", media.id, { shouldDirty: true });
+      setAvatarPreview({
+        url: media.url,
+        type: media.type,
+      });
       pushToast({
         kind: "success",
-        title: "Аватар загружен",
-        description: "Медиа успешно загружено и выбрано для аватара.",
+        title: ru.profile.uploadSuccessTitle,
+        description: ru.profile.uploadSuccessDescription,
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось загрузить файл";
+      const message = error instanceof Error ? error.message : ru.profile.uploadErrorDescription;
       pushToast({
         kind: "error",
-        title: "Ошибка загрузки",
+        title: ru.profile.uploadErrorTitle,
         description: message,
       });
     },
   });
 
   if (profileQuery.isLoading) {
-    return <LoadingState title="Загружаем профиль инфлюэнсера..." />;
+    return <LoadingState title={ru.profile.loading} />;
   }
 
   if (profileQuery.isError) {
     return (
       <ErrorState
-        title="Не удалось загрузить профиль"
+        title={ru.profile.loadError}
         description={profileQuery.error.message}
         onRetry={() => void profileQuery.refetch()}
       />
@@ -185,12 +207,8 @@ export function InfluencerProfilePage() {
   return (
     <div>
       <PageHeader
-        title={onboardingMode ? "Создайте профиль инфлюэнсера" : "Редактирование профиля"}
-        subtitle={
-          onboardingMode
-            ? "Заполните профиль, чтобы продолжить работу в кабинете инфлюэнсера."
-            : "Обновите данные профиля инфлюэнсера."
-        }
+        title={onboardingMode ? ru.profile.titleCreate : ru.profile.titleEdit}
+        subtitle={onboardingMode ? ru.profile.subtitleCreate : ru.profile.subtitleEdit}
       />
 
       <form
@@ -207,33 +225,33 @@ export function InfluencerProfilePage() {
         ) : null}
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Отображаемое имя</label>
+          <label className="text-sm font-medium text-foreground">{ru.profile.displayName}</label>
           <AppInput
             {...form.register("displayName")}
-            placeholder="Ваше отображаемое имя"
+            placeholder={ru.profile.displayNamePlaceholder}
             disabled={saveMutation.isPending}
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">О себе</label>
+          <label className="text-sm font-medium text-foreground">{ru.profile.bio}</label>
           <textarea
             {...form.register("bio")}
-            placeholder="Коротко о себе"
+            placeholder={ru.profile.bioPlaceholder}
             disabled={saveMutation.isPending}
             className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Аватар</label>
+          <label className="text-sm font-medium text-foreground">{ru.profile.avatar}</label>
           <div className="rounded-md border border-border/80 bg-sidebar/40 p-3">
             <label className="mb-2 block text-xs text-muted-foreground">
-              Загрузите файл с устройства
+              {ru.profile.uploadFromDevice}
             </label>
             <input
               type="file"
-              accept="image/*,video/*"
+              accept="image/*"
               disabled={saveMutation.isPending || avatarUploadMutation.isPending}
               onChange={(event) => {
                 const file = event.target.files?.[0];
@@ -247,12 +265,26 @@ export function InfluencerProfilePage() {
               className="block w-full rounded-md border border-border bg-card p-2 text-sm text-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary/15 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-secondary"
             />
             {avatarUploadMutation.isPending ? (
-              <p className="mt-2 text-xs text-muted-foreground">Загружаем файл...</p>
+              <p className="mt-2 text-xs text-muted-foreground">{ru.profile.uploading}</p>
             ) : null}
-            {avatarMediaId ? (
-              <p className="mt-2 font-mono text-xs text-muted-foreground">
-                Выбранный mediaId: {avatarMediaId}
-              </p>
+            {avatarPreview ? (
+              <div className="mt-3 w-44 overflow-hidden rounded-md border border-border bg-card">
+                {avatarPreview.type === "VIDEO" ? (
+                  <video
+                    className="h-44 w-44 object-cover"
+                    src={avatarPreview.url}
+                    controls
+                    preload="metadata"
+                  />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarPreview.url}
+                    alt={ru.profile.avatarPreviewAlt}
+                    className="h-44 w-44 object-cover"
+                  />
+                )}
+              </div>
             ) : null}
           </div>
           {avatarMediaId ? (
@@ -260,10 +292,13 @@ export function InfluencerProfilePage() {
               type="button"
               variant="secondary"
               className="h-9 px-3 text-xs"
-              onClick={() => form.setValue("avatarMediaId", "", { shouldDirty: true })}
+              onClick={() => {
+                form.setValue("avatarMediaId", "", { shouldDirty: true });
+                setAvatarPreview(null);
+              }}
               disabled={saveMutation.isPending}
             >
-              Очистить аватар
+              {ru.common.actions.clearAvatar}
             </AppButton>
           ) : null}
           {form.formState.errors.avatarMediaId ? (
@@ -275,7 +310,7 @@ export function InfluencerProfilePage() {
 
         <div className="space-y-3 rounded-lg border border-border/80 bg-sidebar/40 p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">Социальные ссылки</p>
+            <p className="text-sm font-medium text-foreground">{ru.profile.socialLinks}</p>
             <AppButton
               type="button"
               variant="secondary"
@@ -283,12 +318,12 @@ export function InfluencerProfilePage() {
               disabled={saveMutation.isPending}
               onClick={() => socialLinks.append({ type: "", url: "" })}
             >
-              Добавить ссылку
+              {ru.common.actions.addLink}
             </AppButton>
           </div>
 
           {socialLinks.fields.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Ссылки не добавлены.</p>
+            <p className="text-sm text-muted-foreground">{ru.profile.socialLinksEmpty}</p>
           ) : null}
 
           <div className="space-y-3">
@@ -297,7 +332,7 @@ export function InfluencerProfilePage() {
                 <div>
                   <AppInput
                     {...form.register(`socialLinks.${index}.type`)}
-                    placeholder="Тип (instagram, youtube)"
+                    placeholder={ru.profile.socialLinkTypePlaceholder}
                     disabled={saveMutation.isPending}
                   />
                   {form.formState.errors.socialLinks?.[index]?.type ? (
@@ -309,7 +344,7 @@ export function InfluencerProfilePage() {
                 <div>
                   <AppInput
                     {...form.register(`socialLinks.${index}.url`)}
-                    placeholder="https://example.com/profil"
+                    placeholder={ru.profile.socialLinkUrlPlaceholder}
                     disabled={saveMutation.isPending}
                   />
                   {form.formState.errors.socialLinks?.[index]?.url ? (
@@ -325,7 +360,7 @@ export function InfluencerProfilePage() {
                   onClick={() => socialLinks.remove(index)}
                   disabled={saveMutation.isPending}
                 >
-                  Удалить
+                  {ru.common.actions.delete}
                 </AppButton>
               </div>
             ))}
@@ -339,10 +374,10 @@ export function InfluencerProfilePage() {
             disabled={saveMutation.isPending}
             onClick={() => router.replace(resolveReturnPath(returnTo))}
           >
-            Отмена
+            {ru.common.actions.cancel}
           </AppButton>
           <AppButton type="submit" disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? "Сохраняем..." : "Сохранить профиль"}
+            {saveMutation.isPending ? ru.profile.saving : ru.common.actions.saveProfile}
           </AppButton>
         </div>
       </form>

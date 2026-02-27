@@ -14,6 +14,7 @@ import {
 import { AddExerciseDialog } from "@/features/workouts/add-exercise-dialog";
 import { ReorderableExercisesList } from "@/features/workouts/reorderable-exercises-list";
 import { WorkoutExerciseEditor } from "@/features/workouts/workout-exercise-editor";
+import { ru } from "@/localization/ru";
 import { AppButton, ErrorState, LoadingState, PageHeader, useAppToast } from "@/shared/ui";
 
 type WorkoutDetailsPageProps = {
@@ -66,8 +67,8 @@ export function WorkoutDetailsPage({
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Exercise added",
-        description: "Упражнение добавлено в workout.",
+        title: ru.workouts.exerciseAdded,
+        description: ru.workouts.exerciseAdded,
       });
       setAddExerciseOpen(false);
       await Promise.all([
@@ -78,10 +79,12 @@ export function WorkoutDetailsPage({
       ]);
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось добавить упражнение";
+      const message = error instanceof Error ? error.message : ru.workouts.exerciseAddError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка добавления",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.workouts.exerciseAddError,
         description: message,
       });
     },
@@ -112,10 +115,12 @@ export function WorkoutDetailsPage({
     },
     onError: (error, variables) => {
       setLocalExercises(variables.previousExercises);
-      const message = error instanceof Error ? error.message : "Не удалось сохранить порядок";
+      const message = error instanceof Error ? error.message : ru.workouts.reorderError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка reorder",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.workouts.reorderError,
         description: message,
       });
     },
@@ -139,18 +144,20 @@ export function WorkoutDetailsPage({
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Exercise updated",
-        description: "Параметры упражнения сохранены.",
+        title: ru.workouts.exerciseUpdated,
+        description: ru.workouts.exerciseUpdated,
       });
       await queryClient.invalidateQueries({
         queryKey: [...scope.queryKeys.details, workoutTemplateId],
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось сохранить упражнение";
+      const message = error instanceof Error ? error.message : ru.workouts.exerciseUpdateError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.workouts.exerciseUpdateError,
         description: message,
       });
     },
@@ -166,18 +173,20 @@ export function WorkoutDetailsPage({
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Exercise removed",
-        description: "Упражнение удалено из workout.",
+        title: ru.workouts.exerciseRemoved,
+        description: ru.workouts.exerciseRemoved,
       });
       await queryClient.invalidateQueries({
         queryKey: [...scope.queryKeys.details, workoutTemplateId],
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось удалить упражнение";
+      const message = error instanceof Error ? error.message : ru.workouts.exerciseDeleteError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка удаления",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.workouts.exerciseDeleteError,
         description: message,
       });
     },
@@ -191,8 +200,8 @@ export function WorkoutDetailsPage({
     pushToast({
       kind: "error",
       title: isForbiddenMessage(detailsQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить workout",
+        ? ru.common.states.notPermitted
+        : ru.workouts.detailsLoadError,
       description: detailsQuery.error.message,
     });
   }, [detailsQuery.error, detailsQuery.isError, pushToast]);
@@ -206,13 +215,13 @@ export function WorkoutDetailsPage({
   }, [detailsQuery.data]);
 
   if (detailsQuery.isLoading) {
-    return <LoadingState title="Загружаем workout..." />;
+    return <LoadingState title={ru.workouts.detailsLoadError} />;
   }
 
   if (detailsQuery.isError) {
     return (
       <ErrorState
-        title="Не удалось загрузить workout"
+        title={ru.workouts.detailsLoadError}
         description={detailsQuery.error.message}
         onRetry={() => void detailsQuery.refetch()}
       />
@@ -221,40 +230,47 @@ export function WorkoutDetailsPage({
 
   const workout = detailsQuery.data;
   if (!workout) {
-    return <ErrorState title="Workout не найден" description="Пустой ответ сервера." />;
+    return (
+      <ErrorState
+        title={ru.workouts.detailsNotFound}
+        description={ru.workouts.detailsEmptyServer}
+      />
+    );
   }
 
   return (
     <div className="space-y-4">
       <div className="mb-2 text-sm text-muted-foreground">
         <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          Programs
+          {ru.common.labels.programs}
         </Link>
         {" / "}
         <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          Program
+          {ru.common.labels.program}
         </Link>
         {" / "}
         <Link
           className="hover:text-secondary"
           href={scope.routes.workoutsList(programId, programVersionId)}
         >
-          Workouts
+          {ru.common.labels.workouts}
         </Link>
         {" / "}
-        <span className="text-foreground">Workout</span>
+        <span className="text-foreground">{ru.workouts.title}</span>
       </div>
 
       <PageHeader
-        title={workout.title ?? `Workout day ${workout.dayOrder}`}
-        subtitle={`Program ${programId} · Version ${programVersionId}`}
+        title={workout.title ?? `${ru.common.labels.dayOrder} ${workout.dayOrder}`}
+        subtitle={ru.workouts.detailsSubtitle
+          .replace("{programId}", programId)
+          .replace("{programVersionId}", programVersionId)}
         actions={
           <AppButton
             type="button"
             variant="secondary"
             onClick={() => router.push(scope.routes.workoutsList(programId, programVersionId))}
           >
-            Back to Workouts
+            {ru.workouts.backToWorkouts}
           </AppButton>
         }
       />
@@ -262,30 +278,38 @@ export function WorkoutDetailsPage({
       <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-xl border border-border bg-sidebar/40 p-4">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Day order</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              {ru.common.labels.dayOrder}
+            </p>
             <p className="mt-1 text-lg font-semibold text-foreground">{workout.dayOrder}</p>
           </div>
           <div className="rounded-xl border border-border bg-sidebar/40 p-4">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Coach note</p>
-            <p className="mt-1 text-sm text-foreground">{workout.coachNote ?? "-"}</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              {ru.common.labels.coachNote}
+            </p>
+            <p className="mt-1 text-sm text-foreground">
+              {workout.coachNote ?? ru.common.states.dash}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-foreground">Exercises</h2>
+          <h2 className="text-base font-semibold text-foreground">{ru.common.labels.exercises}</h2>
           <div className="flex items-center gap-2">
-            <p className="text-sm text-muted-foreground">{workout.exercises.length} items</p>
+            <p className="text-sm text-muted-foreground">
+              {workout.exercises.length} {ru.workouts.exerciseCount}
+            </p>
             <AppButton type="button" onClick={() => setAddExerciseOpen(true)}>
-              Add exercise
+              {ru.common.actions.addExercise}
             </AppButton>
           </div>
         </div>
 
         {workout.exercises.length === 0 ? (
           <p className="rounded-xl border border-dashed border-border bg-sidebar/40 px-4 py-6 text-sm text-muted-foreground">
-            В этом workout пока нет упражнений.
+            {ru.workouts.noExercises}
           </p>
         ) : (
           <ReorderableExercisesList

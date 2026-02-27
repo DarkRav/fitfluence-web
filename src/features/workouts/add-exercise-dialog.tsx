@@ -12,11 +12,12 @@ import {
   type WorkoutExerciseRecord,
   type WorkoutsScopeConfig,
 } from "@/features/workouts/types";
+import { ru } from "@/localization/ru";
 import { AppButton, AppInput } from "@/shared/ui";
 
 const addExerciseSchema = z.object({
-  exerciseId: z.string().uuid("Выберите упражнение"),
-  sets: z.number().int().min(1, "Минимум 1 подход"),
+  exerciseId: z.string().uuid(ru.workouts.selectExerciseValidation),
+  sets: z.number().int().min(1, ru.workouts.minSetsValidation),
   repsMin: z.number().int().min(1).optional(),
   repsMax: z.number().int().min(1).optional(),
   targetRpe: z.number().min(1).max(10).optional(),
@@ -113,10 +114,10 @@ export function AddExerciseDialog({
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[96vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-card focus:outline-none">
           <Dialog.Title className="text-lg font-semibold text-card-foreground">
-            Add exercise
+            {ru.common.actions.addExercise}
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-            Найдите упражнение и задайте стартовые параметры.
+            {ru.workouts.addExerciseDescription}
           </Dialog.Description>
 
           <form
@@ -135,21 +136,25 @@ export function AddExerciseDialog({
             })}
           >
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Search exercise</label>
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.placeholders.searchExercise}
+              </label>
               <AppInput
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Name or code"
+                placeholder={ru.common.placeholders.exerciseNameOrCode}
               />
               <div className="max-h-56 overflow-y-auto rounded-xl border border-border bg-sidebar/30 p-2">
                 {exercisesQuery.isLoading ? (
-                  <p className="px-2 py-3 text-sm text-muted-foreground">Загружаем упражнения...</p>
+                  <p className="px-2 py-3 text-sm text-muted-foreground">
+                    {ru.workouts.loadingExercises}
+                  </p>
                 ) : exercisesQuery.isError ? (
                   <p className="px-2 py-3 text-sm text-destructive">
                     {exercisesQuery.error.message}
                   </p>
                 ) : (exercisesQuery.data?.length ?? 0) === 0 ? (
-                  <p className="px-2 py-3 text-sm text-muted-foreground">Ничего не найдено.</p>
+                  <p className="px-2 py-3 text-sm text-muted-foreground">{ru.workouts.notFound}</p>
                 ) : (
                   <div className="space-y-1">
                     {exercisesQuery.data?.map((exercise) => {
@@ -175,9 +180,9 @@ export function AddExerciseDialog({
                             {exercise.code}
                             {exercise.createdByInfluencerId
                               ? scope.scope === "influencer"
-                                ? " · My"
-                                : " · Influencer"
-                              : " · Base"}
+                                ? ` · ${ru.workouts.unknownSourceMine}`
+                                : ` · ${ru.workouts.unknownSourceInfluencer}`
+                              : ` · ${ru.workouts.unknownSourceBase}`}
                           </p>
                         </button>
                       );
@@ -194,7 +199,9 @@ export function AddExerciseDialog({
 
             <div className="grid gap-3 md:grid-cols-3">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Sets</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.sets}
+                </label>
                 <AppInput
                   type="number"
                   min={1}
@@ -202,7 +209,9 @@ export function AddExerciseDialog({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Reps min</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.repsMin}
+                </label>
                 <AppInput
                   type="number"
                   min={1}
@@ -210,7 +219,9 @@ export function AddExerciseDialog({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Reps max</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.repsMax}
+                </label>
                 <AppInput
                   type="number"
                   min={1}
@@ -221,7 +232,9 @@ export function AddExerciseDialog({
 
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Target RPE</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.targetRpe}
+                </label>
                 <AppInput
                   type="number"
                   min={1}
@@ -231,7 +244,9 @@ export function AddExerciseDialog({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Rest seconds</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.restSeconds}
+                </label>
                 <AppInput
                   type="number"
                   min={0}
@@ -241,7 +256,9 @@ export function AddExerciseDialog({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Notes</label>
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.labels.notes}
+              </label>
               <textarea
                 {...form.register("notes")}
                 className="min-h-20 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
@@ -255,10 +272,10 @@ export function AddExerciseDialog({
                 disabled={isSubmitting}
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {ru.common.actions.cancel}
               </AppButton>
               <AppButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add exercise"}
+                {isSubmitting ? ru.workouts.adding : ru.common.actions.addExercise}
               </AppButton>
             </div>
           </form>

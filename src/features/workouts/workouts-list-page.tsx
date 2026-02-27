@@ -10,6 +10,7 @@ import { ConfirmDeleteDialog } from "@/features/reference/confirm-delete-dialog"
 import { adminWorkoutScope } from "@/features/workouts/scopes/adminWorkoutScope";
 import { influencerWorkoutScope } from "@/features/workouts/scopes/influencerWorkoutScope";
 import { WorkoutFormDialog } from "@/features/workouts/workout-form-dialog";
+import { ru } from "@/localization/ru";
 import type {
   WorkoutTemplateRecord,
   WorkoutsScope,
@@ -105,8 +106,8 @@ export function WorkoutsListPage({
     pushToast({
       kind: "error",
       title: isForbiddenMessage(listQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить workouts",
+        ? ru.common.states.notPermitted
+        : ru.workouts.loadError,
       description: listQuery.error.message,
     });
   }, [listQuery.error, listQuery.isError, pushToast]);
@@ -123,8 +124,8 @@ export function WorkoutsListPage({
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Workout создан",
-        description: "Template успешно добавлен в версию программы.",
+        title: ru.workouts.created,
+        description: ru.workouts.created,
       });
       setCreateOpen(false);
       await queryClient.invalidateQueries({
@@ -132,10 +133,12 @@ export function WorkoutsListPage({
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось создать workout";
+      const message = error instanceof Error ? error.message : ru.workouts.createError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка создания",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.workouts.createError,
         description: message,
       });
     },
@@ -159,8 +162,8 @@ export function WorkoutsListPage({
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Workout обновлен",
-        description: "Изменения сохранены.",
+        title: ru.workouts.updated,
+        description: ru.workouts.updated,
       });
       setEditingWorkout(null);
       await queryClient.invalidateQueries({
@@ -168,10 +171,12 @@ export function WorkoutsListPage({
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось обновить workout";
+      const message = error instanceof Error ? error.message : ru.workouts.updateError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.workouts.updateError,
         description: message,
       });
     },
@@ -187,8 +192,8 @@ export function WorkoutsListPage({
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Workout удален",
-        description: "Template удален из версии программы.",
+        title: ru.workouts.deleted,
+        description: ru.workouts.deleted,
       });
       setDeleteWorkout(null);
       await queryClient.invalidateQueries({
@@ -196,10 +201,12 @@ export function WorkoutsListPage({
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось удалить workout";
+      const message = error instanceof Error ? error.message : ru.workouts.deleteError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка удаления",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.workouts.deleteError,
         description: message,
       });
     },
@@ -211,28 +218,28 @@ export function WorkoutsListPage({
     <div>
       <div className="mb-2 text-sm text-muted-foreground">
         <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          Programs
+          {ru.common.labels.programs}
         </Link>
         {" / "}
         <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          Program
+          {ru.common.labels.program}
         </Link>
         {" / "}
-        <span>Version</span>
+        <span>{ru.common.labels.version}</span>
         {" / "}
-        <span className="text-foreground">Workouts</span>
+        <span className="text-foreground">{ru.common.labels.workouts}</span>
       </div>
 
       <PageHeader
-        title="Version Workouts"
-        subtitle="Управление workout templates для выбранной версии программы."
+        title={ru.workouts.listTitle}
+        subtitle={ru.workouts.listSubtitle}
         actions={
           <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
             <div className="min-w-[220px] flex-1">
               <AppInput
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search workouts"
+                placeholder={ru.common.placeholders.searchWorkouts}
               />
             </div>
             <AppButton
@@ -240,31 +247,28 @@ export function WorkoutsListPage({
               variant="secondary"
               onClick={() => router.push(scope.routes.programDetails(programId))}
             >
-              Back to Program
+              {ru.workouts.backToProgram}
             </AppButton>
             <AppButton type="button" onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Create workout
+              {ru.workouts.createWorkout}
             </AppButton>
           </div>
         }
       />
 
-      {listQuery.isLoading ? <LoadingState title="Загружаем workouts..." /> : null}
+      {listQuery.isLoading ? <LoadingState title={ru.workouts.loadError} /> : null}
 
       {!listQuery.isLoading && listQuery.isError ? (
         <ErrorState
-          title="Не удалось загрузить workouts"
+          title={ru.workouts.loadError}
           description={listQuery.error.message}
           onRetry={() => void listQuery.refetch()}
         />
       ) : null}
 
       {!listQuery.isLoading && !listQuery.isError && (listQuery.data?.items.length ?? 0) === 0 ? (
-        <EmptyState
-          title="Workouts не найдены"
-          description="Создайте первый workout template для этой версии."
-        />
+        <EmptyState title={ru.workouts.emptyTitle} description={ru.workouts.emptyDescription} />
       ) : null}
 
       {!listQuery.isLoading && !listQuery.isError && listQuery.data ? (
@@ -273,11 +277,11 @@ export function WorkoutsListPage({
             <table className="w-full text-left text-sm">
               <thead className="bg-sidebar/60 text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Day</th>
-                  <th className="px-4 py-3 font-medium">Title</th>
-                  <th className="px-4 py-3 font-medium">Exercises</th>
-                  <th className="px-4 py-3 font-medium">Coach note</th>
-                  <th className="px-4 py-3 text-right font-medium">Actions</th>
+                  <th className="px-4 py-3 font-medium">{ru.common.labels.dayOrder}</th>
+                  <th className="px-4 py-3 font-medium">{ru.common.labels.title}</th>
+                  <th className="px-4 py-3 font-medium">{ru.common.labels.exercises}</th>
+                  <th className="px-4 py-3 font-medium">{ru.common.labels.coachNote}</th>
+                  <th className="px-4 py-3 text-right font-medium">{ru.common.labels.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -286,11 +290,13 @@ export function WorkoutsListPage({
                     key={workout.id}
                     className="border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
                   >
-                    <td className="px-4 py-3 font-medium">Day {workout.dayOrder}</td>
-                    <td className="px-4 py-3">{workout.title ?? "Untitled workout"}</td>
+                    <td className="px-4 py-3 font-medium">
+                      {ru.common.labels.dayOrder} {workout.dayOrder}
+                    </td>
+                    <td className="px-4 py-3">{workout.title ?? ru.workouts.unnamedWorkout}</td>
                     <td className="px-4 py-3 text-muted-foreground">{workout.exercises.length}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {workout.coachNote ?? "-"}
+                      {workout.coachNote ?? ru.common.states.dash}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
@@ -304,7 +310,7 @@ export function WorkoutsListPage({
                             )
                           }
                         >
-                          Open
+                          {ru.common.actions.open}
                         </AppButton>
                         <AppButton
                           type="button"
@@ -312,7 +318,7 @@ export function WorkoutsListPage({
                           className="h-9 px-3 text-xs"
                           onClick={() => setEditingWorkout(workout)}
                         >
-                          Edit
+                          {ru.common.actions.edit}
                         </AppButton>
                         <AppButton
                           type="button"
@@ -320,7 +326,7 @@ export function WorkoutsListPage({
                           className="h-9 px-3 text-xs"
                           onClick={() => setDeleteWorkout(workout)}
                         >
-                          Delete
+                          {ru.common.actions.delete}
                         </AppButton>
                       </div>
                     </td>
@@ -332,8 +338,8 @@ export function WorkoutsListPage({
 
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
-              Страница {listQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
-              {listQuery.data.totalElements} элементов
+              {ru.common.labels.page} {listQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
+              {listQuery.data.totalElements} {ru.common.labels.elements}
             </p>
             <div className="flex items-center gap-2">
               <AppButton
@@ -342,7 +348,7 @@ export function WorkoutsListPage({
                 disabled={page === 0}
                 onClick={() => setPage((previous) => previous - 1)}
               >
-                Назад
+                {ru.common.actions.back}
               </AppButton>
               <AppButton
                 type="button"
@@ -350,7 +356,7 @@ export function WorkoutsListPage({
                 disabled={page + 1 >= totalPages}
                 onClick={() => setPage((previous) => previous + 1)}
               >
-                Вперед
+                {ru.common.actions.forward}
               </AppButton>
             </div>
           </div>
@@ -384,12 +390,8 @@ export function WorkoutsListPage({
 
       <ConfirmDeleteDialog
         open={Boolean(deleteWorkout)}
-        title="Удалить workout template?"
-        description={
-          deleteWorkout
-            ? `Workout ${deleteWorkout.title ?? deleteWorkout.id} будет удален вместе со всеми упражнениями.`
-            : ""
-        }
+        title={ru.workouts.deleteConfirmTitle}
+        description={deleteWorkout ? ru.workouts.deleteConfirmDescription : ""}
         isSubmitting={deleteMutation.isPending}
         onOpenChange={(open) => {
           if (!open) {

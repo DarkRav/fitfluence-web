@@ -7,6 +7,7 @@ import { searchInfluencerPrograms } from "@/api/influencerPrograms";
 import { searchInfluencerProgramVersions } from "@/api/influencerProgramVersions";
 import { REFERENCE_LIST_PAGE_SIZE, REFERENCE_LIST_STALE_TIME_MS } from "@/config/query";
 import { WorkoutsListPage } from "@/features/workouts/workouts-list-page";
+import { ru } from "@/localization/ru";
 import {
   AppButton,
   AppInput,
@@ -108,8 +109,8 @@ export function InfluencerWorkoutsHubPage() {
     pushToast({
       kind: "error",
       title: isForbiddenMessage(programsQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить программы",
+        ? ru.common.states.notPermitted
+        : ru.programs.page.loadError,
       description: programsQuery.error.message,
     });
   }, [programsQuery.error, programsQuery.isError, pushToast]);
@@ -122,8 +123,8 @@ export function InfluencerWorkoutsHubPage() {
     pushToast({
       kind: "error",
       title: isForbiddenMessage(versionsQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить версии",
+        ? ru.common.states.notPermitted
+        : ru.programs.versions.loadError,
       description: versionsQuery.error.message,
     });
   }, [pushToast, versionsQuery.error, versionsQuery.isError]);
@@ -151,15 +152,15 @@ export function InfluencerWorkoutsHubPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Workouts"
-        subtitle="Быстрый доступ к тренировкам по выбранной программе и версии."
+        title={ru.workouts.title}
+        subtitle={ru.workouts.hubSubtitle}
         actions={
           <div className="flex w-full max-w-5xl flex-wrap items-center gap-2">
             <div className="min-w-[220px] flex-1">
               <AppInput
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search programs"
+                placeholder={ru.common.placeholders.searchPrograms}
               />
             </div>
             <div className="min-w-[250px] flex-1">
@@ -170,7 +171,7 @@ export function InfluencerWorkoutsHubPage() {
                   setSelectedProgramVersionId("");
                 }}
                 options={programOptions}
-                placeholder="Select program"
+                placeholder={ru.common.placeholders.selectProgram}
               />
             </div>
             <div className="min-w-[250px] flex-1">
@@ -178,7 +179,11 @@ export function InfluencerWorkoutsHubPage() {
                 value={selectedProgramVersionId}
                 onValueChange={setSelectedProgramVersionId}
                 options={versionOptions}
-                placeholder={selectedProgramId ? "Select version" : "Select program first"}
+                placeholder={
+                  selectedProgramId
+                    ? ru.common.placeholders.selectVersion
+                    : ru.common.placeholders.selectProgramFirst
+                }
               />
             </div>
             <AppButton
@@ -186,17 +191,17 @@ export function InfluencerWorkoutsHubPage() {
               variant="secondary"
               onClick={() => router.push("/influencer/programs")}
             >
-              All Programs
+              {ru.common.labels.programs}
             </AppButton>
           </div>
         }
       />
 
-      {programsQuery.isLoading ? <LoadingState title="Загружаем программы..." /> : null}
+      {programsQuery.isLoading ? <LoadingState title={ru.workouts.loadingPrograms} /> : null}
 
       {!programsQuery.isLoading && programsQuery.isError ? (
         <ErrorState
-          title="Не удалось загрузить программы"
+          title={ru.workouts.loadProgramsError}
           description={programsQuery.error.message}
           onRetry={() => void programsQuery.refetch()}
         />
@@ -205,10 +210,7 @@ export function InfluencerWorkoutsHubPage() {
       {!programsQuery.isLoading &&
       !programsQuery.isError &&
       (programsQuery.data?.items.length ?? 0) === 0 ? (
-        <EmptyState
-          title="Программы не найдены"
-          description="Попробуйте изменить поисковый запрос."
-        />
+        <EmptyState title={ru.programs.page.emptyTitle} description={ru.workouts.emptySearchHint} />
       ) : null}
 
       {!programsQuery.isLoading &&
@@ -216,8 +218,8 @@ export function InfluencerWorkoutsHubPage() {
       !selectedProgramId &&
       (programsQuery.data?.items.length ?? 0) > 0 ? (
         <EmptyState
-          title="Выберите программу"
-          description="Выберите Program и Version сверху, чтобы открыть editor workouts."
+          title={ru.workouts.selectProgramTitle}
+          description={ru.workouts.selectProgramDescription}
         />
       ) : null}
 
@@ -226,8 +228,8 @@ export function InfluencerWorkoutsHubPage() {
       selectedProgramId &&
       !selectedProgramVersionId ? (
         <EmptyState
-          title="Выберите версию"
-          description="После выбора версии откроется список workouts и кнопка Create workout."
+          title={ru.workouts.selectVersionTitle}
+          description={ru.workouts.selectVersionDescription}
         />
       ) : null}
 
@@ -242,8 +244,8 @@ export function InfluencerWorkoutsHubPage() {
       {programsQuery.data && programsQuery.data.totalPages > 1 ? (
         <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
           <p className="text-muted-foreground">
-            Страница {programsQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
-            {programsQuery.data.totalElements} элементов
+            {ru.common.labels.page} {programsQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
+            {programsQuery.data.totalElements} {ru.common.labels.elements}
           </p>
           <div className="flex items-center gap-2">
             <AppButton
@@ -252,7 +254,7 @@ export function InfluencerWorkoutsHubPage() {
               disabled={page === 0}
               onClick={() => setPage((previous) => previous - 1)}
             >
-              Назад
+              {ru.common.actions.back}
             </AppButton>
             <AppButton
               type="button"
@@ -260,7 +262,7 @@ export function InfluencerWorkoutsHubPage() {
               disabled={page + 1 >= totalPages}
               onClick={() => setPage((previous) => previous + 1)}
             >
-              Вперед
+              {ru.common.actions.forward}
             </AppButton>
           </div>
         </div>

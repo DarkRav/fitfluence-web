@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { searchAdminPrograms } from "@/api/adminPrograms";
 import { REFERENCE_LIST_PAGE_SIZE, REFERENCE_LIST_STALE_TIME_MS } from "@/config/query";
+import { ru } from "@/localization/ru";
 import {
   AppButton,
   AppInput,
@@ -24,14 +25,14 @@ function isForbiddenMessage(message: string): boolean {
 
 function renderStatus(status: ProgramStatus): string {
   if (status === "DRAFT") {
-    return "Draft";
+    return ru.common.status.DRAFT;
   }
 
   if (status === "PUBLISHED") {
-    return "Published";
+    return ru.common.status.PUBLISHED;
   }
 
-  return "Archived";
+  return ru.common.status.ARCHIVED;
 }
 
 export function AdminWorkoutsHubPage() {
@@ -77,8 +78,8 @@ export function AdminWorkoutsHubPage() {
     pushToast({
       kind: "error",
       title: isForbiddenMessage(programsQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить программы",
+        ? ru.common.states.notPermitted
+        : ru.workouts.loadProgramsError,
       description: programsQuery.error.message,
     });
   }, [programsQuery.error, programsQuery.isError, pushToast]);
@@ -88,15 +89,15 @@ export function AdminWorkoutsHubPage() {
   return (
     <div>
       <PageHeader
-        title="Workouts"
-        subtitle="Выберите программу и откройте её версии для редактирования workouts."
+        title={ru.workouts.title}
+        subtitle={ru.workouts.selectProgramDescription}
         actions={
           <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
             <div className="min-w-[220px] flex-1">
               <AppInput
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search programs"
+                placeholder={ru.common.placeholders.searchPrograms}
               />
             </div>
             <AppButton
@@ -104,17 +105,17 @@ export function AdminWorkoutsHubPage() {
               variant="secondary"
               onClick={() => router.push("/admin/programs")}
             >
-              All Programs
+              {ru.common.labels.allPrograms}
             </AppButton>
           </div>
         }
       />
 
-      {programsQuery.isLoading ? <LoadingState title="Загружаем программы..." /> : null}
+      {programsQuery.isLoading ? <LoadingState title={ru.workouts.loadingPrograms} /> : null}
 
       {!programsQuery.isLoading && programsQuery.isError ? (
         <ErrorState
-          title="Не удалось загрузить программы"
+          title={ru.workouts.loadProgramsError}
           description={programsQuery.error.message}
           onRetry={() => void programsQuery.refetch()}
         />
@@ -124,8 +125,8 @@ export function AdminWorkoutsHubPage() {
       !programsQuery.isError &&
       (programsQuery.data?.items.length ?? 0) === 0 ? (
         <EmptyState
-          title="Программы не найдены"
-          description="Откройте /admin/programs и создайте или найдите нужную программу."
+          title={ru.programs.page.emptyTitle}
+          description={ru.programs.page.emptyDescription}
         />
       ) : null}
 
@@ -135,10 +136,10 @@ export function AdminWorkoutsHubPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-sidebar/60 text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Title</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Published Version</th>
-                  <th className="px-4 py-3 text-right font-medium">Actions</th>
+                  <th className="px-4 py-3 font-medium">{ru.common.labels.title}</th>
+                  <th className="px-4 py-3 font-medium">{ru.common.labels.status}</th>
+                  <th className="px-4 py-3 font-medium">{ru.common.labels.publishedVersion}</th>
+                  <th className="px-4 py-3 text-right font-medium">{ru.common.labels.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -149,7 +150,9 @@ export function AdminWorkoutsHubPage() {
                   >
                     <td className="px-4 py-3">
                       <p className="font-medium">{program.title}</p>
-                      <p className="text-xs text-muted-foreground">{program.description ?? "-"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {program.description ?? ru.common.states.dash}
+                      </p>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {renderStatus(program.status)}
@@ -157,7 +160,7 @@ export function AdminWorkoutsHubPage() {
                     <td className="px-4 py-3 text-muted-foreground">
                       {program.currentPublishedVersionNumber
                         ? `v${program.currentPublishedVersionNumber}`
-                        : "-"}
+                        : ru.common.states.dash}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
@@ -172,7 +175,7 @@ export function AdminWorkoutsHubPage() {
                               )
                             }
                           >
-                            Open Workouts
+                            {ru.programs.versions.table.openWorkouts}
                           </AppButton>
                         ) : null}
                         <AppButton
@@ -181,7 +184,7 @@ export function AdminWorkoutsHubPage() {
                           className="h-9 px-3 text-xs"
                           onClick={() => router.push(`/admin/programs/${program.id}`)}
                         >
-                          Open Versions
+                          {ru.common.labels.versions}
                         </AppButton>
                       </div>
                     </td>
@@ -193,8 +196,8 @@ export function AdminWorkoutsHubPage() {
 
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
-              Страница {programsQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
-              {programsQuery.data.totalElements} элементов
+              {ru.common.labels.page} {programsQuery.data.page + 1} / {Math.max(totalPages, 1)} •{" "}
+              {programsQuery.data.totalElements} {ru.common.labels.elements}
             </p>
             <div className="flex items-center gap-2">
               <AppButton
@@ -203,7 +206,7 @@ export function AdminWorkoutsHubPage() {
                 disabled={page === 0}
                 onClick={() => setPage((previous) => previous - 1)}
               >
-                Назад
+                {ru.common.actions.back}
               </AppButton>
               <AppButton
                 type="button"
@@ -211,7 +214,7 @@ export function AdminWorkoutsHubPage() {
                 disabled={page + 1 >= totalPages}
                 onClick={() => setPage((previous) => previous + 1)}
               >
-                Вперед
+                {ru.common.actions.forward}
               </AppButton>
             </div>
           </div>
