@@ -50,7 +50,6 @@ export function ProgressionTable({
       <table className="w-full text-left text-sm">
         <thead className="bg-sidebar/60 text-muted-foreground">
           <tr>
-            <th className="px-4 py-3 font-medium">{ru.progression.table.code}</th>
             <th className="px-4 py-3 font-medium">{ru.progression.table.name}</th>
             <th className="px-4 py-3 font-medium">{ru.progression.table.type}</th>
             <th className="px-4 py-3 font-medium">{ru.progression.table.status}</th>
@@ -67,7 +66,6 @@ export function ProgressionTable({
               key={item.id}
               className="border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
             >
-              <td className="px-4 py-3 font-mono text-xs">{item.code}</td>
               <td className="px-4 py-3">
                 <p className="font-medium">{item.name}</p>
                 {item.description ? (
