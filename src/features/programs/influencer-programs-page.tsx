@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import {
+  createInfluencerProgram,
   searchInfluencerPrograms,
+  type CreateInfluencerProgramPayload,
   type InfluencerProgramsPageResult,
 } from "@/api/influencerPrograms";
 import { REFERENCE_LIST_PAGE_SIZE, REFERENCE_LIST_STALE_TIME_MS } from "@/config/query";
+import { ProgramCreateDialog } from "@/features/programs/program-create-dialog";
 import { ProgramsTable } from "@/features/programs/programs-table";
 import {
   AppButton,
@@ -22,10 +25,12 @@ import {
 
 export function InfluencerProgramsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -67,6 +72,34 @@ export function InfluencerProgramsPage() {
     });
   }, [listQuery.error, listQuery.isError, pushToast]);
 
+  const createMutation = useMutation({
+    mutationFn: async (payload: CreateInfluencerProgramPayload) => {
+      const result = await createInfluencerProgram(payload);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      pushToast({
+        kind: "success",
+        title: "Программа создана",
+        description: "Метаданные программы успешно сохранены.",
+      });
+      setIsCreateOpen(false);
+      await queryClient.invalidateQueries({ queryKey: ["influencerPrograms"] });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось создать программу";
+      pushToast({
+        kind: "error",
+        title: "Ошибка создания",
+        description: message,
+      });
+    },
+  });
+
   const totalPages = listQuery.data?.totalPages ?? 0;
   const hasPrev = page > 0;
   const hasNext = page + 1 < totalPages;
@@ -83,7 +116,11 @@ export function InfluencerProgramsPage() {
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Поиск по названию программы"
             />
-            <AppButton type="button" disabled>
+            <AppButton
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              disabled={createMutation.isPending}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Create Program
             </AppButton>
@@ -140,6 +177,15 @@ export function InfluencerProgramsPage() {
           </div>
         </div>
       ) : null}
+
+      <ProgramCreateDialog
+        open={isCreateOpen}
+        isSubmitting={createMutation.isPending}
+        onOpenChange={setIsCreateOpen}
+        onSubmit={async (payload) => {
+          await createMutation.mutateAsync(payload);
+        }}
+      />
     </div>
   );
 }
