@@ -1,4 +1,5 @@
 export { AdminProgramsPage } from "@/features/programs/admin-programs-page";
+export { AdminProgramDetailsPage } from "@/features/programs/admin-program-details-page";
 export { InfluencerProgramsPage } from "@/features/programs/influencer-programs-page";
 export { InfluencerProgramDetailsPage } from "@/features/programs/influencer-program-details-page";
 export { ProgramCreateDialog } from "@/features/programs/program-create-dialog";
@@ -10,3 +11,4 @@ export { adminProgramScope } from "@/features/programs/scopes/admin-program-scop
 export { influencerProgramScope } from "@/features/programs/scopes/influencer-program-scope";
 export { ProgramTabs } from "@/features/programs/program-tabs";
 export { StatusBadge } from "@/features/programs/status-badge";
+export { VersionsTable } from "@/features/programs/versions-table";

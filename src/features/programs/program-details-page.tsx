@@ -1,15 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProgramForm } from "@/features/programs/program-form";
 import { ProgramHeader } from "@/features/programs/program-header";
 import { ProgramTabs, type ProgramTabId } from "@/features/programs/program-tabs";
-import { AppButton, ErrorState, LoadingState, useAppToast } from "@/shared/ui";
+import { VersionsTable } from "@/features/programs/versions-table";
+import {
+  AppButton,
+  AppInput,
+  AppSelect,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  useAppToast,
+} from "@/shared/ui";
 import type {
+  ProgramVersionRecord,
   ProgramRecord,
   ProgramUpdatePayload,
+  ProgramVersionsPageResult,
   ProgramsScopeConfig,
 } from "@/features/programs/types";
 
@@ -18,11 +29,23 @@ type ProgramDetailsPageProps = {
   config: ProgramsScopeConfig;
 };
 
+const statusFilterOptions = [
+  { value: "ALL", label: "All statuses" },
+  { value: "DRAFT", label: "DRAFT" },
+  { value: "PUBLISHED", label: "PUBLISHED" },
+  { value: "ARCHIVED", label: "ARCHIVED" },
+] as const;
+
 export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [activeTab, setActiveTab] = useState<ProgramTabId>("details");
+  const [versionsSearch, setVersionsSearch] = useState("");
+  const [debouncedVersionsSearch, setDebouncedVersionsSearch] = useState("");
+  const [versionsPage, setVersionsPage] = useState(0);
+  const [versionsStatusFilter, setVersionsStatusFilter] =
+    useState<(typeof statusFilterOptions)[number]["value"]>("ALL");
 
   const detailsQuery = useQuery<ProgramRecord, Error>({
     queryKey: [...config.queryKeyPrefix, "details", programId],
@@ -71,6 +94,58 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       });
     },
   });
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedVersionsSearch(versionsSearch);
+      setVersionsPage(0);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [versionsSearch]);
+
+  const versionsQuery = useQuery<ProgramVersionsPageResult, Error>({
+    queryKey: [
+      ...config.queryKeyPrefix,
+      "versions",
+      programId,
+      versionsPage,
+      debouncedVersionsSearch,
+      { status: versionsStatusFilter },
+    ],
+    enabled: activeTab === "versions" && Boolean(config.api.searchVersions),
+    queryFn: async () => {
+      if (!config.api.searchVersions) {
+        throw new Error("Versions API is not available");
+      }
+
+      const result = await config.api.searchVersions({
+        programId,
+        page: versionsPage,
+        size: 20,
+        search: debouncedVersionsSearch,
+        status: versionsStatusFilter === "ALL" ? undefined : versionsStatusFilter,
+      });
+
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+  });
+
+  useEffect(() => {
+    if (!versionsQuery.isError) {
+      return;
+    }
+
+    pushToast({
+      kind: "error",
+      title: "Не удалось загрузить версии",
+      description: versionsQuery.error.message,
+    });
+  }, [pushToast, versionsQuery.error, versionsQuery.isError]);
 
   if (detailsQuery.isLoading) {
     return <LoadingState title="Загружаем программу..." />;
@@ -132,12 +207,87 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
               Редактирование недоступно для текущего scope.
             </p>
           </div>
+        ) : config.capabilities.showVersions ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <AppInput
+                value={versionsSearch}
+                onChange={(event) => setVersionsSearch(event.target.value)}
+                placeholder="Search versions"
+              />
+              <div className="w-[190px]">
+                <AppSelect
+                  value={versionsStatusFilter}
+                  onValueChange={(value) => {
+                    setVersionsStatusFilter(value as (typeof statusFilterOptions)[number]["value"]);
+                    setVersionsPage(0);
+                  }}
+                  options={statusFilterOptions.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                  placeholder="Status"
+                />
+              </div>
+            </div>
+
+            {versionsQuery.isLoading ? <LoadingState title="Загружаем версии..." /> : null}
+
+            {!versionsQuery.isLoading && versionsQuery.isError ? (
+              <ErrorState
+                title="Не удалось загрузить версии"
+                description={versionsQuery.error.message}
+                onRetry={() => void versionsQuery.refetch()}
+              />
+            ) : null}
+
+            {!versionsQuery.isLoading &&
+            !versionsQuery.isError &&
+            (versionsQuery.data?.items.length ?? 0) === 0 ? (
+              <EmptyState title="Версии не найдены" description="Попробуйте изменить фильтры." />
+            ) : null}
+
+            {!versionsQuery.isLoading && !versionsQuery.isError && versionsQuery.data ? (
+              <div className="space-y-4">
+                <VersionsTable
+                  items={versionsQuery.data.items}
+                  canPublish={config.capabilities.canPublish}
+                  isPublishing={false}
+                  onPublish={(version: ProgramVersionRecord) => {
+                    void version;
+                  }}
+                />
+                <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
+                  <p className="text-muted-foreground">
+                    Страница {versionsQuery.data.page + 1} /{" "}
+                    {Math.max(versionsQuery.data.totalPages, 1)} •{" "}
+                    {versionsQuery.data.totalElements} элементов
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <AppButton
+                      type="button"
+                      variant="secondary"
+                      disabled={versionsPage === 0}
+                      onClick={() => setVersionsPage((prev) => prev - 1)}
+                    >
+                      Назад
+                    </AppButton>
+                    <AppButton
+                      type="button"
+                      variant="secondary"
+                      disabled={versionsPage + 1 >= (versionsQuery.data.totalPages ?? 0)}
+                      onClick={() => setVersionsPage((prev) => prev + 1)}
+                    >
+                      Вперед
+                    </AppButton>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-sidebar/40 p-6">
-            <p className="text-sm font-medium text-foreground">Coming next: versions & publish</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Здесь появится управление версиями программы и публикацией.
-            </p>
+            <p className="text-sm font-medium text-foreground">Versions are not available</p>
           </div>
         )}
       </div>
