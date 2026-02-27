@@ -1,6 +1,11 @@
 export { InfluencerProgramsPage } from "@/features/programs/influencer-programs-page";
+export { InfluencerProgramDetailsPage } from "@/features/programs/influencer-program-details-page";
 export { ProgramCreateDialog } from "@/features/programs/program-create-dialog";
 export { ProgramDetailsPage } from "@/features/programs/program-details-page";
 export { ProgramForm } from "@/features/programs/program-form";
 export { ProgramHeader } from "@/features/programs/program-header";
+export { ProgramListPage } from "@/features/programs/program-list-page";
+export { adminProgramScope } from "@/features/programs/scopes/admin-program-scope";
+export { influencerProgramScope } from "@/features/programs/scopes/influencer-program-scope";
 export { ProgramTabs } from "@/features/programs/program-tabs";
+export { StatusBadge } from "@/features/programs/status-badge";

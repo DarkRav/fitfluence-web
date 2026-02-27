@@ -2,14 +2,14 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import type { CreateInfluencerProgramPayload } from "@/api/influencerPrograms";
 import { ProgramForm } from "@/features/programs/program-form";
+import type { ProgramCreatePayload } from "@/features/programs/types";
 
 type ProgramCreateDialogProps = {
   open: boolean;
   isSubmitting: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (payload: CreateInfluencerProgramPayload) => Promise<void>;
+  onSubmit: (payload: ProgramCreatePayload) => Promise<void>;
 };
 
 export function ProgramCreateDialog({

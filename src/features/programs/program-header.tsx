@@ -1,24 +1,9 @@
 import { AppButton } from "@/shared/ui";
-import type { InfluencerProgramRecord } from "@/api/influencerPrograms";
-
-function mapProgramStatusLabel(status: InfluencerProgramRecord["status"]): string {
-  if (status === "DRAFT") {
-    return "Черновик";
-  }
-
-  if (status === "PUBLISHED") {
-    return "Опубликована";
-  }
-
-  if (status === "ARCHIVED") {
-    return "Архив";
-  }
-
-  return status;
-}
+import { StatusBadge } from "@/features/programs/status-badge";
+import type { ProgramRecord } from "@/features/programs/types";
 
 type ProgramHeaderProps = {
-  program: InfluencerProgramRecord;
+  program: ProgramRecord;
   onBack: () => void;
 };
 
@@ -29,9 +14,7 @@ export function ProgramHeader({ program, onBack }: ProgramHeaderProps) {
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-foreground">{program.title}</h1>
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span className="rounded-full border border-secondary/35 bg-secondary/10 px-2 py-1 font-medium text-secondary">
-              {mapProgramStatusLabel(program.status)}
-            </span>
+            <StatusBadge status={program.status} />
             <span>Program ID: {program.id}</span>
             {program.updatedAt ? (
               <span>Updated: {new Date(program.updatedAt).toLocaleString()}</span>

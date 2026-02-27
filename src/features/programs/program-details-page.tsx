@@ -3,31 +3,31 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getInfluencerProgram,
-  updateInfluencerProgram,
-  type InfluencerProgramRecord,
-  type UpdateInfluencerProgramPayload,
-} from "@/api/influencerPrograms";
 import { ProgramForm } from "@/features/programs/program-form";
 import { ProgramHeader } from "@/features/programs/program-header";
 import { ProgramTabs, type ProgramTabId } from "@/features/programs/program-tabs";
 import { AppButton, ErrorState, LoadingState, useAppToast } from "@/shared/ui";
+import type {
+  ProgramRecord,
+  ProgramUpdatePayload,
+  ProgramsScopeConfig,
+} from "@/features/programs/types";
 
 type ProgramDetailsPageProps = {
   programId: string;
+  config: ProgramsScopeConfig;
 };
 
-export function ProgramDetailsPage({ programId }: ProgramDetailsPageProps) {
+export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
   const [activeTab, setActiveTab] = useState<ProgramTabId>("details");
 
-  const detailsQuery = useQuery<InfluencerProgramRecord, Error>({
-    queryKey: ["influencerProgram", programId],
+  const detailsQuery = useQuery<ProgramRecord, Error>({
+    queryKey: [...config.queryKeyPrefix, "details", programId],
     queryFn: async () => {
-      const result = await getInfluencerProgram(programId);
+      const result = await config.api.get(programId);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -37,8 +37,12 @@ export function ProgramDetailsPage({ programId }: ProgramDetailsPageProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (payload: UpdateInfluencerProgramPayload) => {
-      const result = await updateInfluencerProgram(programId, payload);
+    mutationFn: async (payload: ProgramUpdatePayload) => {
+      if (!config.api.update) {
+        throw new Error("Update operation is not supported");
+      }
+
+      const result = await config.api.update(programId, payload);
       if (!result.ok) {
         throw new Error(result.error.message);
       }
@@ -52,8 +56,10 @@ export function ProgramDetailsPage({ programId }: ProgramDetailsPageProps) {
         description: "Изменения метаданных успешно применены.",
       });
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["influencerProgram", programId] }),
-        queryClient.invalidateQueries({ queryKey: ["influencerPrograms"] }),
+        queryClient.invalidateQueries({
+          queryKey: [...config.queryKeyPrefix, "details", programId],
+        }),
+        queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix }),
       ]);
     },
     onError: (error) => {
@@ -93,21 +99,17 @@ export function ProgramDetailsPage({ programId }: ProgramDetailsPageProps) {
 
   return (
     <div className="space-y-4">
-      <ProgramHeader program={program} onBack={() => router.push("/influencer/programs")} />
+      <ProgramHeader program={program} onBack={() => router.push(config.routes.list)} />
 
       <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
         <div className="mb-4 flex items-center justify-between gap-3">
           <ProgramTabs activeTab={activeTab} onChange={setActiveTab} />
-          <AppButton
-            type="button"
-            variant="ghost"
-            onClick={() => router.push("/influencer/programs")}
-          >
+          <AppButton type="button" variant="ghost" onClick={() => router.push(config.routes.list)}>
             Back to Programs
           </AppButton>
         </div>
 
-        {activeTab === "details" ? (
+        {activeTab === "details" && config.capabilities.canEdit && config.api.update ? (
           <ProgramForm
             mode="edit"
             initialValues={{
@@ -123,6 +125,13 @@ export function ProgramDetailsPage({ programId }: ProgramDetailsPageProps) {
               await updateMutation.mutateAsync(payload);
             }}
           />
+        ) : activeTab === "details" ? (
+          <div className="rounded-xl border border-border bg-sidebar/40 p-6">
+            <p className="text-sm font-medium text-foreground">Program details</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Редактирование недоступно для текущего scope.
+            </p>
+          </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-sidebar/40 p-6">
             <p className="text-sm font-medium text-foreground">Coming next: versions & publish</p>

@@ -1,30 +1,26 @@
 "use client";
 
 import { AppButton } from "@/shared/ui";
-import type { InfluencerProgramRecord } from "@/api/influencerPrograms";
-
-function mapProgramStatusLabel(status: InfluencerProgramRecord["status"]): string {
-  if (status === "DRAFT") {
-    return "Черновик";
-  }
-
-  if (status === "PUBLISHED") {
-    return "Опубликована";
-  }
-
-  if (status === "ARCHIVED") {
-    return "Архив";
-  }
-
-  return status;
-}
+import { StatusBadge } from "@/features/programs/status-badge";
+import type { ProgramRecord } from "@/features/programs/types";
 
 type ProgramsTableProps = {
-  items: InfluencerProgramRecord[];
-  onOpen: (item: InfluencerProgramRecord) => void;
+  items: ProgramRecord[];
+  showOwner?: boolean;
+  onOpen: (item: ProgramRecord) => void;
 };
 
-export function ProgramsTable({ items, onOpen }: ProgramsTableProps) {
+function resolveOwner(item: ProgramRecord): string {
+  if ("influencerId" in item && item.influencerId) {
+    return item.influencerDisplayName
+      ? `INFLUENCER · ${item.influencerDisplayName}`
+      : `INFLUENCER · ${item.influencerId}`;
+  }
+
+  return "OWNER N/A";
+}
+
+export function ProgramsTable({ items, showOwner = false, onOpen }: ProgramsTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <table className="w-full text-left text-sm">
@@ -32,6 +28,7 @@ export function ProgramsTable({ items, onOpen }: ProgramsTableProps) {
           <tr>
             <th className="px-4 py-3 font-medium">Обложка</th>
             <th className="px-4 py-3 font-medium">Название</th>
+            {showOwner ? <th className="px-4 py-3 font-medium">Owner</th> : null}
             <th className="px-4 py-3 font-medium">Версия</th>
             <th className="px-4 py-3 font-medium">Статус</th>
             <th className="px-4 py-3 font-medium">Обновлено</th>
@@ -66,15 +63,16 @@ export function ProgramsTable({ items, onOpen }: ProgramsTableProps) {
                   <p className="line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
                 ) : null}
               </td>
+              {showOwner ? (
+                <td className="px-4 py-3 text-xs text-muted-foreground">{resolveOwner(item)}</td>
+              ) : null}
               <td className="px-4 py-3 text-xs text-muted-foreground">
                 {item.currentPublishedVersionNumber
                   ? `v${item.currentPublishedVersionNumber}`
                   : "—"}
               </td>
               <td className="px-4 py-3">
-                <span className="rounded-full border border-secondary/35 bg-secondary/10 px-2 py-1 text-xs font-medium text-secondary">
-                  {mapProgramStatusLabel(item.status)}
-                </span>
+                <StatusBadge status={item.status} />
               </td>
               <td className="px-4 py-3 text-xs text-muted-foreground">
                 {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "—"}

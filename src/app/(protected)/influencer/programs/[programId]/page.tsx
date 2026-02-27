@@ -1,4 +1,4 @@
-import { ProgramDetailsPage } from "@/features/programs/program-details-page";
+import { InfluencerProgramDetailsPage } from "@/features/programs/influencer-program-details-page";
 
 type InfluencerProgramDetailsRoutePageProps = {
   params: Promise<{
@@ -10,5 +10,5 @@ export default async function InfluencerProgramDetailsRoutePage({
   params,
 }: InfluencerProgramDetailsRoutePageProps) {
   const { programId } = await params;
-  return <ProgramDetailsPage programId={programId} />;
+  return <InfluencerProgramDetailsPage programId={programId} />;
 }

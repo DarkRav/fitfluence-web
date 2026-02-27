@@ -4,11 +4,8 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  type CreateInfluencerProgramPayload,
-  type InfluencerProgramStatus,
-  type UpdateInfluencerProgramPayload,
-} from "@/api/influencerPrograms";
+import type { AdminProgramStatus } from "@/api/adminPrograms";
+import { type ProgramCreatePayload, type ProgramUpdatePayload } from "@/features/programs/types";
 import { MediaPicker } from "@/features/media";
 import { AppButton, AppInput, AppSelect } from "@/shared/ui";
 
@@ -33,7 +30,7 @@ export type ProgramFormInitialValues = {
   description: string;
   goals: string[];
   coverMediaId: string;
-  status?: InfluencerProgramStatus;
+  status?: AdminProgramStatus;
 };
 
 type ProgramFormProps = {
@@ -44,11 +41,11 @@ type ProgramFormProps = {
 } & (
   | {
       mode: "create";
-      onSubmit: (payload: CreateInfluencerProgramPayload) => Promise<void>;
+      onSubmit: (payload: ProgramCreatePayload) => Promise<void>;
     }
   | {
       mode: "edit";
-      onSubmit: (payload: UpdateInfluencerProgramPayload) => Promise<void>;
+      onSubmit: (payload: ProgramUpdatePayload) => Promise<void>;
     }
 );
 
@@ -154,7 +151,7 @@ export function ProgramForm({
             render={({ field }) => (
               <AppSelect
                 value={field.value}
-                onValueChange={(value) => field.onChange(value as InfluencerProgramStatus)}
+                onValueChange={(value) => field.onChange(value as AdminProgramStatus)}
                 options={statusOptions.map((option) => ({
                   value: option.value,
                   label: option.label,
