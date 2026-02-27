@@ -15,6 +15,7 @@ import type {
 import {
   AppButton,
   AppInput,
+  AppSelect,
   EmptyState,
   ErrorState,
   LoadingState,
@@ -26,6 +27,13 @@ type ProgramListPageProps = {
   config: ProgramsScopeConfig;
 };
 
+const statusFilterOptions = [
+  { value: "ALL", label: "All statuses" },
+  { value: "DRAFT", label: "DRAFT" },
+  { value: "PUBLISHED", label: "PUBLISHED" },
+  { value: "ARCHIVED", label: "ARCHIVED" },
+] as const;
+
 export function ProgramListPage({ config }: ProgramListPageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -33,6 +41,8 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
+  const [statusFilter, setStatusFilter] =
+    useState<(typeof statusFilterOptions)[number]["value"]>("ALL");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   useEffect(() => {
@@ -45,12 +55,19 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
   }, [search]);
 
   const listQuery = useQuery<ProgramsPageResult, Error>({
-    queryKey: [...config.queryKeyPrefix, page, REFERENCE_LIST_PAGE_SIZE, debouncedSearch, {}],
+    queryKey: [
+      ...config.queryKeyPrefix,
+      page,
+      REFERENCE_LIST_PAGE_SIZE,
+      debouncedSearch,
+      { status: statusFilter },
+    ],
     queryFn: async () => {
       const result = await config.api.search({
         page,
         size: REFERENCE_LIST_PAGE_SIZE,
         search: debouncedSearch,
+        status: statusFilter === "ALL" ? undefined : statusFilter,
       });
 
       if (!result.ok) {
@@ -124,6 +141,22 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
               onChange={(event) => setSearch(event.target.value)}
               placeholder={config.searchPlaceholder}
             />
+            {config.capabilities.enableStatusFilter ? (
+              <div className="w-[190px]">
+                <AppSelect
+                  value={statusFilter}
+                  onValueChange={(value) => {
+                    setStatusFilter(value as (typeof statusFilterOptions)[number]["value"]);
+                    setPage(0);
+                  }}
+                  options={statusFilterOptions.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                  placeholder="Status"
+                />
+              </div>
+            ) : null}
             {config.capabilities.canCreate ? (
               <AppButton
                 type="button"

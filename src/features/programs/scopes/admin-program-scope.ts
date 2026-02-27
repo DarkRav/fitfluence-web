@@ -19,6 +19,7 @@ export const adminProgramScope: ProgramsScopeConfig = {
     showOwner: true,
     showVersions: true,
     canPublish: true,
+    enableStatusFilter: true,
   },
   api: {
     search: searchAdminPrograms,

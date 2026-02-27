@@ -1,3 +1,4 @@
+export { AdminProgramsPage } from "@/features/programs/admin-programs-page";
 export { InfluencerProgramsPage } from "@/features/programs/influencer-programs-page";
 export { InfluencerProgramDetailsPage } from "@/features/programs/influencer-program-details-page";
 export { ProgramCreateDialog } from "@/features/programs/program-create-dialog";

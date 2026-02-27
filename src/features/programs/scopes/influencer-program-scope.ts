@@ -23,6 +23,7 @@ export const influencerProgramScope: ProgramsScopeConfig = {
     showOwner: false,
     showVersions: true,
     canPublish: false,
+    enableStatusFilter: false,
   },
   api: {
     search: searchInfluencerPrograms,

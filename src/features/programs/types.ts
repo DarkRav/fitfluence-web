@@ -49,6 +49,7 @@ export type ProgramsScopeConfig = {
     showOwner: boolean;
     showVersions: boolean;
     canPublish: boolean;
+    enableStatusFilter: boolean;
   };
   api: {
     search: (params: ProgramSearchParams) => Promise<ApiResult<ProgramsPageResult>>;
