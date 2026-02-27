@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { AuthProvider } from "@/features/auth/auth-provider";
 import "./globals.css";
 
 const geist = Geist({
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru" className="dark">
-      <body className={`${geist.variable} min-h-screen`}>{children}</body>
+      <body className={`${geist.variable} min-h-screen`}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
