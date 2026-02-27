@@ -1,19 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
-import { X } from "lucide-react";
 import { z } from "zod";
+import {
+  AppDialogContent,
+  AppDialogDescription,
+  AppDialogFooter,
+  AppDialogHeader,
+  AppDialogRoot,
+  AppDialogTitle,
+} from "@/components/ui";
 import {
   type AddWorkoutExercisePayload,
   type WorkoutExerciseRecord,
   type WorkoutsScopeConfig,
 } from "@/features/workouts/types";
 import { ru } from "@/localization/ru";
-import { AppButton, AppInput } from "@/shared/ui";
+import { AppButton, AppInput, AppTextarea } from "@/shared/ui";
 
 const addExerciseSchema = z.object({
   exerciseId: z.string().uuid(ru.workouts.selectExerciseValidation),
@@ -109,185 +115,162 @@ export function AddExerciseDialog({
   }, [form, open]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[96vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-card focus:outline-none">
-          <Dialog.Title className="text-lg font-semibold text-card-foreground">
+    <AppDialogRoot open={open} onOpenChange={onOpenChange}>
+      <AppDialogContent maxWidthClassName="max-w-2xl">
+        <AppDialogHeader>
+          <AppDialogTitle className="text-lg font-semibold text-card-foreground">
             {ru.common.actions.addExercise}
-          </Dialog.Title>
-          <Dialog.Description className="mt-1 text-sm text-muted-foreground">
+          </AppDialogTitle>
+          <AppDialogDescription className="text-sm text-muted-foreground">
             {ru.workouts.addExerciseDescription}
-          </Dialog.Description>
+          </AppDialogDescription>
+        </AppDialogHeader>
 
-          <form
-            className="mt-4 space-y-4"
-            onSubmit={form.handleSubmit(async (values) => {
-              await onSubmit({
-                exerciseId: values.exerciseId,
-                sets: values.sets,
-                repsMin: values.repsMin,
-                repsMax: values.repsMax,
-                targetRpe: values.targetRpe,
-                restSeconds: values.restSeconds,
-                notes: values.notes?.trim() || undefined,
-              });
-              onOpenChange(false);
-            })}
-          >
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                {ru.common.placeholders.searchExercise}
-              </label>
-              <AppInput
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={ru.common.placeholders.exerciseNameOrCode}
-              />
-              <div className="max-h-56 overflow-y-auto rounded-xl border border-border bg-sidebar/30 p-2">
-                {exercisesQuery.isLoading ? (
-                  <p className="px-2 py-3 text-sm text-muted-foreground">
-                    {ru.workouts.loadingExercises}
-                  </p>
-                ) : exercisesQuery.isError ? (
-                  <p className="px-2 py-3 text-sm text-destructive">
-                    {exercisesQuery.error.message}
-                  </p>
-                ) : (exercisesQuery.data?.length ?? 0) === 0 ? (
-                  <p className="px-2 py-3 text-sm text-muted-foreground">{ru.workouts.notFound}</p>
-                ) : (
-                  <div className="space-y-1">
-                    {exercisesQuery.data?.map((exercise) => {
-                      const selected = selectedExerciseId === exercise.id;
-                      const alreadyAdded = existingExerciseIds.includes(exercise.id);
-
-                      return (
-                        <button
-                          key={exercise.id}
-                          type="button"
-                          disabled={alreadyAdded}
-                          className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition ${
-                            selected
-                              ? "border-secondary/50 bg-secondary/15"
-                              : "border-border bg-card hover:bg-secondary/10"
-                          } ${alreadyAdded ? "cursor-not-allowed opacity-50" : ""}`}
-                          onClick={() =>
-                            form.setValue("exerciseId", exercise.id, { shouldValidate: true })
-                          }
-                        >
-                          <p className="font-medium text-foreground">{exercise.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {exercise.code}
-                            {exercise.createdByInfluencerId
-                              ? scope.scope === "influencer"
-                                ? ` · ${ru.workouts.unknownSourceMine}`
-                                : ` · ${ru.workouts.unknownSourceInfluencer}`
-                              : ` · ${ru.workouts.unknownSourceBase}`}
-                          </p>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-              {form.formState.errors.exerciseId ? (
-                <p className="text-xs text-destructive">
-                  {form.formState.errors.exerciseId.message}
+        <form
+          className="mt-4 space-y-4"
+          onSubmit={form.handleSubmit(async (values) => {
+            await onSubmit({
+              exerciseId: values.exerciseId,
+              sets: values.sets,
+              repsMin: values.repsMin,
+              repsMax: values.repsMax,
+              targetRpe: values.targetRpe,
+              restSeconds: values.restSeconds,
+              notes: values.notes?.trim() || undefined,
+            });
+            onOpenChange(false);
+          })}
+        >
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              {ru.common.placeholders.searchExercise}
+            </label>
+            <AppInput
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={ru.common.placeholders.exerciseNameOrCode}
+            />
+            <div className="max-h-56 overflow-y-auto rounded-xl border border-border bg-sidebar/30 p-2">
+              {exercisesQuery.isLoading ? (
+                <p className="px-2 py-3 text-sm text-muted-foreground">
+                  {ru.workouts.loadingExercises}
                 </p>
-              ) : null}
-            </div>
+              ) : exercisesQuery.isError ? (
+                <p className="px-2 py-3 text-sm text-destructive">{exercisesQuery.error.message}</p>
+              ) : (exercisesQuery.data?.length ?? 0) === 0 ? (
+                <p className="px-2 py-3 text-sm text-muted-foreground">{ru.workouts.notFound}</p>
+              ) : (
+                <div className="space-y-1">
+                  {exercisesQuery.data?.map((exercise) => {
+                    const selected = selectedExerciseId === exercise.id;
+                    const alreadyAdded = existingExerciseIds.includes(exercise.id);
 
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">
-                  {ru.common.labels.sets}
-                </label>
-                <AppInput
-                  type="number"
-                  min={1}
-                  {...form.register("sets", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">
-                  {ru.common.labels.repsMin}
-                </label>
-                <AppInput
-                  type="number"
-                  min={1}
-                  {...form.register("repsMin", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">
-                  {ru.common.labels.repsMax}
-                </label>
-                <AppInput
-                  type="number"
-                  min={1}
-                  {...form.register("repsMax", { valueAsNumber: true })}
-                />
-              </div>
+                    return (
+                      <button
+                        key={exercise.id}
+                        type="button"
+                        disabled={alreadyAdded}
+                        className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition ${
+                          selected
+                            ? "border-secondary/50 bg-secondary/15"
+                            : "border-border bg-card hover:bg-secondary/10"
+                        } ${alreadyAdded ? "cursor-not-allowed opacity-50" : ""}`}
+                        onClick={() =>
+                          form.setValue("exerciseId", exercise.id, { shouldValidate: true })
+                        }
+                      >
+                        <p className="font-medium text-foreground">{exercise.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {exercise.code}
+                          {exercise.createdByInfluencerId
+                            ? scope.scope === "influencer"
+                              ? ` · ${ru.workouts.unknownSourceMine}`
+                              : ` · ${ru.workouts.unknownSourceInfluencer}`
+                            : ` · ${ru.workouts.unknownSourceBase}`}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
+            {form.formState.errors.exerciseId ? (
+              <p className="text-xs text-destructive">{form.formState.errors.exerciseId.message}</p>
+            ) : null}
+          </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">
-                  {ru.common.labels.targetRpe}
-                </label>
-                <AppInput
-                  type="number"
-                  min={1}
-                  max={10}
-                  step="0.5"
-                  {...form.register("targetRpe", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">
-                  {ru.common.labels.restSeconds}
-                </label>
-                <AppInput
-                  type="number"
-                  min={0}
-                  {...form.register("restSeconds", { valueAsNumber: true })}
-                />
-              </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">{ru.common.labels.sets}</label>
+              <AppInput type="number" min={1} {...form.register("sets", { valueAsNumber: true })} />
             </div>
-
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                {ru.common.labels.notes}
+                {ru.common.labels.repsMin}
               </label>
-              <textarea
-                {...form.register("notes")}
-                className="min-h-20 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+              <AppInput
+                type="number"
+                min={1}
+                {...form.register("repsMin", { valueAsNumber: true })}
               />
             </div>
-
-            <div className="flex justify-end gap-2">
-              <AppButton
-                type="button"
-                variant="secondary"
-                disabled={isSubmitting}
-                onClick={() => onOpenChange(false)}
-              >
-                {ru.common.actions.cancel}
-              </AppButton>
-              <AppButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? ru.workouts.adding : ru.common.actions.addExercise}
-              </AppButton>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.labels.repsMax}
+              </label>
+              <AppInput
+                type="number"
+                min={1}
+                {...form.register("repsMax", { valueAsNumber: true })}
+              />
             </div>
-          </form>
+          </div>
 
-          <Dialog.Close
-            disabled={isSubmitting}
-            className="absolute right-3 top-3 rounded-sm p-1 text-muted-foreground transition hover:bg-card disabled:opacity-50"
-          >
-            <X className="h-4 w-4" />
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.labels.targetRpe}
+              </label>
+              <AppInput
+                type="number"
+                min={1}
+                max={10}
+                step="0.5"
+                {...form.register("targetRpe", { valueAsNumber: true })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">
+                {ru.common.labels.restSeconds}
+              </label>
+              <AppInput
+                type="number"
+                min={0}
+                {...form.register("restSeconds", { valueAsNumber: true })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">{ru.common.labels.notes}</label>
+            <AppTextarea {...form.register("notes")} className="min-h-20" />
+          </div>
+
+          <AppDialogFooter>
+            <AppButton
+              type="button"
+              variant="secondary"
+              disabled={isSubmitting}
+              onClick={() => onOpenChange(false)}
+            >
+              {ru.common.actions.cancel}
+            </AppButton>
+            <AppButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? ru.workouts.adding : ru.common.actions.addExercise}
+            </AppButton>
+          </AppDialogFooter>
+        </form>
+      </AppDialogContent>
+    </AppDialogRoot>
   );
 }

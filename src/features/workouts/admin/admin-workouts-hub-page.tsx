@@ -92,7 +92,7 @@ export function AdminWorkoutsHubPage() {
         title={ru.workouts.title}
         subtitle={ru.workouts.selectProgramDescription}
         actions={
-          <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2">
             <div className="min-w-[220px] flex-1">
               <AppInput
                 value={search}

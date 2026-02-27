@@ -235,7 +235,7 @@ export function WorkoutsListPage({
       ) : null}
 
       {embedded ? (
-        <div className="mb-4 flex w-full max-w-4xl flex-wrap items-center gap-2">
+        <div className="mb-4 flex w-full flex-wrap items-center gap-2">
           <div className="min-w-[220px] flex-1">
             <AppInput
               value={search}
@@ -255,7 +255,7 @@ export function WorkoutsListPage({
           title={ru.workouts.listTitle}
           subtitle={ru.workouts.listSubtitle}
           actions={
-            <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2">
               <div className="min-w-[220px] flex-1">
                 <AppInput
                   value={search}

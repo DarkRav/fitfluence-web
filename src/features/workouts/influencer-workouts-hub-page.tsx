@@ -155,7 +155,7 @@ export function InfluencerWorkoutsHubPage() {
         title={ru.workouts.title}
         subtitle={ru.workouts.hubSubtitle}
         actions={
-          <div className="flex w-full max-w-5xl flex-wrap items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2">
             <div className="min-w-[220px] flex-1">
               <AppInput
                 value={search}

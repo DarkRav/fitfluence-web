@@ -273,7 +273,7 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
         title={config.title}
         subtitle={config.subtitle}
         actions={
-          <div className="flex w-full max-w-6xl items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2">
             <AppInput
               value={search}
               onChange={(event) => setSearch(event.target.value)}

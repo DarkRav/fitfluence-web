@@ -19,7 +19,7 @@ export function ExerciseToolbar({
   onCreateClick,
 }: ExerciseToolbarProps) {
   return (
-    <div className="flex w-full max-w-4xl items-center gap-2">
+    <div className="flex w-full flex-wrap items-center gap-2">
       <AppInput
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}

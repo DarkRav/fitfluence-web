@@ -1,4 +1,11 @@
 import type { MediaRecord } from "@/api/media";
+import {
+  TableContainer,
+  tableCellClassName,
+  tableHeadClassName,
+  tableRowClassName,
+} from "@/components/ui";
+import { AppButton } from "@/shared/ui";
 
 type MediaTableProps = {
   items: MediaRecord[];
@@ -33,26 +40,26 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
   const canClickRow = Boolean(onOpenDetails) || (pickMode && Boolean(onPick));
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
+    <TableContainer>
       <table className="w-full text-left text-sm">
-        <thead className="bg-sidebar/60 text-muted-foreground">
+        <thead className={tableHeadClassName}>
           <tr>
-            <th className="px-4 py-3 font-medium">Превью</th>
-            <th className="px-4 py-3 font-medium">ID</th>
-            <th className="px-4 py-3 font-medium">Тип</th>
-            <th className="px-4 py-3 font-medium">Теги</th>
-            <th className="px-4 py-3 font-medium">Создано</th>
-            <th className="px-4 py-3 font-medium">Владелец</th>
-            {(onOpenDetails || pickMode) && <th className="px-4 py-3 font-medium">Действие</th>}
+            <th className={`${tableCellClassName} font-medium`}>Превью</th>
+            <th className={`${tableCellClassName} font-medium`}>ID</th>
+            <th className={`${tableCellClassName} font-medium`}>Тип</th>
+            <th className={`${tableCellClassName} font-medium`}>Теги</th>
+            <th className={`${tableCellClassName} font-medium`}>Создано</th>
+            <th className={`${tableCellClassName} font-medium`}>Владелец</th>
+            {(onOpenDetails || pickMode) && (
+              <th className={`${tableCellClassName} font-medium`}>Действие</th>
+            )}
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
             <tr
               key={item.id}
-              className={`border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10 ${
-                canClickRow ? "cursor-pointer" : ""
-              }`}
+              className={`${tableRowClassName} ${canClickRow ? "cursor-pointer" : ""}`}
               onClick={() => {
                 if (pickMode) {
                   onPick?.(item.id);
@@ -61,10 +68,12 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
                 onOpenDetails?.(item.id);
               }}
             >
-              <td className="px-4 py-3">{renderPreview(item)}</td>
-              <td className="max-w-[260px] truncate px-4 py-3 font-mono text-xs">{item.id}</td>
-              <td className="px-4 py-3">{item.type}</td>
-              <td className="px-4 py-3">
+              <td className={tableCellClassName}>{renderPreview(item)}</td>
+              <td className={`max-w-[260px] truncate ${tableCellClassName} font-mono text-xs`}>
+                {item.id}
+              </td>
+              <td className={tableCellClassName}>{item.type}</td>
+              <td className={tableCellClassName}>
                 {item.tags.length > 0 ? (
                   <div className="flex max-w-[240px] flex-wrap gap-1">
                     {item.tags.map((tag) => (
@@ -80,34 +89,36 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
                   "-"
                 )}
               </td>
-              <td className="px-4 py-3">
+              <td className={tableCellClassName}>
                 {item.createdAt ? new Date(item.createdAt).toLocaleString() : "-"}
               </td>
-              <td className="px-4 py-3">{item.owner ?? "-"}</td>
+              <td className={tableCellClassName}>{item.owner ?? "-"}</td>
               {(onOpenDetails || pickMode) && (
-                <td className="px-4 py-3">
+                <td className={tableCellClassName}>
                   {pickMode ? (
-                    <button
+                    <AppButton
                       type="button"
-                      className="rounded-md border border-secondary/35 bg-secondary/10 px-3 py-1.5 text-xs font-semibold text-secondary transition hover:bg-secondary/20"
+                      variant="secondary"
+                      size="sm"
                       onClick={(event) => {
                         event.stopPropagation();
                         onPick?.(item.id);
                       }}
                     >
                       Выбрать
-                    </button>
+                    </AppButton>
                   ) : (
-                    <button
+                    <AppButton
                       type="button"
-                      className="rounded-md border border-border/80 bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-secondary/40 hover:text-secondary"
+                      variant="secondary"
+                      size="sm"
                       onClick={(event) => {
                         event.stopPropagation();
                         onOpenDetails?.(item.id);
                       }}
                     >
                       Детали
-                    </button>
+                    </AppButton>
                   )}
                 </td>
               )}
@@ -115,6 +126,6 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
           ))}
         </tbody>
       </table>
-    </div>
+    </TableContainer>
   );
 }

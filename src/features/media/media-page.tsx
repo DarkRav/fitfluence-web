@@ -56,7 +56,7 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
 
   const actions = useMemo(
     () => (
-      <div className="flex w-full max-w-2xl items-center gap-2">
+      <div className="flex w-full flex-wrap items-center gap-2">
         <AppInput
           value={search}
           onChange={(event) => {

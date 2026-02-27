@@ -49,14 +49,16 @@ export function ExerciseMediaSection({
             className="inline-flex items-center gap-1 rounded-md border border-secondary/35 bg-secondary/10 px-2 py-1 text-xs text-foreground"
           >
             <span className="font-mono">{mediaId}</span>
-            <button
+            <AppButton
               type="button"
-              className="rounded p-0.5 text-muted-foreground transition hover:bg-secondary/20 hover:text-foreground"
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
               onClick={() => onChange(mediaIds.filter((value) => value !== mediaId))}
               disabled={disabled}
             >
               <X className="h-3 w-3" />
-            </button>
+            </AppButton>
           </span>
         ))}
 
