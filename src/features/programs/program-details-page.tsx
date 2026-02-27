@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProgramForm } from "@/features/programs/program-form";
 import { ProgramHeader } from "@/features/programs/program-header";
+import { PublishVersionDialog } from "@/features/programs/publish-version-dialog";
 import { ProgramTabs, type ProgramTabId } from "@/features/programs/program-tabs";
 import { VersionsTable } from "@/features/programs/versions-table";
 import {
@@ -46,6 +47,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
   const [versionsPage, setVersionsPage] = useState(0);
   const [versionsStatusFilter, setVersionsStatusFilter] =
     useState<(typeof statusFilterOptions)[number]["value"]>("ALL");
+  const [publishTarget, setPublishTarget] = useState<ProgramVersionRecord | null>(null);
 
   const detailsQuery = useQuery<ProgramRecord, Error>({
     queryKey: [...config.queryKeyPrefix, "details", programId],
@@ -146,6 +148,46 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       description: versionsQuery.error.message,
     });
   }, [pushToast, versionsQuery.error, versionsQuery.isError]);
+
+  const publishMutation = useMutation({
+    mutationFn: async (programVersionId: string) => {
+      if (!config.api.publishVersion) {
+        throw new Error("Publish operation is not supported");
+      }
+
+      const result = await config.api.publishVersion(programVersionId);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      setPublishTarget(null);
+      pushToast({
+        kind: "success",
+        title: "Version published",
+        description: "Программа обновлена и версия опубликована.",
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [...config.queryKeyPrefix, "versions", programId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [...config.queryKeyPrefix, "details", programId],
+        }),
+        queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix }),
+      ]);
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось опубликовать версию";
+      pushToast({
+        kind: "error",
+        title: message.toLowerCase().includes("forbidden") ? "Not permitted" : "Ошибка публикации",
+        description: message,
+      });
+    },
+  });
 
   if (detailsQuery.isLoading) {
     return <LoadingState title="Загружаем программу..." />;
@@ -252,9 +294,9 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                 <VersionsTable
                   items={versionsQuery.data.items}
                   canPublish={config.capabilities.canPublish}
-                  isPublishing={false}
+                  isPublishing={publishMutation.isPending}
                   onPublish={(version: ProgramVersionRecord) => {
-                    void version;
+                    setPublishTarget(version);
                   }}
                 />
                 <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
@@ -291,6 +333,24 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
           </div>
         )}
       </div>
+
+      <PublishVersionDialog
+        open={Boolean(publishTarget)}
+        version={publishTarget}
+        isSubmitting={publishMutation.isPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPublishTarget(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (!publishTarget) {
+            return;
+          }
+
+          await publishMutation.mutateAsync(publishTarget.id);
+        }}
+      />
     </div>
   );
 }
