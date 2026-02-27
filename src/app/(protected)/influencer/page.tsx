@@ -1,10 +1,5 @@
-import { EmptyState, PageHeader } from "@/shared/ui";
+import { redirect } from "next/navigation";
 
 export default function InfluencerPage() {
-  return (
-    <div>
-      <PageHeader title="Кабинет инфлюенсера" subtitle="Стартовая точка для роли INFLUENCER." />
-      <EmptyState title="Раздел в разработке" description="Будущие инструменты инфлюенсера." />
-    </div>
-  );
+  redirect("/influencer/programs");
 }
