@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fitfluence Web Admin
 
-## Getting Started
+Production-ready scaffold for Fitfluence web admin.
 
-First, run the development server:
+## Stack
+
+- Next.js (App Router) + TypeScript
+- Tailwind CSS + design tokens
+- Radix-based UI wrappers (shadcn style)
+- TanStack Query
+- react-hook-form + zod
+- OIDC (Keycloak, Authorization Code + PKCE)
+- Generated OpenAPI client
+
+## Run
+
+1. Install dependencies:
+
+```bash
+npm install --cache .npm-cache
+```
+
+2. Configure environment:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Generate API client:
+
+```bash
+npm run gen:api
+```
+
+4. Start dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` — dev server
+- `npm run build` — production build
+- `npm run start` — run built app
+- `npm run lint` — eslint
+- `npm run typecheck` — TypeScript checks
+- `npm run format` — prettier
+- `npm run gen:api` — regenerate OpenAPI client into `src/api/gen`
 
-## Learn More
+## Auth Flow
 
-To learn more about Next.js, take a look at the following resources:
+- `/login` → `signIn()` redirect to Keycloak
+- `/auth/callback` → handles code exchange and stores tokens
+- after login app calls `GET /v1/me`, stores user + roles
+- route guards:
+  - `/admin/*` requires `ADMIN`
+  - `/influencer/*` requires `INFLUENCER`
+  - unauthenticated users are redirected to `/login`
+  - unauthorized users are redirected to `/forbidden`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Keycloak (local)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Minimal setup:
 
-## Deploy on Vercel
+- Realm: `fitfluence`
+- Client ID: `fitfluence-web-admin`
+- Access type: public client
+- Standard Flow enabled
+- Redirect URI includes: `http://localhost:3000/auth/callback`
+- Web origins include: `http://localhost:3000`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Generation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+By default generator reads OpenAPI schema from:
+
+`/Users/ravil/work/fitfluence/fitfluence/openapi/schemas/openapi.yaml`
+
+Override input path if needed:
+
+```bash
+OPENAPI_INPUT=/path/to/openapi.yaml npm run gen:api
+```
+
+## Design System
+
+- Tokens: `src/design/tokens.ts`
+- Theme variables: `src/styles/theme.css`
+- Tailwind mapping: `tailwind.config.ts`
+- UI wrappers: `src/shared/ui/*`
+
+No hardcoded palette values in feature components — use semantic tokens only.
+
+## Dev Panel
+
+Visible only in development mode (`NODE_ENV !== production`).
+
+Shows:
+
+- current user
+- roles
+- api base URL
+- quick logout button
+
+## Notes
+
+- Token storage for scaffold: in-memory + `sessionStorage` via `oidc-client-ts`
+- Generated files in `src/api/gen` must not be edited manually
