@@ -4,7 +4,7 @@ export default function InfluencerMediaPage() {
   return (
     <MediaPage
       role="INFLUENCER"
-      title="Мои медиа"
+      title="Медиафайлы"
       subtitle="Медиафайлы для упражнений и программ"
     />
   );
