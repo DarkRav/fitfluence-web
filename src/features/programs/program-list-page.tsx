@@ -12,6 +12,7 @@ import type {
   ProgramsPageResult,
   ProgramsScopeConfig,
 } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 import {
   AppButton,
   AppInput,
@@ -33,10 +34,10 @@ function isForbiddenMessage(message: string): boolean {
 }
 
 const statusFilterOptions = [
-  { value: "ALL", label: "All statuses" },
-  { value: "DRAFT", label: "DRAFT" },
-  { value: "PUBLISHED", label: "PUBLISHED" },
-  { value: "ARCHIVED", label: "ARCHIVED" },
+  { value: "ALL", label: ru.common.status.ALL },
+  { value: "DRAFT", label: ru.common.status.DRAFT },
+  { value: "PUBLISHED", label: ru.common.status.PUBLISHED },
+  { value: "ARCHIVED", label: ru.common.status.ARCHIVED },
 ] as const;
 
 export function ProgramListPage({ config }: ProgramListPageProps) {
@@ -93,8 +94,8 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
     pushToast({
       kind: "error",
       title: isForbiddenMessage(listQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить программы",
+        ? ru.common.states.notPermitted
+        : ru.programs.page.loadError,
       description: listQuery.error.message,
     });
   }, [listQuery.error, listQuery.isError, pushToast]);
@@ -115,18 +116,20 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
     onSuccess: async (program) => {
       pushToast({
         kind: "success",
-        title: "Программа создана",
-        description: "Метаданные программы успешно сохранены.",
+        title: ru.programs.page.createSuccessTitle,
+        description: ru.programs.page.createSuccessDescription,
       });
       setIsCreateOpen(false);
       await queryClient.invalidateQueries({ queryKey: config.queryKeyPrefix });
       router.push(config.routes.details(program.id));
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось создать программу";
+      const message = error instanceof Error ? error.message : ru.programs.page.createError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка создания",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.programs.page.createError,
         description: message,
       });
     },
@@ -160,7 +163,7 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
                     value: option.value,
                     label: option.label,
                   }))}
-                  placeholder="Status"
+                  placeholder={ru.common.labels.status}
                 />
               </div>
             ) : null}
@@ -178,11 +181,11 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
         }
       />
 
-      {listQuery.isLoading ? <LoadingState title="Загружаем программы..." /> : null}
+      {listQuery.isLoading ? <LoadingState title={ru.programs.page.loading} /> : null}
 
       {!listQuery.isLoading && listQuery.isError ? (
         <ErrorState
-          title="Не удалось загрузить программы"
+          title={ru.programs.page.loadError}
           description={listQuery.error.message}
           onRetry={() => void listQuery.refetch()}
         />
@@ -190,8 +193,10 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
 
       {!listQuery.isLoading && !listQuery.isError && (listQuery.data?.items.length ?? 0) === 0 ? (
         <EmptyState
-          title="Программы не найдены"
-          description={search ? "Смените поисковый запрос." : "Создайте первую программу."}
+          title={ru.programs.page.emptyTitle}
+          description={
+            search ? ru.programs.page.emptyDescriptionSearch : ru.programs.page.emptyDescription
+          }
         />
       ) : null}
 
@@ -204,8 +209,9 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
           />
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
-              Страница {listQuery.data.page + 1} / {Math.max(listQuery.data.totalPages, 1)} •{" "}
-              {listQuery.data.totalElements} элементов
+              {ru.common.labels.page} {listQuery.data.page + 1} /{" "}
+              {Math.max(listQuery.data.totalPages, 1)} • {listQuery.data.totalElements}{" "}
+              {ru.common.labels.elements}
             </p>
             <div className="flex items-center gap-2">
               <AppButton

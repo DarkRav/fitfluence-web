@@ -9,20 +9,21 @@ import type { AdminProgramStatus } from "@/api/adminPrograms";
 import { searchInfluencerOptions } from "@/api/influencers";
 import { type ProgramCreatePayload, type ProgramUpdatePayload } from "@/features/programs/types";
 import { MediaPicker } from "@/features/media";
+import { ru } from "@/localization/ru";
 import { AppButton, AppInput, AppSelect } from "@/shared/ui";
 
 const statusOptions = [
-  { value: "DRAFT", label: "Черновик" },
-  { value: "PUBLISHED", label: "Опубликована" },
-  { value: "ARCHIVED", label: "Архив" },
+  { value: "DRAFT", label: ru.common.status.DRAFT },
+  { value: "PUBLISHED", label: ru.common.status.PUBLISHED },
+  { value: "ARCHIVED", label: ru.common.status.ARCHIVED },
 ] as const;
 
 const programFormSchema = z.object({
   influencerId: z.string().trim().optional(),
-  title: z.string().trim().min(1, "Укажите название программы"),
+  title: z.string().trim().min(1, ru.programs.form.titleRequired),
   description: z.string().trim().optional(),
   goalsInput: z.string().trim().optional(),
-  coverMediaId: z.union([z.literal(""), z.string().uuid("Некорректный ID медиа")]),
+  coverMediaId: z.union([z.literal(""), z.string().uuid(ru.programs.form.invalidMediaId)]),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
 });
 
@@ -131,7 +132,7 @@ export function ProgramForm({
         const influencerId = values.influencerId?.trim();
         if (mode === "create" && requireInfluencerId && !influencerId) {
           form.setError("influencerId", {
-            message: "Укажите influencerId",
+            message: ru.programs.form.influencerRequired,
           });
           return;
         }
@@ -159,11 +160,13 @@ export function ProgramForm({
     >
       {mode === "create" && requireInfluencerId ? (
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Influencer</label>
+          <label className="text-sm font-medium text-foreground">
+            {ru.common.labels.influencer}
+          </label>
           <AppInput
             value={influencerSearch}
             onChange={(event) => setInfluencerSearch(event.target.value)}
-            placeholder="Поиск инфлюэнсера по имени"
+            placeholder={ru.common.placeholders.searchInfluencer}
             disabled={isSubmitting}
           />
           <Controller
@@ -179,8 +182,8 @@ export function ProgramForm({
                 }))}
                 placeholder={
                   influencerOptionsQuery.isLoading
-                    ? "Загружаем инфлюэнсеров..."
-                    : "Выберите инфлюэнсера"
+                    ? ru.common.placeholders.loadingInfluencers
+                    : ru.common.placeholders.selectInfluencer
                 }
               />
             )}
@@ -189,16 +192,16 @@ export function ProgramForm({
             <p className="text-xs text-destructive">{form.formState.errors.influencerId.message}</p>
           ) : null}
           {!influencerOptionsQuery.isLoading && (influencerOptionsQuery.data?.length ?? 0) === 0 ? (
-            <p className="text-xs text-muted-foreground">Инфлюэнсеры не найдены.</p>
+            <p className="text-xs text-muted-foreground">{ru.programs.form.noInfluencers}</p>
           ) : null}
         </div>
       ) : null}
 
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Название</label>
+        <label className="text-sm font-medium text-foreground">{ru.common.labels.title}</label>
         <AppInput
           {...form.register("title")}
-          placeholder="Например: Summer Shred"
+          placeholder={ru.common.placeholders.titleExampleProgram}
           disabled={isSubmitting}
         />
         {form.formState.errors.title ? (
@@ -207,27 +210,31 @@ export function ProgramForm({
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Описание</label>
+        <label className="text-sm font-medium text-foreground">
+          {ru.common.labels.description}
+        </label>
         <textarea
           {...form.register("description")}
-          placeholder="Кратко опишите идею программы"
+          placeholder={ru.common.placeholders.descriptionProgram}
           disabled={isSubmitting}
           className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
         />
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Goals (через запятую)</label>
+        <label className="text-sm font-medium text-foreground">
+          {ru.common.labels.goals} ({ru.programs.form.goalsHint})
+        </label>
         <AppInput
           {...form.register("goalsInput")}
-          placeholder="fat loss, mobility, endurance"
+          placeholder={ru.common.placeholders.goalsComma}
           disabled={isSubmitting}
         />
       </div>
 
       {mode === "edit" ? (
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Статус</label>
+          <label className="text-sm font-medium text-foreground">{ru.common.labels.status}</label>
           <Controller
             control={form.control}
             name="status"
@@ -239,7 +246,7 @@ export function ProgramForm({
                   value: option.value,
                   label: option.label,
                 }))}
-                placeholder="Выберите статус"
+                placeholder={ru.programs.form.statusSelect}
               />
             )}
           />
@@ -247,7 +254,7 @@ export function ProgramForm({
       ) : null}
 
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Cover Media</label>
+        <label className="text-sm font-medium text-foreground">{ru.common.labels.coverMedia}</label>
         <Controller
           control={form.control}
           name="coverMediaId"
@@ -262,7 +269,7 @@ export function ProgramForm({
                   onClick={() => field.onChange("")}
                   disabled={isSubmitting}
                 >
-                  Очистить cover
+                  {ru.common.actions.clearCover}
                 </AppButton>
               ) : null}
             </div>
@@ -276,11 +283,11 @@ export function ProgramForm({
       <div className="flex justify-end gap-2 pt-2">
         {onCancel ? (
           <AppButton type="button" variant="secondary" disabled={isSubmitting} onClick={onCancel}>
-            Отмена
+            {ru.common.actions.cancel}
           </AppButton>
         ) : null}
         <AppButton type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Сохраняем..." : submitLabel}
+          {isSubmitting ? ru.programs.form.saving : submitLabel}
         </AppButton>
       </div>
     </form>

@@ -12,6 +12,7 @@ import {
   type InfluencerProgramVersionsSearchParams,
 } from "@/api/influencerProgramVersions";
 import type { ProgramsScopeConfig } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 
 function isInfluencerVersionParams(
   params: Parameters<NonNullable<ProgramsScopeConfig["api"]["searchVersions"]>>[0],
@@ -21,10 +22,10 @@ function isInfluencerVersionParams(
 
 export const influencerProgramScope: ProgramsScopeConfig = {
   scope: "influencer",
-  title: "Programs",
-  subtitle: "Управляйте метаданными программ инфлюэнсера.",
-  searchPlaceholder: "Поиск по названию программы",
-  createButtonLabel: "Create Program",
+  title: ru.programs.title,
+  subtitle: ru.programs.scope.influencerSubtitle,
+  searchPlaceholder: ru.programs.scope.searchByTitle,
+  createButtonLabel: ru.programs.createProgram,
   queryKeyPrefix: ["programs", "influencer"],
   routes: {
     list: "/influencer/programs",
@@ -49,7 +50,7 @@ export const influencerProgramScope: ProgramsScopeConfig = {
           ok: false,
           error: {
             kind: "validation" as const,
-            message: "Для influencer versions требуется programId",
+            message: ru.programs.scope.versionProgramRequired,
           },
         };
       }

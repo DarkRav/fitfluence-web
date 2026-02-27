@@ -14,25 +14,26 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/features/auth/use-auth";
 import { cn } from "@/lib/utils";
+import { ru } from "@/localization/ru";
 
 const adminItems = [
-  { label: "Дашборд", href: "/admin", icon: BarChart3 },
-  { label: "Медиа", href: "/admin/media", icon: ImageIcon },
-  { label: "Мышцы", href: "/admin/muscles", icon: Target },
-  { label: "Оборудование", href: "/admin/equipment", icon: Wrench },
-  { label: "Упражнения", href: "/admin/exercises", icon: Dumbbell },
-  { label: "Программы", href: "/admin/programs", icon: ClipboardList },
-  { label: "Тренировки", href: "/admin/workouts", icon: ShieldCheck },
-  { label: "Прогрессия", href: "/admin/progression", icon: Repeat2 },
+  { label: ru.sidebar.admin.dashboard, href: "/admin", icon: BarChart3 },
+  { label: ru.sidebar.admin.media, href: "/admin/media", icon: ImageIcon },
+  { label: ru.sidebar.admin.muscles, href: "/admin/muscles", icon: Target },
+  { label: ru.sidebar.admin.equipment, href: "/admin/equipment", icon: Wrench },
+  { label: ru.sidebar.admin.exercises, href: "/admin/exercises", icon: Dumbbell },
+  { label: ru.sidebar.admin.programs, href: "/admin/programs", icon: ClipboardList },
+  { label: ru.sidebar.admin.workouts, href: "/admin/workouts", icon: ShieldCheck },
+  { label: ru.sidebar.admin.progression, href: "/admin/progression", icon: Repeat2 },
 ];
 
 const influencerItems = [
-  { label: "Dashboard", href: "/influencer", icon: BarChart3 },
-  { label: "Медиа", href: "/influencer/media", icon: ImageIcon },
-  { label: "Упражнения", href: "/influencer/exercises", icon: Dumbbell },
-  { label: "Programs", href: "/influencer/programs", icon: ClipboardList },
-  { label: "Workouts", href: "/influencer/workouts", icon: ShieldCheck },
-  { label: "Progression", href: "/influencer/progression", icon: Repeat2 },
+  { label: ru.sidebar.influencer.dashboard, href: "/influencer", icon: BarChart3 },
+  { label: ru.sidebar.influencer.media, href: "/influencer/media", icon: ImageIcon },
+  { label: ru.sidebar.influencer.exercises, href: "/influencer/exercises", icon: Dumbbell },
+  { label: ru.sidebar.influencer.programs, href: "/influencer/programs", icon: ClipboardList },
+  { label: ru.sidebar.influencer.workouts, href: "/influencer/workouts", icon: ShieldCheck },
+  { label: ru.sidebar.influencer.progression, href: "/influencer/progression", icon: Repeat2 },
 ];
 
 export function SidebarNav() {

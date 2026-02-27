@@ -11,16 +11,17 @@ import type {
   InfluencerProgramVersionRecord,
   UpdateInfluencerProgramVersionPayload,
 } from "@/api/influencerProgramVersions";
+import { ru } from "@/localization/ru";
 import { AppButton, AppInput } from "@/shared/ui";
 
 const createSchema = z.object({
-  versionNumber: z.number().int().min(1, "Version number должен быть больше 0"),
-  level: z.string().trim().max(120, "Максимум 120 символов").optional(),
+  versionNumber: z.number().int().min(1, ru.programs.form.versionNumberValidation),
+  level: z.string().trim().max(120, ru.workouts.max200Validation).optional(),
   frequencyPerWeek: z.number().int().min(1).max(14).optional(),
 });
 
 const editSchema = z.object({
-  level: z.string().trim().max(120, "Максимум 120 символов").optional(),
+  level: z.string().trim().max(120, ru.workouts.max200Validation).optional(),
   frequencyPerWeek: z.number().int().min(1).max(14).optional(),
 });
 
@@ -46,7 +47,10 @@ export function ProgramVersionFormDialog({
   onCreate,
   onUpdate,
 }: ProgramVersionFormDialogProps) {
-  const title = useMemo(() => (mode === "create" ? "Create version" : "Edit version"), [mode]);
+  const title = useMemo(
+    () => (mode === "create" ? ru.programs.versions.createVersion : ru.common.actions.edit),
+    [mode],
+  );
 
   const createForm = useForm<CreateValues>({
     resolver: zodResolver(createSchema),
@@ -86,7 +90,7 @@ export function ProgramVersionFormDialog({
             {title}
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-            Настройте метаданные версии программы.
+            {ru.programs.versions.dialogDescription}
           </Dialog.Description>
 
           {mode === "create" ? (
@@ -105,7 +109,9 @@ export function ProgramVersionFormDialog({
               })}
             >
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Version number</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.versionNumber}
+                </label>
                 <AppInput
                   type="number"
                   min={1}
@@ -121,12 +127,19 @@ export function ProgramVersionFormDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Level</label>
-                <AppInput {...createForm.register("level")} placeholder="Beginner / Intermediate" />
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.level}
+                </label>
+                <AppInput
+                  {...createForm.register("level")}
+                  placeholder={ru.common.placeholders.level}
+                />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Frequency per week</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.frequencyPerWeek}
+                </label>
                 <AppInput
                   type="number"
                   min={1}
@@ -149,10 +162,10 @@ export function ProgramVersionFormDialog({
                   disabled={isSubmitting}
                   onClick={() => onOpenChange(false)}
                 >
-                  Cancel
+                  {ru.common.actions.cancel}
                 </AppButton>
                 <AppButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Create"}
+                  {isSubmitting ? `${ru.common.actions.save}...` : ru.common.actions.create}
                 </AppButton>
               </div>
             </form>
@@ -174,17 +187,24 @@ export function ProgramVersionFormDialog({
               })}
             >
               <div className="rounded-xl border border-border bg-sidebar/40 p-4 text-sm text-muted-foreground">
-                Version number:{" "}
+                {ru.common.labels.versionNumber}:{" "}
                 <span className="font-semibold text-foreground">v{version?.versionNumber}</span>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Level</label>
-                <AppInput {...editForm.register("level")} placeholder="Beginner / Intermediate" />
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.level}
+                </label>
+                <AppInput
+                  {...editForm.register("level")}
+                  placeholder={ru.common.placeholders.level}
+                />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Frequency per week</label>
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.frequencyPerWeek}
+                </label>
                 <AppInput
                   type="number"
                   min={1}
@@ -207,10 +227,10 @@ export function ProgramVersionFormDialog({
                   disabled={isSubmitting}
                   onClick={() => onOpenChange(false)}
                 >
-                  Cancel
+                  {ru.common.actions.cancel}
                 </AppButton>
                 <AppButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save"}
+                  {isSubmitting ? `${ru.common.actions.save}...` : ru.common.actions.save}
                 </AppButton>
               </div>
             </form>

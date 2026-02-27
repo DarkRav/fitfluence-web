@@ -18,6 +18,7 @@ import {
   LoadingState,
   useAppToast,
 } from "@/shared/ui";
+import { ru } from "@/localization/ru";
 import type {
   ProgramVersionRecord,
   ProgramRecord,
@@ -32,10 +33,10 @@ type ProgramDetailsPageProps = {
 };
 
 const statusFilterOptions = [
-  { value: "ALL", label: "All statuses" },
-  { value: "DRAFT", label: "DRAFT" },
-  { value: "PUBLISHED", label: "PUBLISHED" },
-  { value: "ARCHIVED", label: "ARCHIVED" },
+  { value: "ALL", label: ru.common.status.ALL },
+  { value: "DRAFT", label: ru.common.status.DRAFT },
+  { value: "PUBLISHED", label: ru.common.status.PUBLISHED },
+  { value: "ARCHIVED", label: ru.common.status.ARCHIVED },
 ] as const;
 
 function isForbiddenMessage(message: string): boolean {
@@ -75,8 +76,8 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     pushToast({
       kind: "error",
       title: isForbiddenMessage(detailsQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить программу",
+        ? ru.common.states.notPermitted
+        : ru.programs.details.loadError,
       description: detailsQuery.error.message,
     });
   }, [detailsQuery.error, detailsQuery.isError, pushToast]);
@@ -84,7 +85,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
   const updateMutation = useMutation({
     mutationFn: async (payload: ProgramUpdatePayload) => {
       if (!config.api.update) {
-        throw new Error("Update operation is not supported");
+        throw new Error(ru.programs.details.updateNotSupported);
       }
 
       const result = await config.api.update(programId, payload);
@@ -97,8 +98,8 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     onSuccess: async () => {
       pushToast({
         kind: "success",
-        title: "Программа сохранена",
-        description: "Изменения метаданных успешно применены.",
+        title: ru.programs.details.saveSuccessTitle,
+        description: ru.programs.details.saveSuccessDescription,
       });
       await Promise.all([
         queryClient.invalidateQueries({
@@ -108,10 +109,12 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       ]);
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось сохранить изменения";
+      const message = error instanceof Error ? error.message : ru.programs.details.saveError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.programs.details.saveError,
         description: message,
       });
     },
@@ -138,7 +141,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     enabled: activeTab === "versions" && Boolean(config.api.searchVersions),
     queryFn: async () => {
       if (!config.api.searchVersions) {
-        throw new Error("Versions API is not available");
+        throw new Error(ru.programs.details.versionsApiUnavailable);
       }
 
       const result = await config.api.searchVersions({
@@ -165,8 +168,8 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     pushToast({
       kind: "error",
       title: isForbiddenMessage(versionsQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить версии",
+        ? ru.common.states.notPermitted
+        : ru.programs.versions.loadError,
       description: versionsQuery.error.message,
     });
   }, [pushToast, versionsQuery.error, versionsQuery.isError]);
@@ -174,7 +177,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
   const publishMutation = useMutation({
     mutationFn: async (programVersionId: string) => {
       if (!config.api.publishVersion) {
-        throw new Error("Publish operation is not supported");
+        throw new Error(ru.programs.details.publishNotSupported);
       }
 
       const result = await config.api.publishVersion(programVersionId);
@@ -188,8 +191,8 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       setPublishTarget(null);
       pushToast({
         kind: "success",
-        title: "Version published",
-        description: "Программа обновлена и версия опубликована.",
+        title: ru.programs.details.publishSuccessTitle,
+        description: ru.programs.details.publishSuccessDescription,
       });
       await Promise.all([
         queryClient.invalidateQueries({
@@ -202,23 +205,25 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       ]);
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось опубликовать версию";
+      const message = error instanceof Error ? error.message : ru.programs.details.publishError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка публикации",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.programs.details.publishError,
         description: message,
       });
     },
   });
 
   if (detailsQuery.isLoading) {
-    return <LoadingState title="Загружаем программу..." />;
+    return <LoadingState title={ru.programs.details.loading} />;
   }
 
   if (detailsQuery.isError) {
     return (
       <ErrorState
-        title="Не удалось загрузить программу"
+        title={ru.programs.details.loadError}
         description={detailsQuery.error.message}
         onRetry={() => void detailsQuery.refetch()}
       />
@@ -229,8 +234,8 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
   if (!program) {
     return (
       <ErrorState
-        title="Не удалось загрузить программу"
-        description="Пустой ответ от сервера."
+        title={ru.programs.details.loadError}
+        description={ru.programs.details.emptyServer}
         onRetry={() => void detailsQuery.refetch()}
       />
     );
@@ -254,7 +259,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                   )
                 }
               >
-                Version Workouts
+                {ru.programs.versions.table.openWorkouts}
               </AppButton>
             ) : null}
             <AppButton
@@ -262,7 +267,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
               variant="ghost"
               onClick={() => router.push(config.routes.list)}
             >
-              Back to Programs
+              {ru.common.labels.programs}
             </AppButton>
           </div>
         </div>
@@ -278,16 +283,18 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
               status: program.status,
             }}
             isSubmitting={updateMutation.isPending}
-            submitLabel="Save"
+            submitLabel={ru.common.actions.save}
             onSubmit={async (payload) => {
               await updateMutation.mutateAsync(payload);
             }}
           />
         ) : activeTab === "details" ? (
           <div className="rounded-xl border border-border bg-sidebar/40 p-6">
-            <p className="text-sm font-medium text-foreground">Program details</p>
+            <p className="text-sm font-medium text-foreground">
+              {ru.programs.details.readOnlyTitle}
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Редактирование недоступно для текущего scope.
+              {ru.programs.details.readOnlyDescription}
             </p>
           </div>
         ) : config.capabilities.showVersions && config.scope === "influencer" ? (
@@ -298,7 +305,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
               <AppInput
                 value={versionsSearch}
                 onChange={(event) => setVersionsSearch(event.target.value)}
-                placeholder="Search versions"
+                placeholder={ru.common.placeholders.searchVersions}
               />
               <div className="w-[190px]">
                 <AppSelect
@@ -311,16 +318,16 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                     value: option.value,
                     label: option.label,
                   }))}
-                  placeholder="Status"
+                  placeholder={ru.common.labels.status}
                 />
               </div>
             </div>
 
-            {versionsQuery.isLoading ? <LoadingState title="Загружаем версии..." /> : null}
+            {versionsQuery.isLoading ? <LoadingState title={ru.programs.versions.loading} /> : null}
 
             {!versionsQuery.isLoading && versionsQuery.isError ? (
               <ErrorState
-                title="Не удалось загрузить версии"
+                title={ru.programs.versions.loadError}
                 description={versionsQuery.error.message}
                 onRetry={() => void versionsQuery.refetch()}
               />
@@ -329,7 +336,10 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
             {!versionsQuery.isLoading &&
             !versionsQuery.isError &&
             (versionsQuery.data?.items.length ?? 0) === 0 ? (
-              <EmptyState title="Версии не найдены" description="Попробуйте изменить фильтры." />
+              <EmptyState
+                title={ru.programs.versions.emptyTitle}
+                description={ru.programs.versions.emptyDescription}
+              />
             ) : null}
 
             {!versionsQuery.isLoading && !versionsQuery.isError && versionsQuery.data ? (
@@ -353,9 +363,9 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                 />
                 <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
                   <p className="text-muted-foreground">
-                    Страница {versionsQuery.data.page + 1} /{" "}
+                    {ru.common.labels.page} {versionsQuery.data.page + 1} /{" "}
                     {Math.max(versionsQuery.data.totalPages, 1)} •{" "}
-                    {versionsQuery.data.totalElements} элементов
+                    {versionsQuery.data.totalElements} {ru.common.labels.elements}
                   </p>
                   <div className="flex items-center gap-2">
                     <AppButton
@@ -364,7 +374,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                       disabled={versionsPage === 0}
                       onClick={() => setVersionsPage((prev) => prev - 1)}
                     >
-                      Назад
+                      {ru.common.actions.back}
                     </AppButton>
                     <AppButton
                       type="button"
@@ -372,7 +382,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                       disabled={versionsPage + 1 >= (versionsQuery.data.totalPages ?? 0)}
                       onClick={() => setVersionsPage((prev) => prev + 1)}
                     >
-                      Вперед
+                      {ru.common.actions.forward}
                     </AppButton>
                   </div>
                 </div>
@@ -381,7 +391,9 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-sidebar/40 p-6">
-            <p className="text-sm font-medium text-foreground">Versions are not available</p>
+            <p className="text-sm font-medium text-foreground">
+              {ru.programs.details.versionsUnavailable}
+            </p>
           </div>
         )}
       </div>

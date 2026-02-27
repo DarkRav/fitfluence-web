@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { ru } from "@/localization/ru";
 
 export type ProgramTabId = "details" | "versions";
 
@@ -22,7 +23,7 @@ export function ProgramTabs({ activeTab, onChange }: ProgramTabsProps) {
         )}
         onClick={() => onChange("details")}
       >
-        Details
+        {ru.programs.tabs.details}
       </button>
       <button
         type="button"
@@ -34,7 +35,7 @@ export function ProgramTabs({ activeTab, onChange }: ProgramTabsProps) {
         )}
         onClick={() => onChange("versions")}
       >
-        Versions
+        {ru.programs.tabs.versions}
       </button>
     </div>
   );

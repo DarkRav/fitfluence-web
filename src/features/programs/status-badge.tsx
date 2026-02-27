@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { AdminProgramStatus } from "@/api/adminPrograms";
 import type { AdminProgramVersionStatus } from "@/api/adminProgramVersions";
+import { ru } from "@/localization/ru";
 
 type StatusBadgeProps = {
   status: AdminProgramStatus | AdminProgramVersionStatus;
@@ -8,15 +9,15 @@ type StatusBadgeProps = {
 
 function mapStatusLabel(status: StatusBadgeProps["status"]): string {
   if (status === "DRAFT") {
-    return "DRAFT";
+    return ru.common.status.DRAFT;
   }
 
   if (status === "PUBLISHED") {
-    return "PUBLISHED";
+    return ru.common.status.PUBLISHED;
   }
 
   if (status === "ARCHIVED") {
-    return "ARCHIVED";
+    return ru.common.status.ARCHIVED;
   }
 
   return status;

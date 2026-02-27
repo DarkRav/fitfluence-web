@@ -7,6 +7,7 @@ import {
 } from "@/api/adminPrograms";
 import { publishAdminProgramVersion, searchAdminProgramVersions } from "@/api/adminProgramVersions";
 import type { ProgramCreatePayload, ProgramsScopeConfig } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 
 function isAdminCreatePayload(payload: ProgramCreatePayload): payload is CreateAdminProgramPayload {
   return "influencerId" in payload && typeof payload.influencerId === "string";
@@ -14,10 +15,10 @@ function isAdminCreatePayload(payload: ProgramCreatePayload): payload is CreateA
 
 export const adminProgramScope: ProgramsScopeConfig = {
   scope: "admin",
-  title: "Programs",
-  subtitle: "Управление программами платформы.",
-  searchPlaceholder: "Поиск по названию программы",
-  createButtonLabel: "Create Program",
+  title: ru.programs.title,
+  subtitle: ru.programs.scope.adminSubtitle,
+  searchPlaceholder: ru.programs.scope.searchByTitle,
+  createButtonLabel: ru.programs.createProgram,
   queryKeyPrefix: ["programs", "admin"],
   routes: {
     list: "/admin/programs",
@@ -41,7 +42,7 @@ export const adminProgramScope: ProgramsScopeConfig = {
           ok: false,
           error: {
             kind: "validation" as const,
-            message: "Для создания программы администратором нужен influencerId",
+            message: ru.programs.scope.adminInfluencerRequired,
           },
         };
       }

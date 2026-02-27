@@ -3,6 +3,7 @@
 import { AppButton } from "@/shared/ui";
 import { StatusBadge } from "@/features/programs/status-badge";
 import type { ProgramVersionRecord } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 
 type ProgramVersionsTableProps = {
   items: ProgramVersionRecord[];
@@ -22,13 +23,13 @@ export function ProgramVersionsTable({
       <table className="w-full text-left text-sm">
         <thead className="bg-sidebar/60 text-muted-foreground">
           <tr>
-            <th className="px-4 py-3 font-medium">Version</th>
-            <th className="px-4 py-3 font-medium">Level</th>
-            <th className="px-4 py-3 font-medium">Frequency</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Published</th>
-            <th className="px-4 py-3 font-medium">Updated</th>
-            <th className="px-4 py-3 text-right font-medium">Actions</th>
+            <th className="px-4 py-3 font-medium">{ru.common.labels.version}</th>
+            <th className="px-4 py-3 font-medium">{ru.common.labels.level}</th>
+            <th className="px-4 py-3 font-medium">{ru.common.labels.frequency}</th>
+            <th className="px-4 py-3 font-medium">{ru.common.labels.status}</th>
+            <th className="px-4 py-3 font-medium">{ru.common.labels.published}</th>
+            <th className="px-4 py-3 font-medium">{ru.common.labels.updatedAt}</th>
+            <th className="px-4 py-3 text-right font-medium">{ru.common.labels.actions}</th>
           </tr>
         </thead>
         <tbody>
@@ -38,16 +39,22 @@ export function ProgramVersionsTable({
               className="border-t border-border/80 text-foreground transition-colors hover:bg-secondary/10"
             >
               <td className="px-4 py-3 font-medium">v{item.versionNumber}</td>
-              <td className="px-4 py-3 text-muted-foreground">{item.level ?? "—"}</td>
-              <td className="px-4 py-3 text-muted-foreground">{item.frequencyPerWeek ?? "—"}</td>
+              <td className="px-4 py-3 text-muted-foreground">
+                {item.level ?? ru.common.states.dash}
+              </td>
+              <td className="px-4 py-3 text-muted-foreground">
+                {item.frequencyPerWeek ?? ru.common.states.dash}
+              </td>
               <td className="px-4 py-3">
                 <StatusBadge status={item.status} />
               </td>
               <td className="px-4 py-3 text-xs text-muted-foreground">
-                {item.publishedAt ? new Date(item.publishedAt).toLocaleString() : "—"}
+                {item.publishedAt
+                  ? new Date(item.publishedAt).toLocaleString()
+                  : ru.common.states.dash}
               </td>
               <td className="px-4 py-3 text-xs text-muted-foreground">
-                {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "—"}
+                {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : ru.common.states.dash}
               </td>
               <td className="px-4 py-3">
                 <div className="flex justify-end gap-2">
@@ -58,7 +65,7 @@ export function ProgramVersionsTable({
                     disabled={!onEdit || item.status === "ARCHIVED"}
                     onClick={() => onEdit?.(item)}
                   >
-                    Edit
+                    {ru.common.actions.edit}
                   </AppButton>
                   <AppButton
                     type="button"
@@ -67,7 +74,7 @@ export function ProgramVersionsTable({
                     disabled={!onArchive || item.status === "ARCHIVED"}
                     onClick={() => onArchive?.(item)}
                   >
-                    Archive
+                    {ru.common.actions.archive}
                   </AppButton>
                   <AppButton
                     type="button"
@@ -76,7 +83,7 @@ export function ProgramVersionsTable({
                     disabled={!onOpenWorkouts}
                     onClick={() => onOpenWorkouts?.(item)}
                   >
-                    Workouts
+                    {ru.common.labels.workouts}
                   </AppButton>
                 </div>
               </td>

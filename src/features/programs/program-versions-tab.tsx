@@ -20,12 +20,13 @@ import type {
   ProgramVersionsPageResult,
   ProgramsScopeConfig,
 } from "@/features/programs/types";
+import { ru } from "@/localization/ru";
 
 const statusFilterOptions = [
-  { value: "ALL", label: "All statuses" },
-  { value: "DRAFT", label: "DRAFT" },
-  { value: "PUBLISHED", label: "PUBLISHED" },
-  { value: "ARCHIVED", label: "ARCHIVED" },
+  { value: "ALL", label: ru.common.status.ALL },
+  { value: "DRAFT", label: ru.common.status.DRAFT },
+  { value: "PUBLISHED", label: ru.common.status.PUBLISHED },
+  { value: "ARCHIVED", label: ru.common.status.ARCHIVED },
 ] as const;
 
 function isForbiddenMessage(message: string): boolean {
@@ -72,7 +73,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
     enabled: Boolean(config.api.searchVersions),
     queryFn: async () => {
       if (!config.api.searchVersions) {
-        throw new Error("Versions API is not available");
+        throw new Error(ru.programs.versions.apiUnavailable);
       }
 
       const result = await config.api.searchVersions({
@@ -99,8 +100,8 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
     pushToast({
       kind: "error",
       title: isForbiddenMessage(versionsQuery.error.message)
-        ? "Not permitted"
-        : "Не удалось загрузить версии",
+        ? ru.common.states.notPermitted
+        : ru.programs.versions.loadError,
       description: versionsQuery.error.message,
     });
   }, [pushToast, versionsQuery.error, versionsQuery.isError]);
@@ -112,7 +113,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
       frequencyPerWeek?: number;
     }) => {
       if (!config.api.createVersion) {
-        throw new Error("Create version operation is not supported");
+        throw new Error(ru.programs.details.createNotSupported);
       }
 
       const result = await config.api.createVersion(programId, payload);
@@ -126,18 +127,20 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
       setIsCreateDialogOpen(false);
       pushToast({
         kind: "success",
-        title: "Версия создана",
-        description: "Новая версия программы добавлена в статусе DRAFT.",
+        title: ru.programs.versions.createSuccess,
+        description: ru.common.status.DRAFT,
       });
       await queryClient.invalidateQueries({
         queryKey: ["influencerProgramVersions", programId],
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось создать версию";
+      const message = error instanceof Error ? error.message : ru.programs.versions.createError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка создания",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.programs.versions.createError,
         description: message,
       });
     },
@@ -150,7 +153,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
       frequencyPerWeek?: number;
     }) => {
       if (!config.api.updateVersion) {
-        throw new Error("Update version operation is not supported");
+        throw new Error(ru.programs.details.updateVersionNotSupported);
       }
 
       const result = await config.api.updateVersion(payload.programVersionId, {
@@ -167,18 +170,20 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
       setEditingVersion(null);
       pushToast({
         kind: "success",
-        title: "Версия обновлена",
-        description: "Изменения метаданных версии сохранены.",
+        title: ru.programs.versions.updateSuccess,
+        description: ru.programs.versions.updateSuccess,
       });
       await queryClient.invalidateQueries({
         queryKey: ["influencerProgramVersions", programId],
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось обновить версию";
+      const message = error instanceof Error ? error.message : ru.programs.versions.updateError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.programs.versions.updateError,
         description: message,
       });
     },
@@ -187,7 +192,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
   const archiveVersionMutation = useMutation({
     mutationFn: async (programVersionId: string) => {
       if (!config.api.deleteVersion) {
-        throw new Error("Archive version operation is not supported");
+        throw new Error(ru.programs.details.archiveNotSupported);
       }
 
       const result = await config.api.deleteVersion(programVersionId);
@@ -201,18 +206,20 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
       setArchivingVersion(null);
       pushToast({
         kind: "success",
-        title: "Версия архивирована",
-        description: "Версия переведена в статус ARCHIVED.",
+        title: ru.programs.versions.archiveSuccess,
+        description: ru.common.status.ARCHIVED,
       });
       await queryClient.invalidateQueries({
         queryKey: ["influencerProgramVersions", programId],
       });
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Не удалось архивировать версию";
+      const message = error instanceof Error ? error.message : ru.programs.versions.archiveError;
       pushToast({
         kind: "error",
-        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка архивации",
+        title: isForbiddenMessage(message)
+          ? ru.common.states.notPermitted
+          : ru.programs.versions.archiveError,
         description: message,
       });
     },
@@ -225,7 +232,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
           <AppInput
             value={versionsSearch}
             onChange={(event) => setVersionsSearch(event.target.value)}
-            placeholder="Search versions"
+            placeholder={ru.common.placeholders.searchVersions}
           />
           <div className="w-[190px]">
             <AppSelect
@@ -238,7 +245,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
                 value: option.value,
                 label: option.label,
               }))}
-              placeholder="Status"
+              placeholder={ru.common.labels.status}
             />
           </div>
         </div>
@@ -247,19 +254,19 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
           disabled={!config.api.createVersion}
           onClick={() => setIsCreateDialogOpen(true)}
         >
-          Create version
+          {ru.programs.versions.createVersion}
         </AppButton>
       </div>
 
       <div className="rounded-xl border border-secondary/35 bg-secondary/10 px-4 py-3 text-sm text-secondary">
-        Publishing is performed by Admin.
+        {ru.programs.publishByAdmin}
       </div>
 
-      {versionsQuery.isLoading ? <LoadingState title="Загружаем версии..." /> : null}
+      {versionsQuery.isLoading ? <LoadingState title={ru.programs.versions.loadError} /> : null}
 
       {!versionsQuery.isLoading && versionsQuery.isError ? (
         <ErrorState
-          title="Не удалось загрузить версии"
+          title={ru.programs.versions.loadError}
           description={versionsQuery.error.message}
           onRetry={() => void versionsQuery.refetch()}
         />
@@ -268,7 +275,10 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
       {!versionsQuery.isLoading &&
       !versionsQuery.isError &&
       (versionsQuery.data?.items.length ?? 0) === 0 ? (
-        <EmptyState title="Версии не найдены" description="Попробуйте изменить фильтры." />
+        <EmptyState
+          title={ru.programs.versions.emptyTitle}
+          description={ru.programs.versions.emptyDescription}
+        />
       ) : null}
 
       {!versionsQuery.isLoading && !versionsQuery.isError && versionsQuery.data ? (
@@ -283,8 +293,9 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
           />
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
-              Страница {versionsQuery.data.page + 1} / {Math.max(versionsQuery.data.totalPages, 1)}{" "}
-              • {versionsQuery.data.totalElements} элементов
+              {ru.common.labels.page} {versionsQuery.data.page + 1} /{" "}
+              {Math.max(versionsQuery.data.totalPages, 1)} • {versionsQuery.data.totalElements}{" "}
+              {ru.common.labels.elements}
             </p>
             <div className="flex items-center gap-2">
               <AppButton
@@ -293,7 +304,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
                 disabled={versionsPage === 0}
                 onClick={() => setVersionsPage((prev) => prev - 1)}
               >
-                Назад
+                {ru.common.actions.back}
               </AppButton>
               <AppButton
                 type="button"
@@ -301,7 +312,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
                 disabled={versionsPage + 1 >= (versionsQuery.data.totalPages ?? 0)}
                 onClick={() => setVersionsPage((prev) => prev + 1)}
               >
-                Вперед
+                {ru.common.actions.forward}
               </AppButton>
             </div>
           </div>
@@ -339,8 +350,8 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
 
       <ConfirmDeleteDialog
         open={Boolean(archivingVersion)}
-        title="Archive version"
-        description="Version will be moved to ARCHIVED status. This action cannot be undone from this screen."
+        title={ru.programs.versions.archiveConfirmTitle}
+        description={ru.programs.versions.archiveConfirmDescription}
         isSubmitting={archiveVersionMutation.isPending}
         onOpenChange={(open) => {
           if (!open) {
