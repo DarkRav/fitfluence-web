@@ -117,7 +117,6 @@ export const ru = {
     tabs: {
       info: "Информация",
       workouts: "Тренировки",
-      settings: "Настройки",
     },
     title: "Программы",
     createProgram: "Создать программу",
@@ -197,7 +196,6 @@ export const ru = {
       noVersionsTitle: "Версии программы отсутствуют",
       noVersionsDescription: "Создайте версию, чтобы перейти к настройке тренировок.",
     },
-    settingsPlaceholder: "Раздел будет доступен после завершения настройки прогрессии.",
   },
   workouts: {
     title: "Тренировки",

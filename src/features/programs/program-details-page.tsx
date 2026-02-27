@@ -32,7 +32,7 @@ function isForbiddenMessage(message: string): boolean {
 }
 
 function parseTab(value: string | null): ProgramTopTabId {
-  if (value === "workouts" || value === "settings" || value === "info") {
+  if (value === "workouts" || value === "info") {
     return value;
   }
 
@@ -408,11 +408,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
                 description={ru.programs.versionPicker.noVersionsDescription}
               />
             )
-          ) : (
-            <div className="rounded-xl border border-border bg-sidebar/40 p-6">
-              <p className="text-sm text-muted-foreground">{ru.programs.settingsPlaceholder}</p>
-            </div>
-          )
+          ) : null
         }
       />
 

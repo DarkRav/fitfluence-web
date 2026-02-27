@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { ru } from "@/localization/ru";
 
-export type ProgramTopTabId = "info" | "workouts" | "settings";
+export type ProgramTopTabId = "info" | "workouts";
 
 type ProgramTabsProps = {
   activeTab: ProgramTopTabId;
@@ -36,18 +36,6 @@ export function ProgramTabs({ activeTab, onChange }: ProgramTabsProps) {
         onClick={() => onChange("workouts")}
       >
         {ru.programs.tabs.workouts}
-      </button>
-      <button
-        type="button"
-        className={cn(
-          "h-10 rounded-lg px-4 text-sm font-semibold transition",
-          activeTab === "settings"
-            ? "bg-primary-gradient text-primary-foreground shadow-card"
-            : "text-muted-foreground hover:bg-secondary/10 hover:text-secondary",
-        )}
-        onClick={() => onChange("settings")}
-      >
-        {ru.programs.tabs.settings}
       </button>
     </div>
   );
