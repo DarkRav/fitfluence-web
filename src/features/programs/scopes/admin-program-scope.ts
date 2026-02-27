@@ -1,6 +1,16 @@
-import { getAdminProgram, searchAdminPrograms, updateAdminProgram } from "@/api/adminPrograms";
+import {
+  type CreateAdminProgramPayload,
+  createAdminProgram,
+  getAdminProgram,
+  searchAdminPrograms,
+  updateAdminProgram,
+} from "@/api/adminPrograms";
 import { publishAdminProgramVersion, searchAdminProgramVersions } from "@/api/adminProgramVersions";
-import type { ProgramsScopeConfig } from "@/features/programs/types";
+import type { ProgramCreatePayload, ProgramsScopeConfig } from "@/features/programs/types";
+
+function isAdminCreatePayload(payload: ProgramCreatePayload): payload is CreateAdminProgramPayload {
+  return "influencerId" in payload && typeof payload.influencerId === "string";
+}
 
 export const adminProgramScope: ProgramsScopeConfig = {
   scope: "admin",
@@ -14,7 +24,7 @@ export const adminProgramScope: ProgramsScopeConfig = {
     details: (programId) => `/admin/programs/${programId}`,
   },
   capabilities: {
-    canCreate: false,
+    canCreate: true,
     canEdit: true,
     showOwner: true,
     showVersions: true,
@@ -25,6 +35,19 @@ export const adminProgramScope: ProgramsScopeConfig = {
     search: searchAdminPrograms,
     get: getAdminProgram,
     update: updateAdminProgram,
+    create: async (payload) => {
+      if (!isAdminCreatePayload(payload)) {
+        return {
+          ok: false,
+          error: {
+            kind: "validation" as const,
+            message: "Для создания программы администратором нужен influencerId",
+          },
+        };
+      }
+
+      return createAdminProgram(payload);
+    },
     searchVersions: searchAdminProgramVersions,
     publishVersion: publishAdminProgramVersion,
   },

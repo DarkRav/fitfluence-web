@@ -233,6 +233,7 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
         <ProgramCreateDialog
           open={isCreateOpen}
           isSubmitting={createMutation.isPending}
+          requireInfluencerId={config.scope === "admin"}
           onOpenChange={setIsCreateOpen}
           onSubmit={async (payload) => {
             await createMutation.mutateAsync(payload);

@@ -3,6 +3,7 @@ import type {
   AdminProgramRecord,
   AdminProgramsPageResult,
   AdminProgramsSearchParams,
+  CreateAdminProgramPayload,
   UpdateAdminProgramPayload,
 } from "@/api/adminPrograms";
 import type {
@@ -27,7 +28,7 @@ export type ProgramVersionRecord = AdminProgramVersionRecord;
 export type ProgramVersionsPageResult = AdminProgramVersionsPageResult;
 
 export type ProgramSearchParams = InfluencerProgramsSearchParams | AdminProgramsSearchParams;
-export type ProgramCreatePayload = CreateInfluencerProgramPayload;
+export type ProgramCreatePayload = CreateInfluencerProgramPayload | CreateAdminProgramPayload;
 export type ProgramUpdatePayload = UpdateInfluencerProgramPayload | UpdateAdminProgramPayload;
 
 export type ProgramVersionSearchParams = AdminProgramVersionsSearchParams;

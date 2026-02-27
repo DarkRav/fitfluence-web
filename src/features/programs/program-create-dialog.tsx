@@ -8,6 +8,7 @@ import type { ProgramCreatePayload } from "@/features/programs/types";
 type ProgramCreateDialogProps = {
   open: boolean;
   isSubmitting: boolean;
+  requireInfluencerId?: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (payload: ProgramCreatePayload) => Promise<void>;
 };
@@ -15,6 +16,7 @@ type ProgramCreateDialogProps = {
 export function ProgramCreateDialog({
   open,
   isSubmitting,
+  requireInfluencerId = false,
   onOpenChange,
   onSubmit,
 }: ProgramCreateDialogProps) {
@@ -34,12 +36,14 @@ export function ProgramCreateDialog({
             <ProgramForm
               mode="create"
               initialValues={{
+                influencerId: "",
                 title: "",
                 description: "",
                 goals: [],
                 coverMediaId: "",
                 status: "DRAFT",
               }}
+              requireInfluencerId={requireInfluencerId}
               isSubmitting={isSubmitting}
               submitLabel="Create Program"
               onSubmit={onSubmit}

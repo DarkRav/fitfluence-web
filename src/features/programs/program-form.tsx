@@ -16,6 +16,7 @@ const statusOptions = [
 ] as const;
 
 const programFormSchema = z.object({
+  influencerId: z.string().trim().optional(),
   title: z.string().trim().min(1, "Укажите название программы"),
   description: z.string().trim().optional(),
   goalsInput: z.string().trim().optional(),
@@ -26,6 +27,7 @@ const programFormSchema = z.object({
 type ProgramFormValues = z.infer<typeof programFormSchema>;
 
 export type ProgramFormInitialValues = {
+  influencerId?: string;
   title: string;
   description: string;
   goals: string[];
@@ -38,6 +40,7 @@ type ProgramFormProps = {
   isSubmitting: boolean;
   submitLabel: string;
   onCancel?: () => void;
+  requireInfluencerId?: boolean;
 } & (
   | {
       mode: "create";
@@ -51,6 +54,7 @@ type ProgramFormProps = {
 
 function buildDefaultValues(initialValues: ProgramFormInitialValues): ProgramFormValues {
   return {
+    influencerId: initialValues.influencerId ?? "",
     title: initialValues.title,
     description: initialValues.description,
     goalsInput: initialValues.goals.join(", "),
@@ -79,6 +83,7 @@ export function ProgramForm({
   submitLabel,
   onSubmit,
   onCancel,
+  requireInfluencerId = false,
 }: ProgramFormProps) {
   const form = useForm<ProgramFormValues>({
     resolver: zodResolver(programFormSchema),
@@ -93,6 +98,14 @@ export function ProgramForm({
     <form
       className="space-y-4"
       onSubmit={form.handleSubmit(async (values) => {
+        const influencerId = values.influencerId?.trim();
+        if (mode === "create" && requireInfluencerId && !influencerId) {
+          form.setError("influencerId", {
+            message: "Укажите influencerId",
+          });
+          return;
+        }
+
         const basePayload = {
           title: values.title.trim(),
           description: values.description?.trim() || undefined,
@@ -108,9 +121,26 @@ export function ProgramForm({
           return;
         }
 
-        await onSubmit(basePayload);
+        await onSubmit({
+          ...basePayload,
+          ...(requireInfluencerId ? { influencerId } : {}),
+        });
       })}
     >
+      {mode === "create" && requireInfluencerId ? (
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">Influencer ID</label>
+          <AppInput
+            {...form.register("influencerId")}
+            placeholder="UUID инфлюэнсера"
+            disabled={isSubmitting}
+          />
+          {form.formState.errors.influencerId ? (
+            <p className="text-xs text-destructive">{form.formState.errors.influencerId.message}</p>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-foreground">Название</label>
         <AppInput
