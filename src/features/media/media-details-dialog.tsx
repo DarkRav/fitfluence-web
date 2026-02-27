@@ -2,9 +2,9 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getMediaById, type MediaRecord, type MediaRole } from "@/api/media";
-import { ErrorState, LoadingState } from "@/shared/ui";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { deleteMediaById, getMediaById, type MediaRecord, type MediaRole } from "@/api/media";
+import { AppButton, ErrorState, LoadingState, useAppToast } from "@/shared/ui";
 
 type MediaDetailsDialogProps = {
   role: MediaRole;
@@ -42,6 +42,9 @@ export function MediaDetailsDialog({
   open,
   onOpenChange,
 }: MediaDetailsDialogProps) {
+  const queryClient = useQueryClient();
+  const { pushToast } = useAppToast();
+
   const detailsQuery = useQuery<MediaRecord, Error>({
     queryKey: ["media", "details", role, mediaId],
     enabled: open && role === "ADMIN" && !!mediaId,
@@ -60,6 +63,30 @@ export function MediaDetailsDialog({
   });
 
   const media = role === "INFLUENCER" ? fallbackMedia : detailsQuery.data;
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const result = await deleteMediaById(id, role);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+    },
+    onSuccess: async () => {
+      pushToast({
+        kind: "success",
+        title: "Медиа удалено",
+        description: "Файл успешно удален.",
+      });
+      onOpenChange(false);
+      await queryClient.invalidateQueries({ queryKey: ["media", role] });
+    },
+    onError: (error) => {
+      pushToast({
+        kind: "error",
+        title: "Не удалось удалить медиа",
+        description: error instanceof Error ? error.message : "Повторите попытку позже",
+      });
+    },
+  });
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -128,11 +155,35 @@ export function MediaDetailsDialog({
                     <dd className="mt-1 break-all text-foreground">{media.url}</dd>
                   </div>
                 </dl>
+                <div className="flex justify-end">
+                  <AppButton
+                    type="button"
+                    variant="destructive"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => {
+                      if (!mediaId) {
+                        return;
+                      }
+                      const confirmed = window.confirm(
+                        "Удалить это медиа? Действие нельзя отменить.",
+                      );
+                      if (!confirmed) {
+                        return;
+                      }
+                      deleteMutation.mutate(mediaId);
+                    }}
+                  >
+                    {deleteMutation.isPending ? "Удаляем..." : "Удалить медиа"}
+                  </AppButton>
+                </div>
               </div>
             ) : null}
           </div>
 
-          <Dialog.Close className="absolute right-3 top-3 rounded-sm p-1 text-muted-foreground transition hover:bg-card">
+          <Dialog.Close
+            disabled={deleteMutation.isPending}
+            className="absolute right-3 top-3 rounded-sm p-1 text-muted-foreground transition hover:bg-card disabled:opacity-50"
+          >
             <X className="h-4 w-4" />
           </Dialog.Close>
         </Dialog.Content>

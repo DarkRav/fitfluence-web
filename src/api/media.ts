@@ -256,3 +256,19 @@ export async function getMediaById(
     data: mapMedia(result.data),
   };
 }
+
+export async function deleteMediaById(id: string, role: MediaRole): Promise<ApiResult<void>> {
+  const result =
+    role === "ADMIN"
+      ? await toApiResult(MediaService.mediaMediaIdDelete({ mediaId: id }))
+      : await toApiResult(InfluencerCabinetService.influencerMediaMediaIdDelete({ mediaId: id }));
+
+  if (!result.ok) {
+    return result;
+  }
+
+  return {
+    ok: true,
+    data: undefined,
+  };
+}
