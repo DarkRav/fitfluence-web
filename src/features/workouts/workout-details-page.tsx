@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { type WorkoutExerciseRecord, type WorkoutsScopeConfig } from "@/features/workouts/types";
+import { adminWorkoutScope } from "@/features/workouts/scopes/adminWorkoutScope";
+import { influencerWorkoutScope } from "@/features/workouts/scopes/influencerWorkoutScope";
+import {
+  type WorkoutExerciseRecord,
+  type WorkoutsScope,
+  type WorkoutsScopeConfig,
+} from "@/features/workouts/types";
 import { AddExerciseDialog } from "@/features/workouts/add-exercise-dialog";
 import { ReorderableExercisesList } from "@/features/workouts/reorderable-exercises-list";
 import { WorkoutExerciseEditor } from "@/features/workouts/workout-exercise-editor";
@@ -14,7 +20,7 @@ type WorkoutDetailsPageProps = {
   programId: string;
   programVersionId: string;
   workoutTemplateId: string;
-  scope: WorkoutsScopeConfig;
+  scopeName: WorkoutsScope;
 };
 
 function isForbiddenMessage(message: string): boolean {
@@ -26,8 +32,10 @@ export function WorkoutDetailsPage({
   programId,
   programVersionId,
   workoutTemplateId,
-  scope,
+  scopeName,
 }: WorkoutDetailsPageProps) {
+  const scope: WorkoutsScopeConfig =
+    scopeName === "admin" ? adminWorkoutScope : influencerWorkoutScope;
   const router = useRouter();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();

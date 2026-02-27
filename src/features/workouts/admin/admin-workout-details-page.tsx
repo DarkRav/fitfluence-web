@@ -1,7 +1,6 @@
 "use client";
 
 import { WorkoutDetailsPage } from "@/features/workouts/workout-details-page";
-import { adminWorkoutScope } from "@/features/workouts/scopes/adminWorkoutScope";
 
 type AdminWorkoutDetailsPageProps = {
   programId: string;
@@ -19,7 +18,7 @@ export function AdminWorkoutDetailsPage({
       programId={programId}
       programVersionId={programVersionId}
       workoutTemplateId={workoutTemplateId}
-      scope={adminWorkoutScope}
+      scopeName="admin"
     />
   );
 }

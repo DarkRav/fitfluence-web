@@ -7,8 +7,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { REFERENCE_LIST_PAGE_SIZE, REFERENCE_LIST_STALE_TIME_MS } from "@/config/query";
 import { ConfirmDeleteDialog } from "@/features/reference/confirm-delete-dialog";
+import { adminWorkoutScope } from "@/features/workouts/scopes/adminWorkoutScope";
+import { influencerWorkoutScope } from "@/features/workouts/scopes/influencerWorkoutScope";
 import { WorkoutFormDialog } from "@/features/workouts/workout-form-dialog";
-import type { WorkoutTemplateRecord, WorkoutsScopeConfig } from "@/features/workouts/types";
+import type {
+  WorkoutTemplateRecord,
+  WorkoutsScope,
+  WorkoutsScopeConfig,
+} from "@/features/workouts/types";
 import {
   AppButton,
   AppInput,
@@ -22,7 +28,7 @@ import {
 type WorkoutsListPageProps = {
   programId: string;
   programVersionId: string;
-  scope: WorkoutsScopeConfig;
+  scopeName: WorkoutsScope;
 };
 
 function isForbiddenMessage(message: string): boolean {
@@ -30,7 +36,16 @@ function isForbiddenMessage(message: string): boolean {
   return normalized.includes("forbidden") || normalized.includes("недостаточно прав");
 }
 
-export function WorkoutsListPage({ programId, programVersionId, scope }: WorkoutsListPageProps) {
+function resolveScope(scopeName: WorkoutsScope): WorkoutsScopeConfig {
+  return scopeName === "admin" ? adminWorkoutScope : influencerWorkoutScope;
+}
+
+export function WorkoutsListPage({
+  programId,
+  programVersionId,
+  scopeName,
+}: WorkoutsListPageProps) {
+  const scope = resolveScope(scopeName);
   const router = useRouter();
   const queryClient = useQueryClient();
   const { pushToast } = useAppToast();

@@ -1,5 +1,4 @@
 import { WorkoutsListPage } from "@/features/workouts";
-import { influencerWorkoutScope } from "@/features/workouts/scopes/influencerWorkoutScope";
 
 type InfluencerProgramVersionWorkoutsRoutePageProps = {
   params: Promise<{
@@ -17,7 +16,7 @@ export default async function InfluencerProgramVersionWorkoutsRoutePage({
     <WorkoutsListPage
       programId={programId}
       programVersionId={programVersionId}
-      scope={influencerWorkoutScope}
+      scopeName="influencer"
     />
   );
 }
