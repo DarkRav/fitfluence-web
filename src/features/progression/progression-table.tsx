@@ -3,6 +3,7 @@
 import { AppButton } from "@/shared/ui";
 import type { ProgressionRecord } from "@/features/progression/types";
 import { ProgressionStatusBadge } from "@/features/progression/status-badge";
+import { ru } from "@/localization/ru";
 
 type ProgressionTableProps = {
   items: ProgressionRecord[];
@@ -74,7 +75,9 @@ export function ProgressionTable({
                     className="h-9 px-3 text-xs"
                     onClick={() => onOpen(item)}
                   >
-                    {canEdit ? "Open/Edit" : "Open"}
+                    {canEdit
+                      ? `${ru.common.actions.open} / ${ru.common.actions.edit}`
+                      : ru.common.actions.open}
                   </AppButton>
                   {canDelete ? (
                     <AppButton
@@ -83,7 +86,7 @@ export function ProgressionTable({
                       className="h-9 px-3 text-xs"
                       onClick={() => onDelete(item)}
                     >
-                      Archive
+                      {ru.common.actions.archive}
                     </AppButton>
                   ) : null}
                 </div>
