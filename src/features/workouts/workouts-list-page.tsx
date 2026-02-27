@@ -48,7 +48,7 @@ export function WorkoutsListPage({
   programVersionId,
   scopeName,
   embedded = false,
-  canManage = scopeName === "influencer",
+  canManage = true,
 }: WorkoutsListPageProps) {
   const scope = resolveScope(scopeName);
   const router = useRouter();
