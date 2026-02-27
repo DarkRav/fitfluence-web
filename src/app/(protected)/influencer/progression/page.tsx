@@ -1,13 +1,5 @@
-import { EmptyState, PageHeader } from "@/shared/ui";
+import { InfluencerProgressionPage } from "@/features/progression";
 
-export default function InfluencerProgressionPage() {
-  return (
-    <div>
-      <PageHeader title="Progression" subtitle="Секция настройки прогрессии по неделям и блокам." />
-      <EmptyState
-        title="Раздел в разработке"
-        description="Здесь появится управление прогрессией программ."
-      />
-    </div>
-  );
+export default function InfluencerProgressionRoutePage() {
+  return <InfluencerProgressionPage />;
 }
