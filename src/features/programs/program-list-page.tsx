@@ -27,6 +27,11 @@ type ProgramListPageProps = {
   config: ProgramsScopeConfig;
 };
 
+function isForbiddenMessage(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return normalized.includes("forbidden") || normalized.includes("недостаточно прав");
+}
+
 const statusFilterOptions = [
   { value: "ALL", label: "All statuses" },
   { value: "DRAFT", label: "DRAFT" },
@@ -87,7 +92,9 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
 
     pushToast({
       kind: "error",
-      title: "Не удалось загрузить программы",
+      title: isForbiddenMessage(listQuery.error.message)
+        ? "Not permitted"
+        : "Не удалось загрузить программы",
       description: listQuery.error.message,
     });
   }, [listQuery.error, listQuery.isError, pushToast]);
@@ -119,7 +126,7 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
       const message = error instanceof Error ? error.message : "Не удалось создать программу";
       pushToast({
         kind: "error",
-        title: "Ошибка создания",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка создания",
         description: message,
       });
     },

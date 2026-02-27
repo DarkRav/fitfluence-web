@@ -37,6 +37,11 @@ const statusFilterOptions = [
   { value: "ARCHIVED", label: "ARCHIVED" },
 ] as const;
 
+function isForbiddenMessage(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return normalized.includes("forbidden") || normalized.includes("недостаточно прав");
+}
+
 export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -60,6 +65,20 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       return result.data;
     },
   });
+
+  useEffect(() => {
+    if (!detailsQuery.isError) {
+      return;
+    }
+
+    pushToast({
+      kind: "error",
+      title: isForbiddenMessage(detailsQuery.error.message)
+        ? "Not permitted"
+        : "Не удалось загрузить программу",
+      description: detailsQuery.error.message,
+    });
+  }, [detailsQuery.error, detailsQuery.isError, pushToast]);
 
   const updateMutation = useMutation({
     mutationFn: async (payload: ProgramUpdatePayload) => {
@@ -91,7 +110,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       const message = error instanceof Error ? error.message : "Не удалось сохранить изменения";
       pushToast({
         kind: "error",
-        title: "Ошибка сохранения",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
         description: message,
       });
     },
@@ -144,7 +163,9 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
 
     pushToast({
       kind: "error",
-      title: "Не удалось загрузить версии",
+      title: isForbiddenMessage(versionsQuery.error.message)
+        ? "Not permitted"
+        : "Не удалось загрузить версии",
       description: versionsQuery.error.message,
     });
   }, [pushToast, versionsQuery.error, versionsQuery.isError]);
@@ -183,7 +204,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       const message = error instanceof Error ? error.message : "Не удалось опубликовать версию";
       pushToast({
         kind: "error",
-        title: message.toLowerCase().includes("forbidden") ? "Not permitted" : "Ошибка публикации",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка публикации",
         description: message,
       });
     },

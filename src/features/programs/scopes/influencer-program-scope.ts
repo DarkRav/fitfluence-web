@@ -21,7 +21,7 @@ export const influencerProgramScope: ProgramsScopeConfig = {
     canCreate: true,
     canEdit: true,
     showOwner: false,
-    showVersions: true,
+    showVersions: false,
     canPublish: false,
     enableStatusFilter: false,
   },
