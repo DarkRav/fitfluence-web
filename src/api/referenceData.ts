@@ -3,7 +3,7 @@ import { EquipmentService, MusclesService, type Equipment, type Muscle } from "@
 
 configureOpenApiClient();
 
-const MAX_REFERENCE_ITEMS = 200;
+const MAX_REFERENCE_ITEMS = 100;
 
 export type ReferenceOption = {
   id: string;
