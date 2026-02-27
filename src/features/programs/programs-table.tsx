@@ -14,11 +14,11 @@ type ProgramsTableProps = {
 function resolveOwner(item: ProgramRecord): string {
   if ("influencerId" in item && item.influencerId) {
     return item.influencerDisplayName
-      ? `INFLUENCER · ${item.influencerDisplayName}`
-      : `INFLUENCER · ${item.influencerId}`;
+      ? `Инфлюэнсер · ${item.influencerDisplayName}`
+      : `Инфлюэнсер · ${item.influencerId}`;
   }
 
-  return "OWNER N/A";
+  return "Владелец не указан";
 }
 
 export function ProgramsTable({ items, showOwner = false, onOpen }: ProgramsTableProps) {
@@ -29,7 +29,7 @@ export function ProgramsTable({ items, showOwner = false, onOpen }: ProgramsTabl
           <tr>
             <th className="px-4 py-3 font-medium">Обложка</th>
             <th className="px-4 py-3 font-medium">Название</th>
-            {showOwner ? <th className="px-4 py-3 font-medium">Owner</th> : null}
+            {showOwner ? <th className="px-4 py-3 font-medium">Владелец</th> : null}
             <th className="px-4 py-3 font-medium">Версия</th>
             <th className="px-4 py-3 font-medium">Статус</th>
             <th className="px-4 py-3 font-medium">Обновлено</th>
@@ -54,7 +54,7 @@ export function ProgramsTable({ items, showOwner = false, onOpen }: ProgramsTabl
                   />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-md border border-dashed border-border text-[10px] text-muted-foreground">
-                    no cover
+                    нет
                   </div>
                 )}
               </td>
