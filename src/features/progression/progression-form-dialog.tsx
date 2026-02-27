@@ -41,25 +41,6 @@ const formSchema = z
     status: z.enum(["ACTIVE", "ARCHIVED"]).optional(),
     ownerType: z.enum(["ADMIN", "INFLUENCER"]).optional(),
     ownerId: z.string().trim().optional(),
-    paramsJson: z
-      .string()
-      .trim()
-      .optional()
-      .refine(
-        (value) => {
-          if (!value) {
-            return true;
-          }
-
-          try {
-            const parsed = JSON.parse(value) as unknown;
-            return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed);
-          } catch {
-            return false;
-          }
-        },
-        { message: "params должен быть JSON-объектом" },
-      ),
   })
   .refine(
     (value) => {
@@ -87,27 +68,6 @@ type ProgressionFormDialogProps = {
   onSubmitUpdate: (id: string, payload: UpdateAdminProgressionPolicyPayload) => Promise<void>;
 };
 
-function toPrettyJson(value: Record<string, unknown> | undefined): string {
-  if (!value || Object.keys(value).length === 0) {
-    return "{}";
-  }
-
-  return JSON.stringify(value, null, 2);
-}
-
-function parseParamsJson(paramsJson?: string): Record<string, unknown> | undefined {
-  if (!paramsJson || paramsJson.trim() === "") {
-    return undefined;
-  }
-
-  const parsed = JSON.parse(paramsJson) as unknown;
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    return undefined;
-  }
-
-  return parsed as Record<string, unknown>;
-}
-
 function buildDefaults(
   item: ProgressionRecord | undefined,
   mode: ProgressionFormDialogProps["mode"],
@@ -121,7 +81,6 @@ function buildDefaults(
       status: "ACTIVE",
       ownerType: "ADMIN",
       ownerId: "",
-      paramsJson: "{}",
     };
   }
 
@@ -133,7 +92,6 @@ function buildDefaults(
     status: item.status,
     ownerType: mode === "create" ? item.ownerType : undefined,
     ownerId: mode === "create" ? (item.ownerId ?? "") : "",
-    paramsJson: toPrettyJson(item.params),
   };
 }
 
@@ -193,7 +151,6 @@ export function ProgressionFormDialog({
                   name: values.name.trim(),
                   description: values.description?.trim() || undefined,
                   type: values.type,
-                  params: parseParamsJson(values.paramsJson),
                   status: values.status,
                   ownerType: values.ownerType,
                   ownerId: values.ownerId?.trim() || undefined,
@@ -210,7 +167,6 @@ export function ProgressionFormDialog({
                 name: values.name.trim(),
                 description: values.description?.trim() || undefined,
                 type: values.type,
-                params: parseParamsJson(values.paramsJson),
                 status: values.status,
               });
             })}
@@ -312,37 +268,6 @@ export function ProgressionFormDialog({
                 </div>
               </div>
             ) : null}
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Params (JSON object)</label>
-              <textarea
-                {...form.register("paramsJson")}
-                disabled={isReadOnly || isSubmitting}
-                className="min-h-44 w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
-                onBlur={(event) => {
-                  const value = event.target.value.trim();
-                  if (!value) {
-                    return;
-                  }
-
-                  try {
-                    const parsed = JSON.parse(value) as unknown;
-                    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-                      form.setValue("paramsJson", JSON.stringify(parsed, null, 2), {
-                        shouldValidate: true,
-                      });
-                    }
-                  } catch {
-                    // keep raw value, validation message already covers parse errors
-                  }
-                }}
-              />
-              {form.formState.errors.paramsJson ? (
-                <p className="text-xs text-destructive">
-                  {form.formState.errors.paramsJson.message}
-                </p>
-              ) : null}
-            </div>
 
             <div className="flex justify-end gap-2">
               <AppButton
