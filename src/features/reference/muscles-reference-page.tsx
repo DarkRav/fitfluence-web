@@ -18,6 +18,8 @@ type MuscleFormValues = {
   description: string;
 };
 
+const NO_MUSCLE_GROUP_VALUE = "__NONE__";
+
 const MUSCLE_GROUP_OPTIONS: Array<{ value: MuscleGroupValue; label: string }> = [
   { value: "BACK", label: "Спина" },
   { value: "CHEST", label: "Грудь" },
@@ -28,7 +30,7 @@ const MUSCLE_GROUP_OPTIONS: Array<{ value: MuscleGroupValue; label: string }> = 
 ];
 
 const muscleGroupSchema = z.union([
-  z.literal(""),
+  z.literal(NO_MUSCLE_GROUP_VALUE),
   z.enum(["BACK", "CHEST", "LEGS", "SHOULDERS", "ARMS", "ABS"]),
 ]);
 
@@ -111,7 +113,7 @@ const musclesConfig: ReferenceCrudConfig<MuscleRecord, MuscleFormValues> = {
       label: "Группа",
       placeholder: "Выберите группу",
       options: [
-        { value: "", label: "Не выбрано" },
+        { value: NO_MUSCLE_GROUP_VALUE, label: "Не выбрано" },
         ...MUSCLE_GROUP_OPTIONS.map((option) => ({
           value: option.value,
           label: option.label,
@@ -128,13 +130,13 @@ const musclesConfig: ReferenceCrudConfig<MuscleRecord, MuscleFormValues> = {
   createDefaultValues: () => ({
     code: "",
     name: "",
-    muscleGroup: "",
+    muscleGroup: NO_MUSCLE_GROUP_VALUE,
     description: "",
   }),
   mapItemToValues: (item) => ({
     code: item.code,
     name: item.name,
-    muscleGroup: item.muscleGroup ?? "",
+    muscleGroup: item.muscleGroup ?? NO_MUSCLE_GROUP_VALUE,
     description: item.description ?? "",
   }),
   search: ({ page, size, search }) => searchMuscles({ page, size, search }),

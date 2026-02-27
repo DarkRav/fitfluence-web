@@ -55,6 +55,9 @@ export function ReferenceFormDialog<TValues extends Record<string, string>>({
           <Dialog.Title className="text-lg font-semibold text-card-foreground">
             {title}
           </Dialog.Title>
+          <Dialog.Description className="mt-1 text-sm text-muted-foreground">
+            Заполните поля формы и нажмите «Сохранить».
+          </Dialog.Description>
 
           <form
             className="mt-4 space-y-4"
