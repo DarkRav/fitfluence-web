@@ -32,7 +32,7 @@ function MediaPreview({ media }: { media: MediaRecord }) {
     <img
       className="h-20 w-28 rounded-md border border-border/80 object-cover"
       src={media.url}
-      alt={`Selected media ${media.id}`}
+      alt={`Выбранное медиа ${media.id}`}
       loading="lazy"
     />
   );
@@ -73,7 +73,7 @@ export function MediaPicker({ value, onChange }: MediaPickerProps) {
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <AppButton type="button" variant="secondary" onClick={() => setOpen(true)}>
-          Choose media
+          Выбрать медиа
         </AppButton>
         {value ? <span className="font-mono text-xs text-muted-foreground">{value}</span> : null}
       </div>

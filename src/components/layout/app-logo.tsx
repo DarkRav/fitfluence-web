@@ -8,7 +8,7 @@ export function AppLogo() {
       </div>
       <div>
         <p className="text-sm font-semibold text-sidebar-foreground">Fitfluence</p>
-        <p className="text-[11px] text-muted-foreground">web-admin</p>
+        <p className="text-[11px] text-muted-foreground">админ-панель</p>
       </div>
     </div>
   );

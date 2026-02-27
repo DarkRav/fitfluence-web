@@ -181,14 +181,14 @@ export async function uploadMedia(
     request.onerror = () => {
       resolve({
         ok: false,
-        error: normalizeApiError(new Error("Network request failed")),
+        error: normalizeApiError(new Error("Сетевая ошибка при загрузке файла")),
       });
     };
 
     request.onload = () => {
       const isSuccess = request.status >= 200 && request.status < 300;
       if (!isSuccess) {
-        const message = request.statusText || "Upload failed";
+        const message = request.statusText || "Ошибка загрузки";
         resolve({
           ok: false,
           error: normalizeApiError(new Error(message)),
@@ -224,7 +224,7 @@ export async function getMediaById(
       ok: false,
       error: {
         kind: "not_found",
-        message: "Get media by id endpoint is not available for influencer role",
+        message: "Эндпоинт получения медиа по ID недоступен для роли INFLUENCER",
       },
     };
   }

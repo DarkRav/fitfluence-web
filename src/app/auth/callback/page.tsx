@@ -37,7 +37,7 @@ export default function AuthCallbackPage() {
 
   return (
     <main className="mx-auto max-w-2xl p-8">
-      <PageHeader title="Auth callback" subtitle="Завершаем OIDC авторизацию." />
+      <PageHeader title="Завершение входа" subtitle="Завершаем OIDC-авторизацию." />
       <LoadingState title="Проверяем токены и роли..." />
     </main>
   );

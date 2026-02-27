@@ -30,7 +30,7 @@ function MediaPreview({ media }: { media: MediaRecord }) {
     <img
       className="h-56 w-full rounded-lg border border-border/80 object-cover"
       src={media.url}
-      alt={`Media ${media.id}`}
+      alt={`Медиа ${media.id}`}
     />
   );
 }
@@ -47,7 +47,7 @@ export function MediaDetailsDialog({
     enabled: open && role === "ADMIN" && !!mediaId,
     queryFn: async () => {
       if (!mediaId) {
-        throw new Error("Media id is required");
+        throw new Error("Не указан идентификатор медиа");
       }
 
       const result = await getMediaById(mediaId, role);
@@ -67,7 +67,7 @@ export function MediaDetailsDialog({
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-6 shadow-card focus:outline-none">
           <Dialog.Title className="text-lg font-semibold text-card-foreground">
-            Media details
+            Детали медиа
           </Dialog.Title>
 
           <div className="mt-4">
@@ -91,17 +91,17 @@ export function MediaDetailsDialog({
                     <dd className="mt-1 break-all font-mono text-xs text-foreground">{media.id}</dd>
                   </div>
                   <div className="rounded-lg border border-border bg-sidebar/40 p-3">
-                    <dt className="text-muted-foreground">Type</dt>
+                    <dt className="text-muted-foreground">Тип</dt>
                     <dd className="mt-1 text-foreground">{media.type}</dd>
                   </div>
                   <div className="rounded-lg border border-border bg-sidebar/40 p-3">
-                    <dt className="text-muted-foreground">Created</dt>
+                    <dt className="text-muted-foreground">Создано</dt>
                     <dd className="mt-1 text-foreground">
                       {media.createdAt ? new Date(media.createdAt).toLocaleString() : "-"}
                     </dd>
                   </div>
                   <div className="rounded-lg border border-border bg-sidebar/40 p-3">
-                    <dt className="text-muted-foreground">MIME type</dt>
+                    <dt className="text-muted-foreground">MIME-тип</dt>
                     <dd className="mt-1 text-foreground">{media.mimeType ?? "-"}</dd>
                   </div>
                   <div className="rounded-lg border border-border bg-sidebar/40 p-3 md:col-span-2">

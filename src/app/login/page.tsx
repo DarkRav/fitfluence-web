@@ -46,7 +46,7 @@ export default function LoginPage() {
         <PageHeader title="Вход" subtitle="Авторизация через корпоративный Keycloak." />
         <div className="space-y-4">
           <AppButton className="w-full" type="button" disabled={isLoading} onClick={onSubmit}>
-            {isLoading ? "Перенаправляем..." : "Sign in"}
+            {isLoading ? "Перенаправляем..." : "Войти"}
           </AppButton>
         </div>
       </section>

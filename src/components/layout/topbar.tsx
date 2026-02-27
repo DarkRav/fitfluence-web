@@ -10,7 +10,7 @@ export function Topbar() {
   return (
     <header className="glass sticky top-0 z-30 flex h-16 items-center justify-between rounded-lg px-4">
       <div>
-        <p className="text-sm text-muted-foreground">Fitfluence Control Room</p>
+        <p className="text-sm text-muted-foreground">Панель управления Fitfluence</p>
       </div>
       <div className="flex items-center gap-3">
         <div className="inline-flex h-11 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm text-foreground">
@@ -18,7 +18,7 @@ export function Topbar() {
           <span>{auth.me?.displayName ?? auth.me?.email ?? "Пользователь"}</span>
         </div>
         <AppButton variant="secondary" onClick={() => void auth.logout()}>
-          Logout
+          Выйти
         </AppButton>
       </div>
     </header>

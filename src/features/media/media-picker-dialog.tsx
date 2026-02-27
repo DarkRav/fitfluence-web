@@ -49,7 +49,7 @@ export function MediaPickerDialog({ role, open, onOpenChange, onSelect }: MediaP
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-6 shadow-card focus:outline-none">
           <Dialog.Title className="text-lg font-semibold text-card-foreground">
-            Select media
+            Выбор медиа
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
             Выберите один файл из библиотеки медиа.
@@ -62,7 +62,7 @@ export function MediaPickerDialog({ role, open, onOpenChange, onSelect }: MediaP
                 setSearch(event.target.value);
                 setPage(0);
               }}
-              placeholder="Search by id or tag"
+              placeholder="Поиск по ID или тегу"
             />
 
             {mediaQuery.isLoading ? <LoadingState title="Загружаем медиа..." /> : null}
@@ -93,7 +93,7 @@ export function MediaPickerDialog({ role, open, onOpenChange, onSelect }: MediaP
 
                 <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-card">
                   <p className="text-muted-foreground">
-                    Page {mediaQuery.data.page + 1} / {Math.max(mediaQuery.data.totalPages, 1)}
+                    Страница {mediaQuery.data.page + 1} / {Math.max(mediaQuery.data.totalPages, 1)}
                   </p>
                   <div className="flex items-center gap-2">
                     <AppButton
@@ -101,14 +101,14 @@ export function MediaPickerDialog({ role, open, onOpenChange, onSelect }: MediaP
                       disabled={page <= 0}
                       onClick={() => setPage((prev) => prev - 1)}
                     >
-                      Previous
+                      Назад
                     </AppButton>
                     <AppButton
                       variant="secondary"
                       disabled={page + 1 >= mediaQuery.data.totalPages}
                       onClick={() => setPage((prev) => prev + 1)}
                     >
-                      Next
+                      Вперед
                     </AppButton>
                   </div>
                 </div>

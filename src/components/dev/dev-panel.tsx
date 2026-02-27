@@ -19,20 +19,20 @@ export function DevPanel() {
 
   return (
     <aside className="fixed bottom-4 right-4 z-50 w-80 rounded-lg border border-border bg-card p-4 text-xs shadow-card">
-      <p className="font-semibold text-foreground">Dev Panel</p>
+      <p className="font-semibold text-foreground">Панель разработки</p>
       <div className="mt-3 space-y-2 text-muted-foreground">
         <p>
-          <span className="text-foreground">Base URL:</span> {baseUrl}
+          <span className="text-foreground">Базовый URL:</span> {baseUrl}
         </p>
         <p>
-          <span className="text-foreground">User:</span> {auth.me?.email ?? "anonymous"}
+          <span className="text-foreground">Пользователь:</span> {auth.me?.email ?? "аноним"}
         </p>
         <p>
-          <span className="text-foreground">Roles:</span> {auth.roles.join(", ") || "none"}
+          <span className="text-foreground">Роли:</span> {auth.roles.join(", ") || "нет"}
         </p>
       </div>
       <AppButton variant="secondary" className="mt-3 w-full" onClick={() => void auth.logout()}>
-        Logout
+        Выйти
       </AppButton>
     </aside>
   );

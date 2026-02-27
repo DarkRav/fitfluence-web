@@ -11,8 +11,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Fitfluence Web Admin",
-  description: "Fitfluence admin panel",
+  title: "Fitfluence Админ-панель",
+  description: "Административная панель Fitfluence",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

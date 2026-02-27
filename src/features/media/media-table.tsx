@@ -23,7 +23,7 @@ function renderPreview(item: MediaRecord) {
     <img
       className="h-12 w-20 rounded-md border border-border/80 object-cover"
       src={item.url}
-      alt={`Media ${item.id}`}
+      alt={`Медиа ${item.id}`}
       loading="lazy"
     />
   );
@@ -35,12 +35,12 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
       <table className="w-full text-left text-sm">
         <thead className="bg-sidebar/60 text-muted-foreground">
           <tr>
-            <th className="px-4 py-3 font-medium">Preview</th>
+            <th className="px-4 py-3 font-medium">Превью</th>
             <th className="px-4 py-3 font-medium">ID</th>
-            <th className="px-4 py-3 font-medium">Type</th>
-            <th className="px-4 py-3 font-medium">Created</th>
-            <th className="px-4 py-3 font-medium">Owner</th>
-            {(onOpenDetails || pickMode) && <th className="px-4 py-3 font-medium">Action</th>}
+            <th className="px-4 py-3 font-medium">Тип</th>
+            <th className="px-4 py-3 font-medium">Создано</th>
+            <th className="px-4 py-3 font-medium">Владелец</th>
+            {(onOpenDetails || pickMode) && <th className="px-4 py-3 font-medium">Действие</th>}
           </tr>
         </thead>
         <tbody>
@@ -64,7 +64,7 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
                       className="rounded-md border border-secondary/35 bg-secondary/10 px-3 py-1.5 text-xs font-semibold text-secondary transition hover:bg-secondary/20"
                       onClick={() => onPick?.(item.id)}
                     >
-                      Select
+                      Выбрать
                     </button>
                   ) : (
                     <button
@@ -72,7 +72,7 @@ export function MediaTable({ items, onOpenDetails, onPick, pickMode = false }: M
                       className="rounded-md border border-border/80 bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-secondary/40 hover:text-secondary"
                       onClick={() => onOpenDetails?.(item.id)}
                     >
-                      Details
+                      Детали
                     </button>
                   )}
                 </td>

@@ -93,6 +93,12 @@ OPENAPI_INPUT=/path/to/openapi.yaml npm run gen:api
 
 No hardcoded palette values in feature components — use semantic tokens only.
 
+## Localization Policy
+
+- Весь пользовательский интерфейс должен быть полностью на русском языке.
+- Новые пользовательские тексты (кнопки, заголовки, подсказки, ошибки, empty/loading states, toasts) добавляются только на русском.
+- Английский допустим только для технических идентификаторов и протокольных значений (`ADMIN`, `INFLUENCER`, `UUID`, `MIME`, URL и т.п.), которые не являются UI-копирайтом.
+
 ## Dev Panel
 
 Visible only in development mode (`NODE_ENV !== production`).

@@ -7,15 +7,15 @@ import { useAuth } from "@/features/auth/use-auth";
 import { cn } from "@/lib/utils";
 
 const adminItems = [
-  { label: "Dashboard", href: "/admin", icon: BarChart3 },
-  { label: "Media", href: "/admin/media", icon: ImageIcon },
-  { label: "Exercises", href: "/admin/exercises", icon: Dumbbell },
-  { label: "Programs", href: "/admin/programs", icon: ClipboardList },
-  { label: "Workouts", href: "/admin/workouts", icon: ShieldCheck },
-  { label: "Progression", href: "/admin/progression", icon: Repeat2 },
+  { label: "Дашборд", href: "/admin", icon: BarChart3 },
+  { label: "Медиа", href: "/admin/media", icon: ImageIcon },
+  { label: "Упражнения", href: "/admin/exercises", icon: Dumbbell },
+  { label: "Программы", href: "/admin/programs", icon: ClipboardList },
+  { label: "Тренировки", href: "/admin/workouts", icon: ShieldCheck },
+  { label: "Прогрессия", href: "/admin/progression", icon: Repeat2 },
 ];
 
-const influencerItems = [{ label: "Media", href: "/influencer/media", icon: ImageIcon }];
+const influencerItems = [{ label: "Медиа", href: "/influencer/media", icon: ImageIcon }];
 
 export function SidebarNav() {
   const pathname = usePathname();

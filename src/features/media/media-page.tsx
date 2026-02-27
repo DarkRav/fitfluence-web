@@ -63,7 +63,7 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
             setSearch(event.target.value);
             setPage(0);
           }}
-          placeholder="Search by id or tag"
+          placeholder="Поиск по ID или тегу"
         />
         <MediaUploadDialog role={role} />
       </div>
@@ -106,8 +106,8 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
 
           <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
-              Page {query.data.page + 1} / {Math.max(query.data.totalPages, 1)} •{" "}
-              {query.data.totalElements} items
+              Страница {query.data.page + 1} / {Math.max(query.data.totalPages, 1)} •{" "}
+              {query.data.totalElements} элементов
             </p>
             <div className="flex items-center gap-2">
               <AppButton
@@ -115,14 +115,14 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
                 disabled={!hasPrev}
                 onClick={() => setPage((prev) => prev - 1)}
               >
-                Previous
+                Назад
               </AppButton>
               <AppButton
                 variant="secondary"
                 disabled={!hasNext}
                 onClick={() => setPage((prev) => prev + 1)}
               >
-                Next
+                Вперед
               </AppButton>
             </div>
           </div>

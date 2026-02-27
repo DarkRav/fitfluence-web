@@ -45,7 +45,7 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
     onError: (error) => {
       pushToast({
         kind: "error",
-        title: "Upload failed",
+        title: "Ошибка загрузки",
         description: error instanceof Error ? error.message : "Не удалось загрузить файл",
       });
     },
@@ -67,14 +67,14 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
       <Dialog.Trigger asChild>
         <AppButton className="shadow-glow">
           <Upload className="mr-2 h-4 w-4" />
-          Upload
+          Загрузить
         </AppButton>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-6 shadow-card focus:outline-none">
           <Dialog.Title className="text-lg font-semibold text-card-foreground">
-            Upload media
+            Загрузка медиа
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
             Поддерживаются изображения и видео.
@@ -94,7 +94,7 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
 
             {uploadMutation.isPending ? (
               <div>
-                <p className="text-xs text-muted-foreground">Uploading: {progress}%</p>
+                <p className="text-xs text-muted-foreground">Загрузка: {progress}%</p>
                 <div className="mt-1 h-2 overflow-hidden rounded bg-sidebar">
                   <div
                     className="h-full bg-primary-gradient transition-all"
@@ -114,7 +114,7 @@ export function MediaUploadDialog({ role }: MediaUploadDialogProps) {
                 }
               }}
             >
-              {uploadMutation.isPending ? "Uploading..." : "Upload file"}
+              {uploadMutation.isPending ? "Загружаем..." : "Загрузить файл"}
             </AppButton>
           </div>
 
