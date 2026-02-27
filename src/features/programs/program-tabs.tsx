@@ -3,11 +3,11 @@
 import { cn } from "@/lib/utils";
 import { ru } from "@/localization/ru";
 
-export type ProgramTabId = "details" | "versions";
+export type ProgramTopTabId = "info" | "workouts" | "settings";
 
 type ProgramTabsProps = {
-  activeTab: ProgramTabId;
-  onChange: (tab: ProgramTabId) => void;
+  activeTab: ProgramTopTabId;
+  onChange: (tab: ProgramTopTabId) => void;
 };
 
 export function ProgramTabs({ activeTab, onChange }: ProgramTabsProps) {
@@ -17,25 +17,37 @@ export function ProgramTabs({ activeTab, onChange }: ProgramTabsProps) {
         type="button"
         className={cn(
           "h-10 rounded-lg px-4 text-sm font-semibold transition",
-          activeTab === "details"
+          activeTab === "info"
             ? "bg-primary-gradient text-primary-foreground shadow-card"
             : "text-muted-foreground hover:bg-secondary/10 hover:text-secondary",
         )}
-        onClick={() => onChange("details")}
+        onClick={() => onChange("info")}
       >
-        {ru.programs.tabs.details}
+        {ru.programs.tabs.info}
       </button>
       <button
         type="button"
         className={cn(
           "h-10 rounded-lg px-4 text-sm font-semibold transition",
-          activeTab === "versions"
+          activeTab === "workouts"
             ? "bg-primary-gradient text-primary-foreground shadow-card"
             : "text-muted-foreground hover:bg-secondary/10 hover:text-secondary",
         )}
-        onClick={() => onChange("versions")}
+        onClick={() => onChange("workouts")}
       >
-        {ru.programs.tabs.versions}
+        {ru.programs.tabs.workouts}
+      </button>
+      <button
+        type="button"
+        className={cn(
+          "h-10 rounded-lg px-4 text-sm font-semibold transition",
+          activeTab === "settings"
+            ? "bg-primary-gradient text-primary-foreground shadow-card"
+            : "text-muted-foreground hover:bg-secondary/10 hover:text-secondary",
+        )}
+        onClick={() => onChange("settings")}
+      >
+        {ru.programs.tabs.settings}
       </button>
     </div>
   );

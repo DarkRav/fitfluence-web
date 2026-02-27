@@ -2,39 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  ClipboardList,
-  Dumbbell,
-  ImageIcon,
-  Repeat2,
-  ShieldCheck,
-  Target,
-  UserCircle2,
-  Wrench,
-} from "lucide-react";
+import { BarChart3, ClipboardList, Dumbbell, ImageIcon, Repeat2, UserCircle2 } from "lucide-react";
 import { useAuth } from "@/features/auth/use-auth";
 import { cn } from "@/lib/utils";
 import { ru } from "@/localization/ru";
 
 const adminItems = [
   { label: ru.sidebar.admin.dashboard, href: "/admin", icon: BarChart3 },
-  { label: ru.sidebar.admin.media, href: "/admin/media", icon: ImageIcon },
-  { label: ru.sidebar.admin.muscles, href: "/admin/muscles", icon: Target },
-  { label: ru.sidebar.admin.equipment, href: "/admin/equipment", icon: Wrench },
-  { label: ru.sidebar.admin.exercises, href: "/admin/exercises", icon: Dumbbell },
   { label: ru.sidebar.admin.programs, href: "/admin/programs", icon: ClipboardList },
-  { label: ru.sidebar.admin.workouts, href: "/admin/workouts", icon: ShieldCheck },
+  { label: ru.sidebar.admin.exercises, href: "/admin/exercises", icon: Dumbbell },
+  { label: ru.sidebar.admin.media, href: "/admin/media", icon: ImageIcon },
   { label: ru.sidebar.admin.progression, href: "/admin/progression", icon: Repeat2 },
 ];
 
 const influencerItems = [
   { label: ru.sidebar.influencer.dashboard, href: "/influencer", icon: BarChart3 },
-  { label: ru.sidebar.influencer.media, href: "/influencer/media", icon: ImageIcon },
-  { label: ru.sidebar.influencer.exercises, href: "/influencer/exercises", icon: Dumbbell },
   { label: ru.sidebar.influencer.programs, href: "/influencer/programs", icon: ClipboardList },
-  { label: ru.sidebar.influencer.workouts, href: "/influencer/workouts", icon: ShieldCheck },
-  { label: ru.sidebar.influencer.progression, href: "/influencer/progression", icon: Repeat2 },
+  { label: ru.sidebar.influencer.exercises, href: "/influencer/exercises", icon: Dumbbell },
+  { label: ru.sidebar.influencer.media, href: "/influencer/media", icon: ImageIcon },
   { label: ru.sidebar.influencer.profile, href: "/influencer/profile", icon: UserCircle2 },
 ];
 

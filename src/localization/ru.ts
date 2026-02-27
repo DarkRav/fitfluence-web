@@ -115,8 +115,9 @@ export const ru = {
   },
   programs: {
     tabs: {
-      details: "Детали",
-      versions: "Версии",
+      info: "Информация",
+      workouts: "Тренировки",
+      settings: "Настройки",
     },
     title: "Программы",
     createProgram: "Создать программу",
@@ -190,6 +191,13 @@ export const ru = {
       adminInfluencerRequired: "Для создания программы администратором нужен influencerId",
       versionProgramRequired: "Для поиска версий требуется programId",
     },
+    versionPicker: {
+      selectVersion: "Выберите версию",
+      createVersion: "Создать версию",
+      noVersionsTitle: "Версии программы отсутствуют",
+      noVersionsDescription: "Создайте версию, чтобы перейти к настройке тренировок.",
+    },
+    settingsPlaceholder: "Раздел будет доступен после завершения настройки прогрессии.",
   },
   workouts: {
     title: "Тренировки",
