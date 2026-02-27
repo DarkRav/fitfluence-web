@@ -43,6 +43,7 @@ export type { InfluencerPublicCard } from "./models/InfluencerPublicCard";
 export type { InfluencersSearchRequest } from "./models/InfluencersSearchRequest";
 export type { Media } from "./models/Media";
 export type { MediaFilter } from "./models/MediaFilter";
+export type { MediaOwnerType } from "./models/MediaOwnerType";
 export type { MediaSearchRequest } from "./models/MediaSearchRequest";
 export type { MeResponse } from "./models/MeResponse";
 export type { MovementPattern } from "./models/MovementPattern";

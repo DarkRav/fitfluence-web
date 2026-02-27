@@ -137,6 +137,27 @@ export class InfluencerCabinetService {
     });
   }
   /**
+   * Получить список версий программы инфлюэнсера
+   * @returns ProgramVersion Список версий
+   * @throws ApiError
+   */
+  public static influencerProgramsProgramIdVersionsGet({
+    programId,
+  }: {
+    programId: string;
+  }): CancelablePromise<Array<ProgramVersion>> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/influencer/programs/{programId}/versions",
+      path: {
+        programId: programId,
+      },
+      errors: {
+        404: `Ресурс не найден`,
+      },
+    });
+  }
+  /**
    * Создать версию программы инфлюэнсера
    * @returns ProgramVersion Версия создана
    * @throws ApiError
@@ -521,6 +542,7 @@ export class InfluencerCabinetService {
   }: {
     formData: {
       file?: Blob;
+      tags?: Array<string>;
     };
   }): CancelablePromise<Media> {
     return __request(OpenAPI, {

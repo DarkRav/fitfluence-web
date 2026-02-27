@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ContentMediaType } from "./ContentMediaType";
+import type { MediaOwnerType } from "./MediaOwnerType";
 /**
  * Медиа-файл (изображение или видео)
  */
@@ -13,4 +14,7 @@ export type Media = {
   mimeType?: string;
   tags?: Array<string>;
   createdAt?: string;
+  readonly ownerType: MediaOwnerType;
+  readonly ownerId: string;
+  readonly ownerDisplayName?: string;
 };
