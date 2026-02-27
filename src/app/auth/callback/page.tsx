@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getInfluencerProfile } from "@/api/influencerProfile";
 import { LoadingState, PageHeader } from "@/shared/ui";
 import { useAuth } from "@/features/auth/use-auth";
 
@@ -25,8 +26,15 @@ export default function AuthCallbackPage() {
     const complete = async () => {
       try {
         const roles = await auth.completeSignIn();
-        const path = resolveLandingPath(roles);
-        router.replace(path);
+        if (roles.includes("INFLUENCER")) {
+          const profileResult = await getInfluencerProfile();
+          if (!profileResult.ok && profileResult.error.kind === "not_found") {
+            router.replace("/influencer/profile?onboarding=1");
+            return;
+          }
+        }
+
+        router.replace(resolveLandingPath(roles));
       } catch {
         router.replace("/login");
       }
