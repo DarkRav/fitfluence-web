@@ -105,6 +105,25 @@ export function MediaDetailsDialog({
                     <dd className="mt-1 text-foreground">{media.mimeType ?? "-"}</dd>
                   </div>
                   <div className="rounded-lg border border-border bg-sidebar/40 p-3 md:col-span-2">
+                    <dt className="text-muted-foreground">Теги</dt>
+                    <dd className="mt-1">
+                      {media.tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {media.tags.map((tag) => (
+                            <span
+                              key={`${media.id}-${tag}`}
+                              className="rounded border border-border bg-secondary/10 px-2 py-1 text-xs text-foreground"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-foreground">-</span>
+                      )}
+                    </dd>
+                  </div>
+                  <div className="rounded-lg border border-border bg-sidebar/40 p-3 md:col-span-2">
                     <dt className="text-muted-foreground">URL</dt>
                     <dd className="mt-1 break-all text-foreground">{media.url}</dd>
                   </div>
