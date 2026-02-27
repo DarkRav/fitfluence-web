@@ -57,6 +57,23 @@ export function WorkoutDetailsPage({
     },
   });
 
+  const progressionPoliciesQuery = useQuery({
+    queryKey: ["progression-policies-for-workout", scopeName],
+    queryFn: async () => {
+      const result = await scope.api.searchProgressionPolicies({
+        page: 0,
+        size: 200,
+      });
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+      return result.data.items.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+    },
+  });
+
   const addExerciseMutation = useMutation({
     mutationFn: async (payload: Parameters<WorkoutsScopeConfig["api"]["addExercise"]>[1]) => {
       const result = await scope.api.addExercise(workoutTemplateId, payload);
@@ -384,6 +401,7 @@ export function WorkoutDetailsPage({
                 {selectedExercise ? (
                   <WorkoutExerciseEditor
                     exercise={selectedExercise}
+                    progressionOptions={progressionPoliciesQuery.data ?? []}
                     isSubmitting={updateExerciseMutation.isPending}
                     isDeleting={deleteExerciseMutation.isPending}
                     onSave={async (exerciseTemplateId, payload) => {

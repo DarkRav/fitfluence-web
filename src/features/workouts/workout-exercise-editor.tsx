@@ -2,14 +2,14 @@
 
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import type {
   UpdateWorkoutExercisePayload,
   WorkoutExerciseRecord,
 } from "@/features/workouts/types";
 import { ru } from "@/localization/ru";
-import { AppButton, AppInput } from "@/shared/ui";
+import { AppButton, AppInput, AppSelect, type SelectOption } from "@/shared/ui";
 
 const exerciseEditorSchema = z.object({
   sets: z.number().int().min(1, ru.workouts.minSetsValidation),
@@ -18,12 +18,14 @@ const exerciseEditorSchema = z.object({
   targetRpe: z.number().min(1).max(10).optional(),
   restSeconds: z.number().int().min(0).optional(),
   notes: z.string().trim().max(2000).optional(),
+  progressionPolicyId: z.union([z.literal(""), z.string().uuid()]).optional(),
 });
 
 type ExerciseEditorValues = z.infer<typeof exerciseEditorSchema>;
 
 type WorkoutExerciseEditorProps = {
   exercise: WorkoutExerciseRecord;
+  progressionOptions: SelectOption[];
   isSubmitting: boolean;
   isDeleting: boolean;
   onSave: (exerciseTemplateId: string, payload: UpdateWorkoutExercisePayload) => Promise<void>;
@@ -38,11 +40,13 @@ function buildDefaultValues(exercise: WorkoutExerciseRecord): ExerciseEditorValu
     targetRpe: exercise.targetRpe,
     restSeconds: exercise.restSeconds,
     notes: exercise.notes ?? "",
+    progressionPolicyId: exercise.progressionPolicyId ?? "",
   };
 }
 
 export function WorkoutExerciseEditor({
   exercise,
+  progressionOptions,
   isSubmitting,
   isDeleting,
   onSave,
@@ -89,6 +93,10 @@ export function WorkoutExerciseEditor({
             targetRpe: values.targetRpe,
             restSeconds: values.restSeconds,
             notes: values.notes?.trim() || undefined,
+            progressionPolicyId:
+              values.progressionPolicyId && values.progressionPolicyId !== "__NONE__"
+                ? values.progressionPolicyId
+                : undefined,
           });
         })}
       >
@@ -153,6 +161,27 @@ export function WorkoutExerciseEditor({
           <textarea
             {...form.register("notes")}
             className="min-h-16 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">
+            {ru.common.labels.progressionPolicy}
+          </label>
+          <Controller
+            control={form.control}
+            name="progressionPolicyId"
+            render={({ field }) => (
+              <AppSelect
+                value={field.value || "__NONE__"}
+                onValueChange={(value) => field.onChange(value === "__NONE__" ? "" : value)}
+                options={[
+                  { value: "__NONE__", label: ru.common.states.dash },
+                  ...progressionOptions,
+                ]}
+                placeholder={ru.common.placeholders.selectProgressionPolicy}
+              />
+            )}
           />
         </div>
 

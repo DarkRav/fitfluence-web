@@ -5,6 +5,7 @@ export type WorkoutExerciseRecord = {
   exerciseId: string;
   exerciseCode: string;
   exerciseName: string;
+  progressionPolicyId?: string;
   sets: number;
   repsMin?: number;
   repsMax?: number;
@@ -118,6 +119,14 @@ export type WorkoutsScopeConfig = {
     searchExercises: (params: { page: number; size: number; search?: string }) => Promise<
       ApiResult<{
         items: WorkoutExerciseSearchRecord[];
+      }>
+    >;
+    searchProgressionPolicies: (params: { page: number; size: number; search?: string }) => Promise<
+      ApiResult<{
+        items: Array<{
+          id: string;
+          name: string;
+        }>;
       }>
     >;
     addExercise: (

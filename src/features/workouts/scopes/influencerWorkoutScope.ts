@@ -10,6 +10,7 @@ import {
   updateInfluencerWorkoutTemplate,
 } from "@/api/influencerWorkouts";
 import { searchInfluencerExercises } from "@/api/influencerExercises";
+import { searchInfluencerProgressionPolicies } from "@/api/influencerProgression";
 import type { WorkoutsScopeConfig } from "@/features/workouts/types";
 
 export const influencerWorkoutScope: WorkoutsScopeConfig = {
@@ -46,6 +47,27 @@ export const influencerWorkoutScope: WorkoutsScopeConfig = {
             code: item.code,
             name: item.name,
             createdByInfluencerId: item.createdByInfluencerId,
+          })),
+        },
+      };
+    },
+    searchProgressionPolicies: async (params) => {
+      const result = await searchInfluencerProgressionPolicies({
+        page: params.page,
+        size: params.size,
+        search: params.search,
+        status: "ACTIVE",
+      });
+      if (!result.ok) {
+        return result;
+      }
+
+      return {
+        ok: true,
+        data: {
+          items: result.data.items.map((item) => ({
+            id: item.id,
+            name: item.name,
           })),
         },
       };

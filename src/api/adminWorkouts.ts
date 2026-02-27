@@ -19,6 +19,7 @@ export type AdminWorkoutExerciseRecord = {
   exerciseId: string;
   exerciseCode: string;
   exerciseName: string;
+  progressionPolicyId?: string;
   sets: number;
   repsMin?: number;
   repsMax?: number;
@@ -64,6 +65,7 @@ function mapExercise(item: ExerciseTemplate): AdminWorkoutExerciseRecord {
     exerciseId: item.exercise.id,
     exerciseCode: item.exercise.code,
     exerciseName: item.exercise.name,
+    progressionPolicyId: (item as { progressionPolicyId?: string }).progressionPolicyId,
     sets: item.sets,
     repsMin: item.repsMin,
     repsMax: item.repsMax,

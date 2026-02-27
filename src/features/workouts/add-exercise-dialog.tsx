@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import {
   AppDialogContent,
@@ -19,7 +19,7 @@ import {
   type WorkoutsScopeConfig,
 } from "@/features/workouts/types";
 import { ru } from "@/localization/ru";
-import { AppButton, AppInput, AppTextarea } from "@/shared/ui";
+import { AppButton, AppInput, AppSelect, AppTextarea } from "@/shared/ui";
 
 const addExerciseSchema = z.object({
   exerciseId: z.string().uuid(ru.workouts.selectExerciseValidation),
@@ -29,6 +29,7 @@ const addExerciseSchema = z.object({
   targetRpe: z.number().min(1).max(10).optional(),
   restSeconds: z.number().int().min(0).optional(),
   notes: z.string().trim().max(2000).optional(),
+  progressionPolicyId: z.union([z.literal(""), z.string().uuid()]).optional(),
 });
 
 type AddExerciseValues = z.infer<typeof addExerciseSchema>;
@@ -89,6 +90,7 @@ export function AddExerciseDialog({
       targetRpe: undefined,
       restSeconds: 90,
       notes: "",
+      progressionPolicyId: "",
     },
   });
   const selectedExerciseId = useWatch({
@@ -109,10 +111,34 @@ export function AddExerciseDialog({
       targetRpe: undefined,
       restSeconds: 90,
       notes: "",
+      progressionPolicyId: "",
     });
     setSearch("");
     setDebouncedSearch("");
   }, [form, open]);
+
+  const progressionQuery = useQuery({
+    queryKey: [...scope.queryKeys.addExercise, "progression-policies"],
+    enabled: open,
+    queryFn: async () => {
+      const result = await scope.api.searchProgressionPolicies({
+        page: 0,
+        size: 200,
+      });
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+      return result.data.items;
+    },
+  });
+
+  const progressionOptions = [
+    { value: "__NONE__", label: ru.common.states.dash },
+    ...(progressionQuery.data ?? []).map((item) => ({
+      value: item.id,
+      label: item.name,
+    })),
+  ];
 
   return (
     <AppDialogRoot open={open} onOpenChange={onOpenChange}>
@@ -137,6 +163,10 @@ export function AddExerciseDialog({
               targetRpe: values.targetRpe,
               restSeconds: values.restSeconds,
               notes: values.notes?.trim() || undefined,
+              progressionPolicyId:
+                values.progressionPolicyId && values.progressionPolicyId !== "__NONE__"
+                  ? values.progressionPolicyId
+                  : undefined,
             });
             onOpenChange(false);
           })}
@@ -254,6 +284,32 @@ export function AddExerciseDialog({
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{ru.common.labels.notes}</label>
             <AppTextarea {...form.register("notes")} className="min-h-20" />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">
+              {ru.common.labels.progressionPolicy}
+            </label>
+            <Controller
+              control={form.control}
+              name="progressionPolicyId"
+              render={({ field }) => (
+                <AppSelect
+                  value={field.value || "__NONE__"}
+                  onValueChange={(value) => field.onChange(value === "__NONE__" ? "" : value)}
+                  options={progressionOptions}
+                  placeholder={ru.common.placeholders.selectProgressionPolicy}
+                />
+              )}
+            />
+            {progressionQuery.isLoading ? (
+              <p className="text-xs text-muted-foreground">
+                {ru.workouts.loadingProgressionPolicies}
+              </p>
+            ) : null}
+            {progressionQuery.isError ? (
+              <p className="text-xs text-destructive">{progressionQuery.error.message}</p>
+            ) : null}
           </div>
 
           <AppDialogFooter>

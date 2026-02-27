@@ -10,6 +10,7 @@ import {
   updateAdminWorkoutExercise,
 } from "@/api/adminWorkouts";
 import { searchAdminExercises } from "@/api/adminExercises";
+import { searchAdminProgressionPolicies } from "@/api/adminProgression";
 import type { WorkoutsScopeConfig } from "@/features/workouts/types";
 
 export const adminWorkoutScope: WorkoutsScopeConfig = {
@@ -46,6 +47,27 @@ export const adminWorkoutScope: WorkoutsScopeConfig = {
             code: item.code,
             name: item.name,
             createdByInfluencerId: item.createdByInfluencerId,
+          })),
+        },
+      };
+    },
+    searchProgressionPolicies: async (params) => {
+      const result = await searchAdminProgressionPolicies({
+        page: params.page,
+        size: params.size,
+        search: params.search,
+        status: "ACTIVE",
+      });
+      if (!result.ok) {
+        return result;
+      }
+
+      return {
+        ok: true,
+        data: {
+          items: result.data.items.map((item) => ({
+            id: item.id,
+            name: item.name,
           })),
         },
       };
