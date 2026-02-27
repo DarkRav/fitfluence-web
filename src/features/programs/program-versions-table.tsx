@@ -7,9 +7,10 @@ import type { ProgramVersionRecord } from "@/features/programs/types";
 type ProgramVersionsTableProps = {
   items: ProgramVersionRecord[];
   onEdit?: (item: ProgramVersionRecord) => void;
+  onArchive?: (item: ProgramVersionRecord) => void;
 };
 
-export function ProgramVersionsTable({ items, onEdit }: ProgramVersionsTableProps) {
+export function ProgramVersionsTable({ items, onEdit, onArchive }: ProgramVersionsTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <table className="w-full text-left text-sm">
@@ -52,6 +53,15 @@ export function ProgramVersionsTable({ items, onEdit }: ProgramVersionsTableProp
                     onClick={() => onEdit?.(item)}
                   >
                     Edit
+                  </AppButton>
+                  <AppButton
+                    type="button"
+                    variant="destructive"
+                    className="h-9 px-3 text-xs"
+                    disabled={!onArchive || item.status === "ARCHIVED"}
+                    onClick={() => onArchive?.(item)}
+                  >
+                    Archive
                   </AppButton>
                   <AppButton
                     type="button"

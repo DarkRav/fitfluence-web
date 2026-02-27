@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ConfirmDeleteDialog } from "@/features/reference/confirm-delete-dialog";
 import { ProgramVersionFormDialog } from "@/features/programs/program-version-form-dialog";
 import { ProgramVersionsTable } from "@/features/programs/program-versions-table";
 import {
@@ -46,6 +47,7 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
     useState<(typeof statusFilterOptions)[number]["value"]>("ALL");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingVersion, setEditingVersion] = useState<ProgramVersionRecord | null>(null);
+  const [archivingVersion, setArchivingVersion] = useState<ProgramVersionRecord | null>(null);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -180,6 +182,40 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
     },
   });
 
+  const archiveVersionMutation = useMutation({
+    mutationFn: async (programVersionId: string) => {
+      if (!config.api.deleteVersion) {
+        throw new Error("Archive version operation is not supported");
+      }
+
+      const result = await config.api.deleteVersion(programVersionId);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      setArchivingVersion(null);
+      pushToast({
+        kind: "success",
+        title: "Версия архивирована",
+        description: "Версия переведена в статус ARCHIVED.",
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["influencerProgramVersions", programId],
+      });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось архивировать версию";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка архивации",
+        description: message,
+      });
+    },
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -213,6 +249,10 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
         </AppButton>
       </div>
 
+      <div className="rounded-xl border border-secondary/35 bg-secondary/10 px-4 py-3 text-sm text-secondary">
+        Publishing is performed by Admin.
+      </div>
+
       {versionsQuery.isLoading ? <LoadingState title="Загружаем версии..." /> : null}
 
       {!versionsQuery.isLoading && versionsQuery.isError ? (
@@ -231,7 +271,11 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
 
       {!versionsQuery.isLoading && !versionsQuery.isError && versionsQuery.data ? (
         <div className="space-y-4">
-          <ProgramVersionsTable items={versionsQuery.data.items} onEdit={setEditingVersion} />
+          <ProgramVersionsTable
+            items={versionsQuery.data.items}
+            onEdit={setEditingVersion}
+            onArchive={setArchivingVersion}
+          />
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-card">
             <p className="text-muted-foreground">
               Страница {versionsQuery.data.page + 1} / {Math.max(versionsQuery.data.totalPages, 1)}{" "}
@@ -285,6 +329,24 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
             level: payload.level,
             frequencyPerWeek: payload.frequencyPerWeek,
           });
+        }}
+      />
+
+      <ConfirmDeleteDialog
+        open={Boolean(archivingVersion)}
+        title="Archive version"
+        description="Version will be moved to ARCHIVED status. This action cannot be undone from this screen."
+        isSubmitting={archiveVersionMutation.isPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setArchivingVersion(null);
+          }
+        }}
+        onConfirm={() => {
+          if (!archivingVersion) {
+            return;
+          }
+          void archiveVersionMutation.mutateAsync(archivingVersion.id);
         }}
       />
     </div>
