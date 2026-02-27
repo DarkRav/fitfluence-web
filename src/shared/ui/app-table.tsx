@@ -1,4 +1,9 @@
-import { cn } from "@/lib/utils";
+import {
+  TableContainer,
+  tableCellClassName,
+  tableHeadClassName,
+  tableRowClassName,
+} from "@/components/ui";
 import type { ReactNode } from "react";
 
 type AppTableProps = {
@@ -9,12 +14,12 @@ type AppTableProps = {
 
 export function AppTable({ headers, rows, className }: AppTableProps) {
   return (
-    <div className={cn("overflow-hidden rounded-lg border border-border bg-card", className)}>
+    <TableContainer className={className}>
       <table className="w-full text-left text-sm">
-        <thead className="bg-sidebar/50 text-muted-foreground">
+        <thead className={tableHeadClassName}>
           <tr>
             {headers.map((header) => (
-              <th key={header} className="px-4 py-3 font-medium">
+              <th key={header} className={tableCellClassName + " font-medium"}>
                 {header}
               </th>
             ))}
@@ -22,9 +27,9 @@ export function AppTable({ headers, rows, className }: AppTableProps) {
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className="border-t border-border/80 text-foreground">
+            <tr key={rowIndex} className={tableRowClassName}>
               {row.map((cell, cellIndex) => (
-                <td key={`${rowIndex}-${cellIndex}`} className="px-4 py-3">
+                <td key={`${rowIndex}-${cellIndex}`} className={tableCellClassName}>
                   {cell}
                 </td>
               ))}
@@ -32,6 +37,6 @@ export function AppTable({ headers, rows, className }: AppTableProps) {
           ))}
         </tbody>
       </table>
-    </div>
+    </TableContainer>
   );
 }
