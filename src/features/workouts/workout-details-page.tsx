@@ -1,10 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { getInfluencerWorkoutTemplate } from "@/api/influencerWorkouts";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import {
+  addInfluencerWorkoutExercise,
+  getInfluencerWorkoutTemplate,
+} from "@/api/influencerWorkouts";
+import { AddExerciseDialog } from "@/features/workouts/add-exercise-dialog";
 import { AppButton, ErrorState, LoadingState, PageHeader, useAppToast } from "@/shared/ui";
-import { useEffect } from "react";
 
 type WorkoutDetailsPageProps = {
   programId: string;
@@ -23,7 +27,9 @@ export function WorkoutDetailsPage({
   workoutTemplateId,
 }: WorkoutDetailsPageProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { pushToast } = useAppToast();
+  const [addExerciseOpen, setAddExerciseOpen] = useState(false);
 
   const detailsQuery = useQuery({
     queryKey: ["workout", workoutTemplateId],
@@ -34,6 +40,37 @@ export function WorkoutDetailsPage({
       }
 
       return result.data;
+    },
+  });
+
+  const addExerciseMutation = useMutation({
+    mutationFn: async (payload: Parameters<typeof addInfluencerWorkoutExercise>[1]) => {
+      const result = await addInfluencerWorkoutExercise(workoutTemplateId, payload);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      pushToast({
+        kind: "success",
+        title: "Exercise added",
+        description: "Упражнение добавлено в workout.",
+      });
+      setAddExerciseOpen(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] }),
+        queryClient.invalidateQueries({ queryKey: ["workouts", programVersionId] }),
+      ]);
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось добавить упражнение";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка добавления",
+        description: message,
+      });
     },
   });
 
@@ -104,7 +141,12 @@ export function WorkoutDetailsPage({
       <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-semibold text-foreground">Exercises</h2>
-          <p className="text-sm text-muted-foreground">{workout.exercises.length} items</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">{workout.exercises.length} items</p>
+            <AppButton type="button" onClick={() => setAddExerciseOpen(true)}>
+              Add exercise
+            </AppButton>
+          </div>
         </div>
 
         {workout.exercises.length === 0 ? (
@@ -152,6 +194,14 @@ export function WorkoutDetailsPage({
           </div>
         )}
       </div>
+
+      <AddExerciseDialog
+        open={addExerciseOpen}
+        isSubmitting={addExerciseMutation.isPending}
+        existingExerciseIds={workout.exercises.map((item) => item.exerciseId)}
+        onOpenChange={setAddExerciseOpen}
+        onSubmit={async (payload) => addExerciseMutation.mutateAsync(payload)}
+      />
     </div>
   );
 }
