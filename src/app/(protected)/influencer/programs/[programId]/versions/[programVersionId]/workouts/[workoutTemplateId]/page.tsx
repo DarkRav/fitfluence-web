@@ -1,6 +1,6 @@
-import { WorkoutDetailsPage } from "@/features/workouts/workout-details-page";
+import { redirect } from "next/navigation";
 
-type InfluencerWorkoutDetailsRoutePageProps = {
+type InfluencerWorkoutDetailsLegacyRoutePageProps = {
   params: Promise<{
     programId: string;
     programVersionId: string;
@@ -8,17 +8,11 @@ type InfluencerWorkoutDetailsRoutePageProps = {
   }>;
 };
 
-export default async function InfluencerWorkoutDetailsRoutePage({
+export default async function InfluencerWorkoutDetailsLegacyRoutePage({
   params,
-}: InfluencerWorkoutDetailsRoutePageProps) {
+}: InfluencerWorkoutDetailsLegacyRoutePageProps) {
   const { programId, programVersionId, workoutTemplateId } = await params;
-
-  return (
-    <WorkoutDetailsPage
-      programId={programId}
-      programVersionId={programVersionId}
-      workoutTemplateId={workoutTemplateId}
-      scopeName="influencer"
-    />
+  redirect(
+    `/influencer/programs/${programId}/workouts/${workoutTemplateId}?version=${programVersionId}`,
   );
 }

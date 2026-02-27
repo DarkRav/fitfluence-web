@@ -1,4 +1,4 @@
-import { AdminWorkoutsListPage } from "@/features/workouts/admin";
+import { redirect } from "next/navigation";
 
 type AdminProgramVersionWorkoutsRoutePageProps = {
   params: Promise<{
@@ -11,6 +11,5 @@ export default async function AdminProgramVersionWorkoutsRoutePage({
   params,
 }: AdminProgramVersionWorkoutsRoutePageProps) {
   const { programId, programVersionId } = await params;
-
-  return <AdminWorkoutsListPage programId={programId} programVersionId={programVersionId} />;
+  redirect(`/admin/programs/${programId}?tab=workouts&version=${programVersionId}`);
 }

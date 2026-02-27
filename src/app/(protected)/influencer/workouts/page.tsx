@@ -1,5 +1,5 @@
-import { InfluencerWorkoutsHubPage } from "@/features/workouts/influencer-workouts-hub-page";
+import { redirect } from "next/navigation";
 
-export default function InfluencerWorkoutsPage() {
-  return <InfluencerWorkoutsHubPage />;
+export default function InfluencerWorkoutsRoutePage() {
+  redirect("/influencer/programs");
 }

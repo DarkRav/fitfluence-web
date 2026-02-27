@@ -1,5 +1,5 @@
-import { AdminWorkoutsHubPage } from "@/features/workouts/admin/admin-workouts-hub-page";
+import { redirect } from "next/navigation";
 
 export default function AdminWorkoutsRoutePage() {
-  return <AdminWorkoutsHubPage />;
+  redirect("/admin/programs");
 }

@@ -1,4 +1,4 @@
-import { WorkoutsListPage } from "@/features/workouts";
+import { redirect } from "next/navigation";
 
 type InfluencerProgramVersionWorkoutsRoutePageProps = {
   params: Promise<{
@@ -11,12 +11,5 @@ export default async function InfluencerProgramVersionWorkoutsRoutePage({
   params,
 }: InfluencerProgramVersionWorkoutsRoutePageProps) {
   const { programId, programVersionId } = await params;
-
-  return (
-    <WorkoutsListPage
-      programId={programId}
-      programVersionId={programVersionId}
-      scopeName="influencer"
-    />
-  );
+  redirect(`/influencer/programs/${programId}?tab=workouts&version=${programVersionId}`);
 }

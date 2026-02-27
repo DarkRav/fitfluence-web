@@ -1,6 +1,6 @@
-import { AdminWorkoutDetailsPage } from "@/features/workouts/admin/admin-workout-details-page";
+import { redirect } from "next/navigation";
 
-type AdminWorkoutDetailsRoutePageProps = {
+type AdminWorkoutDetailsLegacyRoutePageProps = {
   params: Promise<{
     programId: string;
     programVersionId: string;
@@ -8,16 +8,11 @@ type AdminWorkoutDetailsRoutePageProps = {
   }>;
 };
 
-export default async function AdminWorkoutDetailsRoutePage({
+export default async function AdminWorkoutDetailsLegacyRoutePage({
   params,
-}: AdminWorkoutDetailsRoutePageProps) {
+}: AdminWorkoutDetailsLegacyRoutePageProps) {
   const { programId, programVersionId, workoutTemplateId } = await params;
-
-  return (
-    <AdminWorkoutDetailsPage
-      programId={programId}
-      programVersionId={programVersionId}
-      workoutTemplateId={workoutTemplateId}
-    />
+  redirect(
+    `/admin/programs/${programId}/workouts/${workoutTemplateId}?version=${programVersionId}`,
   );
 }
