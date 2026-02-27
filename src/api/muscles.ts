@@ -18,6 +18,8 @@ export type MuscleRecord = {
   mediaCount: number;
 };
 
+export type MuscleGroupValue = MuscleGroup;
+
 export type MusclePageResult = {
   items: MuscleRecord[];
   page: number;
