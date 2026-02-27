@@ -10,6 +10,7 @@ import {
 } from "@/api/media";
 import { AppButton, AppInput, EmptyState, ErrorState, LoadingState, PageHeader } from "@/shared/ui";
 import { MediaTable } from "@/features/media/media-table";
+import { MediaUploadDialog } from "@/features/media/media-upload-dialog";
 
 type MediaPageProps = {
   role: MediaRole;
@@ -48,7 +49,7 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
 
   const actions = useMemo(
     () => (
-      <div className="flex w-full max-w-md items-center gap-2">
+      <div className="flex w-full max-w-2xl items-center gap-2">
         <AppInput
           value={search}
           onChange={(event) => {
@@ -57,9 +58,10 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
           }}
           placeholder="Search by id or tag"
         />
+        <MediaUploadDialog role={role} />
       </div>
     ),
-    [search],
+    [role, search],
   );
 
   return (
