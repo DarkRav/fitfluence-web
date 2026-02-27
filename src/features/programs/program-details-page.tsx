@@ -242,9 +242,28 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
         <div className="mb-4 flex items-center justify-between gap-3">
           <ProgramTabs activeTab={activeTab} onChange={setActiveTab} />
-          <AppButton type="button" variant="ghost" onClick={() => router.push(config.routes.list)}>
-            Back to Programs
-          </AppButton>
+          <div className="flex items-center gap-2">
+            {config.scope === "influencer" && program.currentPublishedVersionId ? (
+              <AppButton
+                type="button"
+                variant="secondary"
+                onClick={() =>
+                  router.push(
+                    `/influencer/programs/${program.id}/versions/${program.currentPublishedVersionId}/workouts`,
+                  )
+                }
+              >
+                Version Workouts
+              </AppButton>
+            ) : null}
+            <AppButton
+              type="button"
+              variant="ghost"
+              onClick={() => router.push(config.routes.list)}
+            >
+              Back to Programs
+            </AppButton>
+          </div>
         </div>
 
         {activeTab === "details" && config.capabilities.canEdit && config.api.update ? (

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { X } from "lucide-react";
 import { z } from "zod";
 import {
@@ -84,6 +84,10 @@ export function AddExerciseDialog({
       notes: "",
     },
   });
+  const selectedExerciseId = useWatch({
+    control: form.control,
+    name: "exerciseId",
+  });
 
   useEffect(() => {
     if (!open) {
@@ -149,7 +153,7 @@ export function AddExerciseDialog({
                 ) : (
                   <div className="space-y-1">
                     {exercisesQuery.data?.map((exercise) => {
-                      const selected = form.watch("exerciseId") === exercise.id;
+                      const selected = selectedExerciseId === exercise.id;
                       const alreadyAdded = existingExerciseIds.includes(exercise.id);
 
                       return (
