@@ -55,11 +55,20 @@ function resolveBaseUrl(): string {
   return baseUrl && baseUrl.length > 0 ? baseUrl : "http://localhost:9876";
 }
 
+function resolveMediaUrl(url: string): string {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  const normalizedPath = url.startsWith("/") ? url : `/${url}`;
+  return `${resolveBaseUrl()}${normalizedPath}`;
+}
+
 function mapMedia(media: Media): MediaRecord {
   return {
     id: media.id,
     type: media.type,
-    url: media.url,
+    url: resolveMediaUrl(media.url),
     mimeType: media.mimeType,
     tags: media.tags ?? [],
     createdAt: media.createdAt,
