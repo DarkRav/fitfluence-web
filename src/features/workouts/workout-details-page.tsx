@@ -5,9 +5,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
   addInfluencerWorkoutExercise,
+  deleteInfluencerWorkoutExercise,
   getInfluencerWorkoutTemplate,
+  updateInfluencerWorkoutExercise,
 } from "@/api/influencerWorkouts";
 import { AddExerciseDialog } from "@/features/workouts/add-exercise-dialog";
+import { WorkoutExerciseEditor } from "@/features/workouts/workout-exercise-editor";
 import { AppButton, ErrorState, LoadingState, PageHeader, useAppToast } from "@/shared/ui";
 
 type WorkoutDetailsPageProps = {
@@ -69,6 +72,64 @@ export function WorkoutDetailsPage({
       pushToast({
         kind: "error",
         title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка добавления",
+        description: message,
+      });
+    },
+  });
+
+  const updateExerciseMutation = useMutation({
+    mutationFn: async ({
+      exerciseTemplateId,
+      payload,
+    }: {
+      exerciseTemplateId: string;
+      payload: Parameters<typeof updateInfluencerWorkoutExercise>[1];
+    }) => {
+      const result = await updateInfluencerWorkoutExercise(exerciseTemplateId, payload);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      pushToast({
+        kind: "success",
+        title: "Exercise updated",
+        description: "Параметры упражнения сохранены.",
+      });
+      await queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось сохранить упражнение";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        description: message,
+      });
+    },
+  });
+
+  const deleteExerciseMutation = useMutation({
+    mutationFn: async (exerciseTemplateId: string) => {
+      const result = await deleteInfluencerWorkoutExercise(exerciseTemplateId);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+    },
+    onSuccess: async () => {
+      pushToast({
+        kind: "success",
+        title: "Exercise removed",
+        description: "Упражнение удалено из workout.",
+      });
+      await queryClient.invalidateQueries({ queryKey: ["workout", workoutTemplateId] });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось удалить упражнение";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка удаления",
         description: message,
       });
     },
@@ -154,43 +215,21 @@ export function WorkoutDetailsPage({
             В этом workout пока нет упражнений.
           </p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-sidebar/60 text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Order</th>
-                  <th className="px-4 py-3 font-medium">Exercise</th>
-                  <th className="px-4 py-3 font-medium">Sets</th>
-                  <th className="px-4 py-3 font-medium">Reps</th>
-                  <th className="px-4 py-3 font-medium">Rest</th>
-                  <th className="px-4 py-3 font-medium">RPE</th>
-                  <th className="px-4 py-3 font-medium">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {workout.exercises.map((exercise) => (
-                  <tr key={exercise.id} className="border-t border-border/80 text-foreground">
-                    <td className="px-4 py-3">{exercise.orderIndex + 1}</td>
-                    <td className="px-4 py-3">
-                      <p className="font-medium">{exercise.exerciseName}</p>
-                      <p className="text-xs text-muted-foreground">{exercise.exerciseCode}</p>
-                    </td>
-                    <td className="px-4 py-3">{exercise.sets}</td>
-                    <td className="px-4 py-3">
-                      {exercise.repsMin ?? "-"}
-                      {exercise.repsMax ? `-${exercise.repsMax}` : ""}
-                    </td>
-                    <td className="px-4 py-3">
-                      {exercise.restSeconds ? `${exercise.restSeconds}s` : "-"}
-                    </td>
-                    <td className="px-4 py-3">{exercise.targetRpe ?? "-"}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {exercise.notes ?? "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            {workout.exercises.map((exercise) => (
+              <WorkoutExerciseEditor
+                key={exercise.id}
+                exercise={exercise}
+                isSubmitting={updateExerciseMutation.isPending}
+                isDeleting={deleteExerciseMutation.isPending}
+                onSave={async (exerciseTemplateId, payload) => {
+                  await updateExerciseMutation.mutateAsync({ exerciseTemplateId, payload });
+                }}
+                onDelete={async (exerciseTemplateId) => {
+                  await deleteExerciseMutation.mutateAsync(exerciseTemplateId);
+                }}
+              />
+            ))}
           </div>
         )}
       </div>
