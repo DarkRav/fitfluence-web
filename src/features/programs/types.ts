@@ -10,6 +10,7 @@ import type {
   AdminProgramVersionRecord,
   AdminProgramVersionsPageResult,
   AdminProgramVersionsSearchParams,
+  UpdateAdminProgramVersionPayload,
 } from "@/api/adminProgramVersions";
 import type {
   CreateInfluencerProgramPayload,
@@ -18,20 +19,35 @@ import type {
   InfluencerProgramsSearchParams,
   UpdateInfluencerProgramPayload,
 } from "@/api/influencerPrograms";
+import type {
+  CreateInfluencerProgramVersionPayload,
+  InfluencerProgramVersionRecord,
+  InfluencerProgramVersionsPageResult,
+  InfluencerProgramVersionsSearchParams,
+  UpdateInfluencerProgramVersionPayload,
+} from "@/api/influencerProgramVersions";
 
 export type ProgramsScope = "admin" | "influencer";
 
 export type ProgramRecord = InfluencerProgramRecord | AdminProgramRecord;
 export type ProgramsPageResult = InfluencerProgramsPageResult | AdminProgramsPageResult;
 
-export type ProgramVersionRecord = AdminProgramVersionRecord;
-export type ProgramVersionsPageResult = AdminProgramVersionsPageResult;
+export type ProgramVersionRecord = AdminProgramVersionRecord | InfluencerProgramVersionRecord;
+export type ProgramVersionsPageResult =
+  | AdminProgramVersionsPageResult
+  | InfluencerProgramVersionsPageResult;
 
 export type ProgramSearchParams = InfluencerProgramsSearchParams | AdminProgramsSearchParams;
 export type ProgramCreatePayload = CreateInfluencerProgramPayload | CreateAdminProgramPayload;
 export type ProgramUpdatePayload = UpdateInfluencerProgramPayload | UpdateAdminProgramPayload;
 
-export type ProgramVersionSearchParams = AdminProgramVersionsSearchParams;
+export type ProgramVersionSearchParams =
+  | AdminProgramVersionsSearchParams
+  | InfluencerProgramVersionsSearchParams;
+export type ProgramVersionCreatePayload = CreateInfluencerProgramVersionPayload;
+export type ProgramVersionUpdatePayload =
+  | UpdateAdminProgramVersionPayload
+  | UpdateInfluencerProgramVersionPayload;
 
 export type ProgramsScopeConfig = {
   scope: ProgramsScope;
@@ -63,6 +79,15 @@ export type ProgramsScopeConfig = {
     searchVersions?: (
       params: ProgramVersionSearchParams,
     ) => Promise<ApiResult<ProgramVersionsPageResult>>;
+    createVersion?: (
+      programId: string,
+      payload: ProgramVersionCreatePayload,
+    ) => Promise<ApiResult<ProgramVersionRecord>>;
+    updateVersion?: (
+      programVersionId: string,
+      payload: ProgramVersionUpdatePayload,
+    ) => Promise<ApiResult<ProgramVersionRecord>>;
+    deleteVersion?: (programVersionId: string) => Promise<ApiResult<ProgramVersionRecord>>;
     publishVersion?: (programVersionId: string) => Promise<ApiResult<ProgramVersionRecord>>;
   };
 };

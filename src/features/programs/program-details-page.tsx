@@ -7,6 +7,7 @@ import { ProgramForm } from "@/features/programs/program-form";
 import { ProgramHeader } from "@/features/programs/program-header";
 import { PublishVersionDialog } from "@/features/programs/publish-version-dialog";
 import { ProgramTabs, type ProgramTabId } from "@/features/programs/program-tabs";
+import { ProgramVersionsTab } from "@/features/programs/program-versions-tab";
 import { VersionsTable } from "@/features/programs/versions-table";
 import {
   AppButton,
@@ -289,6 +290,8 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
               Редактирование недоступно для текущего scope.
             </p>
           </div>
+        ) : config.capabilities.showVersions && config.scope === "influencer" ? (
+          <ProgramVersionsTab programId={programId} config={config} />
         ) : config.capabilities.showVersions ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2">

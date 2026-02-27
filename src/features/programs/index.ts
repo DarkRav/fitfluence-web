@@ -7,6 +7,8 @@ export { ProgramDetailsPage } from "@/features/programs/program-details-page";
 export { ProgramForm } from "@/features/programs/program-form";
 export { ProgramHeader } from "@/features/programs/program-header";
 export { ProgramListPage } from "@/features/programs/program-list-page";
+export { ProgramVersionsTab } from "@/features/programs/program-versions-tab";
+export { ProgramVersionsTable } from "@/features/programs/program-versions-table";
 export { PublishVersionDialog } from "@/features/programs/publish-version-dialog";
 export { adminProgramScope } from "@/features/programs/scopes/admin-program-scope";
 export { influencerProgramScope } from "@/features/programs/scopes/influencer-program-scope";
