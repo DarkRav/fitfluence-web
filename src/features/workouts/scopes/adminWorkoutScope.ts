@@ -22,9 +22,9 @@ export const adminWorkoutScope: WorkoutsScopeConfig = {
   routes: {
     programDetails: (programId) => `/admin/programs/${programId}`,
     workoutsList: (programId, programVersionId) =>
-      `/admin/programs/${programId}/versions/${programVersionId}/workouts`,
+      `/admin/programs/${programId}?tab=workouts&version=${programVersionId}`,
     workoutDetails: (programId, programVersionId, workoutTemplateId) =>
-      `/admin/programs/${programId}/versions/${programVersionId}/workouts/${workoutTemplateId}`,
+      `/admin/programs/${programId}/workouts/${workoutTemplateId}?version=${programVersionId}`,
   },
   api: {
     listWorkouts: listAdminWorkouts,

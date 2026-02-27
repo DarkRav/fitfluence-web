@@ -30,6 +30,8 @@ type WorkoutsListPageProps = {
   programId: string;
   programVersionId: string;
   scopeName: WorkoutsScope;
+  embedded?: boolean;
+  canManage?: boolean;
 };
 
 function isForbiddenMessage(message: string): boolean {
@@ -45,6 +47,8 @@ export function WorkoutsListPage({
   programId,
   programVersionId,
   scopeName,
+  embedded = false,
+  canManage = scopeName === "influencer",
 }: WorkoutsListPageProps) {
   const scope = resolveScope(scopeName);
   const router = useRouter();
@@ -216,46 +220,66 @@ export function WorkoutsListPage({
 
   return (
     <div>
-      <div className="mb-2 text-sm text-muted-foreground">
-        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          {ru.common.labels.programs}
-        </Link>
-        {" / "}
-        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          {ru.common.labels.program}
-        </Link>
-        {" / "}
-        <span>{ru.common.labels.version}</span>
-        {" / "}
-        <span className="text-foreground">{ru.common.labels.workouts}</span>
-      </div>
+      {!embedded ? (
+        <div className="mb-2 text-sm text-muted-foreground">
+          <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
+            {ru.common.labels.programs}
+          </Link>
+          {" / "}
+          <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
+            {ru.common.labels.program}
+          </Link>
+          {" / "}
+          <span className="text-foreground">{ru.common.labels.workouts}</span>
+        </div>
+      ) : null}
 
-      <PageHeader
-        title={ru.workouts.listTitle}
-        subtitle={ru.workouts.listSubtitle}
-        actions={
-          <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
-            <div className="min-w-[220px] flex-1">
-              <AppInput
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={ru.common.placeholders.searchWorkouts}
-              />
-            </div>
-            <AppButton
-              type="button"
-              variant="secondary"
-              onClick={() => router.push(scope.routes.programDetails(programId))}
-            >
-              {ru.workouts.backToProgram}
-            </AppButton>
+      {embedded ? (
+        <div className="mb-4 flex w-full max-w-4xl flex-wrap items-center gap-2">
+          <div className="min-w-[220px] flex-1">
+            <AppInput
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={ru.common.placeholders.searchWorkouts}
+            />
+          </div>
+          {canManage ? (
             <AppButton type="button" onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               {ru.workouts.createWorkout}
             </AppButton>
-          </div>
-        }
-      />
+          ) : null}
+        </div>
+      ) : (
+        <PageHeader
+          title={ru.workouts.listTitle}
+          subtitle={ru.workouts.listSubtitle}
+          actions={
+            <div className="flex w-full max-w-4xl flex-wrap items-center gap-2">
+              <div className="min-w-[220px] flex-1">
+                <AppInput
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={ru.common.placeholders.searchWorkouts}
+                />
+              </div>
+              <AppButton
+                type="button"
+                variant="secondary"
+                onClick={() => router.push(scope.routes.programDetails(programId))}
+              >
+                {ru.workouts.backToProgram}
+              </AppButton>
+              {canManage ? (
+                <AppButton type="button" onClick={() => setCreateOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {ru.workouts.createWorkout}
+                </AppButton>
+              ) : null}
+            </div>
+          }
+        />
+      )}
 
       {listQuery.isLoading ? <LoadingState title={ru.workouts.loadError} /> : null}
 
@@ -312,22 +336,26 @@ export function WorkoutsListPage({
                         >
                           {ru.common.actions.open}
                         </AppButton>
-                        <AppButton
-                          type="button"
-                          variant="secondary"
-                          className="h-9 px-3 text-xs"
-                          onClick={() => setEditingWorkout(workout)}
-                        >
-                          {ru.common.actions.edit}
-                        </AppButton>
-                        <AppButton
-                          type="button"
-                          variant="destructive"
-                          className="h-9 px-3 text-xs"
-                          onClick={() => setDeleteWorkout(workout)}
-                        >
-                          {ru.common.actions.delete}
-                        </AppButton>
+                        {canManage ? (
+                          <AppButton
+                            type="button"
+                            variant="secondary"
+                            className="h-9 px-3 text-xs"
+                            onClick={() => setEditingWorkout(workout)}
+                          >
+                            {ru.common.actions.edit}
+                          </AppButton>
+                        ) : null}
+                        {canManage ? (
+                          <AppButton
+                            type="button"
+                            variant="destructive"
+                            className="h-9 px-3 text-xs"
+                            onClick={() => setDeleteWorkout(workout)}
+                          >
+                            {ru.common.actions.delete}
+                          </AppButton>
+                        ) : null}
                       </div>
                     </td>
                   </tr>
@@ -363,49 +391,55 @@ export function WorkoutsListPage({
         </div>
       ) : null}
 
-      <WorkoutFormDialog
-        open={createOpen}
-        mode="create"
-        isSubmitting={createMutation.isPending}
-        onOpenChange={setCreateOpen}
-        onCreate={async (payload) => {
-          await createMutation.mutateAsync(payload);
-        }}
-      />
+      {canManage ? (
+        <WorkoutFormDialog
+          open={createOpen}
+          mode="create"
+          isSubmitting={createMutation.isPending}
+          onOpenChange={setCreateOpen}
+          onCreate={async (payload) => {
+            await createMutation.mutateAsync(payload);
+          }}
+        />
+      ) : null}
 
-      <WorkoutFormDialog
-        open={Boolean(editingWorkout)}
-        mode="edit"
-        workout={editingWorkout ?? undefined}
-        isSubmitting={updateMutation.isPending}
-        onOpenChange={(open) => {
-          if (!open) {
-            setEditingWorkout(null);
-          }
-        }}
-        onUpdate={async (workoutTemplateId, payload) => {
-          await updateMutation.mutateAsync({ workoutTemplateId, payload });
-        }}
-      />
+      {canManage ? (
+        <WorkoutFormDialog
+          open={Boolean(editingWorkout)}
+          mode="edit"
+          workout={editingWorkout ?? undefined}
+          isSubmitting={updateMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingWorkout(null);
+            }
+          }}
+          onUpdate={async (workoutTemplateId, payload) => {
+            await updateMutation.mutateAsync({ workoutTemplateId, payload });
+          }}
+        />
+      ) : null}
 
-      <ConfirmDeleteDialog
-        open={Boolean(deleteWorkout)}
-        title={ru.workouts.deleteConfirmTitle}
-        description={deleteWorkout ? ru.workouts.deleteConfirmDescription : ""}
-        isSubmitting={deleteMutation.isPending}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteWorkout(null);
-          }
-        }}
-        onConfirm={() => {
-          if (!deleteWorkout) {
-            return;
-          }
+      {canManage ? (
+        <ConfirmDeleteDialog
+          open={Boolean(deleteWorkout)}
+          title={ru.workouts.deleteConfirmTitle}
+          description={deleteWorkout ? ru.workouts.deleteConfirmDescription : ""}
+          isSubmitting={deleteMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteWorkout(null);
+            }
+          }}
+          onConfirm={() => {
+            if (!deleteWorkout) {
+              return;
+            }
 
-          void deleteMutation.mutateAsync(deleteWorkout.id);
-        }}
-      />
+            void deleteMutation.mutateAsync(deleteWorkout.id);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
