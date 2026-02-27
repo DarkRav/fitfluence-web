@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addExerciseToAdminWorkout, getAdminWorkout } from "@/api/adminWorkouts";
+import {
+  addExerciseToAdminWorkout,
+  deleteAdminWorkoutExercise,
+  getAdminWorkout,
+  updateAdminWorkoutExercise,
+} from "@/api/adminWorkouts";
 import { AddExerciseDialog } from "@/features/workouts/admin/add-exercise-dialog";
-import { WorkoutExercisesList } from "@/features/workouts/admin/workout-exercises-list";
+import { WorkoutExerciseEditor } from "@/features/workouts/admin/workout-exercise-editor";
 import { AppButton, ErrorState, LoadingState, PageHeader, useAppToast } from "@/shared/ui";
 
 type AdminWorkoutDetailsPageProps = {
@@ -67,6 +72,64 @@ export function AdminWorkoutDetailsPage({
       pushToast({
         kind: "error",
         title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка добавления",
+        description: message,
+      });
+    },
+  });
+
+  const updateExerciseMutation = useMutation({
+    mutationFn: async ({
+      exerciseTemplateId,
+      payload,
+    }: {
+      exerciseTemplateId: string;
+      payload: Parameters<typeof updateAdminWorkoutExercise>[1];
+    }) => {
+      const result = await updateAdminWorkoutExercise(exerciseTemplateId, payload);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.data;
+    },
+    onSuccess: async () => {
+      pushToast({
+        kind: "success",
+        title: "Exercise updated",
+        description: "Параметры упражнения сохранены.",
+      });
+      await queryClient.invalidateQueries({ queryKey: ["adminWorkout", workoutTemplateId] });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось сохранить упражнение";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка сохранения",
+        description: message,
+      });
+    },
+  });
+
+  const deleteExerciseMutation = useMutation({
+    mutationFn: async (exerciseTemplateId: string) => {
+      const result = await deleteAdminWorkoutExercise(exerciseTemplateId);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+    },
+    onSuccess: async () => {
+      pushToast({
+        kind: "success",
+        title: "Exercise removed",
+        description: "Упражнение удалено из workout.",
+      });
+      await queryClient.invalidateQueries({ queryKey: ["adminWorkout", workoutTemplateId] });
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Не удалось удалить упражнение";
+      pushToast({
+        kind: "error",
+        title: isForbiddenMessage(message) ? "Not permitted" : "Ошибка удаления",
         description: message,
       });
     },
@@ -152,7 +215,22 @@ export function AdminWorkoutDetailsPage({
             В этом workout пока нет упражнений.
           </p>
         ) : (
-          <WorkoutExercisesList items={workout.exercises} />
+          <div className="space-y-3">
+            {workout.exercises.map((exercise) => (
+              <WorkoutExerciseEditor
+                key={exercise.id}
+                exercise={exercise}
+                isSubmitting={updateExerciseMutation.isPending}
+                isDeleting={deleteExerciseMutation.isPending}
+                onSave={async (exerciseTemplateId, payload) => {
+                  await updateExerciseMutation.mutateAsync({ exerciseTemplateId, payload });
+                }}
+                onDelete={async (exerciseTemplateId) => {
+                  await deleteExerciseMutation.mutateAsync(exerciseTemplateId);
+                }}
+              />
+            ))}
+          </div>
         )}
       </div>
 
