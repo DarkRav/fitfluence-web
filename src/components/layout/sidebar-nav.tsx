@@ -2,13 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, ClipboardList, Dumbbell, ImageIcon, Repeat2, ShieldCheck } from "lucide-react";
+import {
+  BarChart3,
+  ClipboardList,
+  Dumbbell,
+  ImageIcon,
+  Repeat2,
+  ShieldCheck,
+  Target,
+  Wrench,
+} from "lucide-react";
 import { useAuth } from "@/features/auth/use-auth";
 import { cn } from "@/lib/utils";
 
 const adminItems = [
   { label: "Дашборд", href: "/admin", icon: BarChart3 },
   { label: "Медиа", href: "/admin/media", icon: ImageIcon },
+  { label: "Muscles", href: "/admin/muscles", icon: Target },
+  { label: "Equipment", href: "/admin/equipment", icon: Wrench },
   { label: "Упражнения", href: "/admin/exercises", icon: Dumbbell },
   { label: "Программы", href: "/admin/programs", icon: ClipboardList },
   { label: "Тренировки", href: "/admin/workouts", icon: ShieldCheck },
