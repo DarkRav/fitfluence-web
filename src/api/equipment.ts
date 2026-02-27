@@ -17,6 +17,8 @@ export type EquipmentRecord = {
   mediaCount: number;
 };
 
+export type EquipmentCategoryValue = EquipmentCategory;
+
 export type EquipmentPageResult = {
   items: EquipmentRecord[];
   page: number;
