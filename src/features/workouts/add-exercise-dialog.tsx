@@ -34,6 +34,17 @@ const addExerciseSchema = z.object({
 
 type AddExerciseValues = z.infer<typeof addExerciseSchema>;
 
+const defaultFormValues: AddExerciseValues = {
+  exerciseId: "",
+  sets: 3,
+  repsMin: undefined,
+  repsMax: undefined,
+  targetRpe: undefined,
+  restSeconds: 90,
+  notes: "",
+  progressionPolicyId: "",
+};
+
 type AddExerciseDialogProps = {
   scope: WorkoutsScopeConfig;
   open: boolean;
@@ -53,6 +64,7 @@ export function AddExerciseDialog({
 }: AddExerciseDialogProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [keepOpenAfterSubmit, setKeepOpenAfterSubmit] = useState(true);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -82,16 +94,7 @@ export function AddExerciseDialog({
 
   const form = useForm<AddExerciseValues>({
     resolver: zodResolver(addExerciseSchema),
-    defaultValues: {
-      exerciseId: "",
-      sets: 3,
-      repsMin: undefined,
-      repsMax: undefined,
-      targetRpe: undefined,
-      restSeconds: 90,
-      notes: "",
-      progressionPolicyId: "",
-    },
+    defaultValues: defaultFormValues,
   });
   const selectedExerciseId = useWatch({
     control: form.control,
@@ -103,18 +106,10 @@ export function AddExerciseDialog({
       return;
     }
 
-    form.reset({
-      exerciseId: "",
-      sets: 3,
-      repsMin: undefined,
-      repsMax: undefined,
-      targetRpe: undefined,
-      restSeconds: 90,
-      notes: "",
-      progressionPolicyId: "",
-    });
+    form.reset(defaultFormValues);
     setSearch("");
     setDebouncedSearch("");
+    setKeepOpenAfterSubmit(true);
   }, [form, open]);
 
   const progressionQuery = useQuery({
@@ -168,7 +163,21 @@ export function AddExerciseDialog({
                   ? values.progressionPolicyId
                   : undefined,
             });
-            onOpenChange(false);
+            if (!keepOpenAfterSubmit) {
+              onOpenChange(false);
+              return;
+            }
+
+            form.reset({
+              ...defaultFormValues,
+              sets: values.sets,
+              repsMin: values.repsMin,
+              repsMax: values.repsMax,
+              targetRpe: values.targetRpe,
+              restSeconds: values.restSeconds,
+              notes: values.notes,
+              progressionPolicyId: values.progressionPolicyId,
+            });
           })}
         >
           <div className="space-y-2">
@@ -310,6 +319,23 @@ export function AddExerciseDialog({
             {progressionQuery.isError ? (
               <p className="text-xs text-destructive">{progressionQuery.error.message}</p>
             ) : null}
+          </div>
+
+          <div className="rounded-lg border border-border bg-sidebar/35 p-3">
+            <label className="flex cursor-pointer items-start gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={keepOpenAfterSubmit}
+                onChange={(event) => setKeepOpenAfterSubmit(event.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-border"
+              />
+              <span>
+                <span className="font-medium">{ru.workouts.keepDialogOpen}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {ru.workouts.keepDialogOpenHint}
+                </span>
+              </span>
+            </label>
           </div>
 
           <AppDialogFooter>

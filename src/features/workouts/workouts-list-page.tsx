@@ -125,7 +125,7 @@ export function WorkoutsListPage({
 
       return result.data;
     },
-    onSuccess: async () => {
+    onSuccess: async (workout) => {
       pushToast({
         kind: "success",
         title: ru.workouts.created,
@@ -135,6 +135,7 @@ export function WorkoutsListPage({
       await queryClient.invalidateQueries({
         queryKey: [...scope.queryKeys.list, programVersionId],
       });
+      router.push(scope.routes.workoutDetails(programId, programVersionId, workout.id));
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : ru.workouts.createError;

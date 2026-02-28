@@ -260,6 +260,8 @@ export const ru = {
     unknownSourceBase: "База",
     selectExerciseValidation: "Выберите упражнение",
     addExerciseDescription: "Найдите упражнение и задайте стартовые параметры.",
+    keepDialogOpen: "Оставлять окно открытым после добавления",
+    keepDialogOpenHint: "Удобно для быстрого добавления нескольких упражнений подряд.",
     fillTemplateParams: "Заполните базовые параметры шаблона тренировки.",
     advancedFormTitle: "Дополнительные параметры",
     unnamedWorkout: "Без названия",
