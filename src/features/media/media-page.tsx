@@ -89,6 +89,7 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
     () => (
       <div className="flex w-full flex-wrap items-center gap-2">
         <AppInput
+          className="w-full sm:w-[320px]"
           value={search}
           onChange={(event) => {
             setSearch(event.target.value);

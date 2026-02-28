@@ -21,6 +21,7 @@ export function ReferenceToolbar({
   return (
     <div className="flex w-full flex-wrap items-center gap-2">
       <AppInput
+        className="w-full sm:w-[320px]"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder={searchPlaceholder}
