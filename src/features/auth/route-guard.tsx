@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { getInfluencerProfile } from "@/api/influencerProfile";
 import { LoadingState } from "@/shared/ui";
 import { useAuth } from "@/features/auth/use-auth";
 
@@ -23,9 +22,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const requiredRole = resolveRequiredRole(pathname);
-  const isInfluencerSection = pathname.startsWith("/influencer");
-  const isInfluencerProfilePage = pathname.startsWith("/influencer/profile");
-  const [isCheckingInfluencerProfile, setIsCheckingInfluencerProfile] = useState(false);
+  const [isRedirectingToOnboarding, setIsRedirectingToOnboarding] = useState(false);
 
   useEffect(() => {
     if (auth.status === "anonymous") {
@@ -39,47 +36,34 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   }, [auth, requiredRole, router]);
 
   useEffect(() => {
-    let isCancelled = false;
-
-    if (
-      auth.status !== "authenticated" ||
-      !auth.hasRole("INFLUENCER") ||
-      !isInfluencerSection ||
-      isInfluencerProfilePage
-    ) {
-      setIsCheckingInfluencerProfile(false);
-      return () => {
-        isCancelled = true;
-      };
+    if (auth.status !== "authenticated") {
+      setIsRedirectingToOnboarding(false);
+      return;
     }
 
-    setIsCheckingInfluencerProfile(true);
+    if (
+      auth.me?.onboarding.requiresAthleteProfile ||
+      auth.me?.onboarding.requiresInfluencerProfile
+    ) {
+      setIsRedirectingToOnboarding(true);
+      router.replace("/onboarding");
+      return;
+    }
 
-    void getInfluencerProfile().then((result) => {
-      if (isCancelled) {
-        return;
-      }
-
-      if (!result.ok && result.error.kind === "not_found") {
-        const returnTo = encodeURIComponent(pathname);
-        router.replace(`/influencer/profile?onboarding=1&returnTo=${returnTo}`);
-        return;
-      }
-
-      setIsCheckingInfluencerProfile(false);
-    });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [auth, isInfluencerProfilePage, isInfluencerSection, pathname, router]);
+    setIsRedirectingToOnboarding(false);
+  }, [
+    auth.me?.onboarding.requiresAthleteProfile,
+    auth.me?.onboarding.requiresInfluencerProfile,
+    auth.status,
+    router,
+  ]);
 
   if (auth.status !== "authenticated") {
     return <LoadingState title="Проверяем доступ..." />;
   }
 
-  if (isCheckingInfluencerProfile) {
-    return <LoadingState title="Проверяем профиль инфлюэнсера..." />;
+  if (isRedirectingToOnboarding) {
+    return <LoadingState title="Требуется завершить onboarding..." />;
   }
 
   if (requiredRole && !auth.hasRole(requiredRole)) {

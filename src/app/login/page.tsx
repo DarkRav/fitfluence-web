@@ -14,12 +14,23 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (auth.status === "authenticated") {
+      if (
+        auth.me?.onboarding.requiresInfluencerProfile ||
+        auth.me?.onboarding.requiresAthleteProfile
+      ) {
+        router.replace("/onboarding");
+        return;
+      }
       if (auth.hasRole("ADMIN")) {
-        router.replace("/admin");
+        router.replace("/admin/programs");
         return;
       }
       if (auth.hasRole("INFLUENCER")) {
-        router.replace("/influencer");
+        router.replace("/influencer/programs");
+        return;
+      }
+      if (auth.hasRole("ATHLETE")) {
+        router.replace("/athlete");
         return;
       }
       router.replace("/forbidden");

@@ -28,7 +28,7 @@ function resolveLandingPath(roles: string[]): string {
   }
 
   if (roles.includes("ATHLETE")) {
-    return "/forbidden";
+    return "/athlete";
   }
 
   return "/forbidden";

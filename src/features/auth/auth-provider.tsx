@@ -10,7 +10,11 @@ import type { AuthState, AppRole } from "@/features/auth/types";
 type AuthContextValue = AuthState & {
   signIn: () => Promise<void>;
   signUp: () => Promise<void>;
-  completeSignIn: () => Promise<AppRole[]>;
+  completeSignIn: () => Promise<{
+    roles: AppRole[];
+    requiresAthleteProfile: boolean;
+    requiresInfluencerProfile: boolean;
+  }>;
   logout: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
   refreshMe: () => Promise<void>;
@@ -105,7 +109,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         me: null,
         roles: [],
       });
-      return [];
+      return {
+        roles: [],
+        requiresAthleteProfile: false,
+        requiresInfluencerProfile: false,
+      };
     }
 
     const roles = normalizeRoles(meResult.data.roles);
@@ -115,7 +123,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       me: meResult.data,
       roles,
     }));
-    return roles;
+    return {
+      roles,
+      requiresAthleteProfile: meResult.data.onboarding.requiresAthleteProfile,
+      requiresInfluencerProfile: meResult.data.onboarding.requiresInfluencerProfile,
+    };
   }, []);
 
   const logout = useCallback(async () => {

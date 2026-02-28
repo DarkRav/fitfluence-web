@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getInfluencerProfile } from "@/api/influencerProfile";
 import { LoadingState, PageHeader } from "@/shared/ui";
 import { useAuth } from "@/features/auth/use-auth";
 
@@ -12,7 +11,11 @@ function resolveLandingPath(roles: string[]): string {
   }
 
   if (roles.includes("INFLUENCER")) {
-    return "/influencer";
+    return "/influencer/programs";
+  }
+
+  if (roles.includes("ATHLETE")) {
+    return "/athlete";
   }
 
   return "/forbidden";
@@ -25,16 +28,13 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const complete = async () => {
       try {
-        const roles = await auth.completeSignIn();
-        if (roles.includes("INFLUENCER")) {
-          const profileResult = await getInfluencerProfile();
-          if (!profileResult.ok && profileResult.error.kind === "not_found") {
-            router.replace("/influencer/profile?onboarding=1");
-            return;
-          }
+        const result = await auth.completeSignIn();
+        if (result.requiresInfluencerProfile || result.requiresAthleteProfile) {
+          router.replace("/onboarding");
+          return;
         }
 
-        router.replace(resolveLandingPath(roles));
+        router.replace(resolveLandingPath(result.roles));
       } catch {
         router.replace("/login");
       }
