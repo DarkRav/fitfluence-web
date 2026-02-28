@@ -77,10 +77,15 @@ export function resolveOnboardingEntryPath(
   },
 ): string {
   const onboarding: OnboardingFlags = me.onboarding;
+  const hasAnyProfile = me.profiles.athleteProfileExists || me.profiles.influencerProfileExists;
   const noProfiles = !me.profiles.athleteProfileExists && !me.profiles.influencerProfileExists;
   const hasInfluencerAccess =
     me.roles.includes("INFLUENCER") || me.profiles.influencerProfileExists;
   const hasAdminAccess = me.roles.includes("ADMIN");
+
+  if (hasAnyProfile && !options?.manualChoice) {
+    return resolveRoleHomePath(me);
+  }
 
   if (onboarding.requiresInfluencerProfile && !onboarding.requiresAthleteProfile) {
     return withReturnTo("/onboarding/influencer", options?.returnTo);
