@@ -19,7 +19,14 @@ import type {
 } from "@/features/programs/types";
 import { WorkoutsListPage } from "@/features/workouts/workouts-list-page";
 import { ru } from "@/localization/ru";
-import { AppButton, EmptyState, ErrorState, LoadingState, useAppToast } from "@/shared/ui";
+import {
+  AppBreadcrumbs,
+  AppButton,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  useAppToast,
+} from "@/shared/ui";
 
 type ProgramDetailsPageProps = {
   programId: string;
@@ -321,6 +328,12 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
 
   return (
     <>
+      <AppBreadcrumbs
+        items={[
+          { label: ru.common.labels.programs, href: config.routes.list },
+          { label: program.title || ru.common.labels.program },
+        ]}
+      />
       <ProgramPageLayout
         header={
           <ProgramHeader

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GripVertical } from "lucide-react";
@@ -16,7 +15,14 @@ import { AddExerciseDialog } from "@/features/workouts/add-exercise-dialog";
 import { ReorderableExercisesList } from "@/features/workouts/reorderable-exercises-list";
 import { WorkoutExerciseEditor } from "@/features/workouts/workout-exercise-editor";
 import { ru } from "@/localization/ru";
-import { AppButton, ErrorState, LoadingState, PageHeader, useAppToast } from "@/shared/ui";
+import {
+  AppBreadcrumbs,
+  AppButton,
+  ErrorState,
+  LoadingState,
+  PageHeader,
+  useAppToast,
+} from "@/shared/ui";
 
 type WorkoutDetailsPageProps = {
   programId: string;
@@ -271,26 +277,17 @@ export function WorkoutDetailsPage({
 
   return (
     <div className="space-y-4">
-      <div className="mb-2 text-sm text-muted-foreground">
-        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          {ru.common.labels.programs}
-        </Link>
-        {" / "}
-        <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-          {ru.common.labels.program}
-        </Link>
-        {" / "}
-        <Link
-          className="hover:text-secondary"
-          href={scope.routes.workoutsList(programId, programVersionId)}
-        >
-          {ru.common.labels.workouts}
-        </Link>
-        {" / "}
-        <span className="text-foreground">
-          {workout.title?.trim() || ru.workouts.workoutBreadcrumbFallback}
-        </span>
-      </div>
+      <AppBreadcrumbs
+        items={[
+          { label: ru.common.labels.programs, href: scope.routes.programDetails(programId) },
+          { label: ru.common.labels.program, href: scope.routes.programDetails(programId) },
+          {
+            label: ru.common.labels.workouts,
+            href: scope.routes.workoutsList(programId, programVersionId),
+          },
+          { label: workout.title?.trim() || ru.workouts.workoutBreadcrumbFallback },
+        ]}
+      />
 
       <PageHeader
         title={workout.title ?? `${ru.common.labels.dayOrder} ${workout.dayOrder}`}

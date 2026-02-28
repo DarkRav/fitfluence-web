@@ -3,6 +3,7 @@ export { AppInput } from "./app-input";
 export { AppSelect, type SelectOption } from "./app-select";
 export { AppTextarea } from "./app-textarea";
 export { AppDialog } from "./app-dialog";
+export { AppBreadcrumbs } from "./app-breadcrumbs";
 export { AppTable } from "./app-table";
 export { PageHeader } from "./page-header";
 export { LoadingState } from "./loading-state";

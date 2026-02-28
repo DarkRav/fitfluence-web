@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -17,6 +16,7 @@ import type {
   WorkoutsScopeConfig,
 } from "@/features/workouts/types";
 import {
+  AppBreadcrumbs,
   AppButton,
   AppInput,
   EmptyState,
@@ -221,17 +221,13 @@ export function WorkoutsListPage({
   return (
     <div>
       {!embedded ? (
-        <div className="mb-2 text-sm text-muted-foreground">
-          <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-            {ru.common.labels.programs}
-          </Link>
-          {" / "}
-          <Link className="hover:text-secondary" href={scope.routes.programDetails(programId)}>
-            {ru.common.labels.program}
-          </Link>
-          {" / "}
-          <span className="text-foreground">{ru.common.labels.workouts}</span>
-        </div>
+        <AppBreadcrumbs
+          items={[
+            { label: ru.common.labels.programs, href: scope.routes.programDetails(programId) },
+            { label: ru.common.labels.program, href: scope.routes.programDetails(programId) },
+            { label: ru.common.labels.workouts },
+          ]}
+        />
       ) : null}
 
       {embedded ? (
