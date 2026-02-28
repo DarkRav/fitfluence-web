@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/api";
+import { getMe } from "@/api/me";
 
 export function useMeQuery() {
   return useQuery({
     queryKey: ["me"],
     queryFn: async () => {
-      const result = await api.me.get();
+      const result = await getMe();
       if (!result.ok) {
         throw result.error;
       }
