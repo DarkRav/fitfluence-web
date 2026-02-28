@@ -202,6 +202,7 @@ export const ru = {
     versionPicker: {
       selectVersion: "Выберите версию",
       createVersion: "Создать версию",
+      currentVersion: "Текущая версия",
       noVersionsTitle: "Версии программы отсутствуют",
       noVersionsDescription: "Создайте версию, чтобы перейти к настройке тренировок.",
     },

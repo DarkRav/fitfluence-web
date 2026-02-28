@@ -89,7 +89,7 @@ export function ProgramsTable({ items, showOwner = false, onOpen }: ProgramsTabl
                       onOpen(item);
                     }}
                   >
-                    {ru.common.actions.open} / {ru.common.actions.edit}
+                    {ru.common.actions.open}
                   </AppButton>
                 </div>
               </td>
