@@ -37,7 +37,12 @@ function resolveLandingPath(roles: string[]): string {
 function resolvePendingSteps(
   requiresInfluencerProfile: boolean,
   requiresAthleteProfile: boolean,
+  preferredFirstStep?: OnboardingStep | null,
 ): OnboardingStep[] {
+  if (requiresInfluencerProfile && requiresAthleteProfile && preferredFirstStep) {
+    return preferredFirstStep === "ATHLETE" ? ["ATHLETE", "INFLUENCER"] : ["INFLUENCER", "ATHLETE"];
+  }
+
   const steps: OnboardingStep[] = [];
   if (requiresInfluencerProfile) {
     steps.push("INFLUENCER");
@@ -61,10 +66,12 @@ function parseInteger(value: string): number | undefined {
   if (!value.trim()) {
     return undefined;
   }
+
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
     return undefined;
   }
+
   return Math.round(parsed);
 }
 
@@ -72,11 +79,13 @@ function parseFloatNumber(value: string): number | undefined {
   if (!value.trim()) {
     return undefined;
   }
+
   const normalized = value.replace(",", ".");
   const parsed = Number(normalized);
   if (!Number.isFinite(parsed)) {
     return undefined;
   }
+
   return parsed;
 }
 
@@ -84,7 +93,9 @@ export function OnboardingPage() {
   const router = useRouter();
   const auth = useAuth();
   const { pushToast } = useAppToast();
+
   const [stepIndex, setStepIndex] = useState(0);
+  const [preferredFirstStep, setPreferredFirstStep] = useState<OnboardingStep | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -99,16 +110,18 @@ export function OnboardingPage() {
   const [heightCm, setHeightCm] = useState("");
   const [weightKg, setWeightKg] = useState("");
 
+  const requiresInfluencerProfile = Boolean(auth.me?.onboarding.requiresInfluencerProfile);
+  const requiresAthleteProfile = Boolean(auth.me?.onboarding.requiresAthleteProfile);
+  const needsRoleChoice =
+    requiresInfluencerProfile && requiresAthleteProfile && !preferredFirstStep;
+
   const steps = useMemo(
     () =>
-      resolvePendingSteps(
-        Boolean(auth.me?.onboarding.requiresInfluencerProfile),
-        Boolean(auth.me?.onboarding.requiresAthleteProfile),
-      ),
-    [auth.me?.onboarding.requiresAthleteProfile, auth.me?.onboarding.requiresInfluencerProfile],
+      resolvePendingSteps(requiresInfluencerProfile, requiresAthleteProfile, preferredFirstStep),
+    [preferredFirstStep, requiresAthleteProfile, requiresInfluencerProfile],
   );
 
-  const currentStep = steps[stepIndex] ?? null;
+  const currentStep = needsRoleChoice ? null : (steps[stepIndex] ?? null);
 
   useEffect(() => {
     if (auth.status === "anonymous") {
@@ -130,10 +143,24 @@ export function OnboardingPage() {
       return;
     }
 
-    if (stepIndex >= steps.length) {
+    if (!needsRoleChoice && stepIndex >= steps.length) {
       setStepIndex(steps.length - 1);
     }
-  }, [auth.me?.profiles.athleteProfileExists, auth.roles, auth.status, router, stepIndex, steps]);
+  }, [
+    auth.me?.profiles.athleteProfileExists,
+    auth.roles,
+    auth.status,
+    needsRoleChoice,
+    router,
+    stepIndex,
+    steps,
+  ]);
+
+  useEffect(() => {
+    if (preferredFirstStep) {
+      setStepIndex(0);
+    }
+  }, [preferredFirstStep]);
 
   if (auth.status !== "authenticated") {
     return (
@@ -219,9 +246,11 @@ export function OnboardingPage() {
         <PageHeader
           title="Завершение регистрации"
           subtitle={
-            steps.length > 1
-              ? `Шаг ${stepIndex + 1} из ${steps.length}`
-              : "Нужно заполнить профиль перед началом работы."
+            needsRoleChoice
+              ? "Выберите, в каком режиме вы начинаете работу."
+              : steps.length > 1
+                ? `Шаг ${stepIndex + 1} из ${steps.length}`
+                : "Нужно заполнить профиль перед началом работы."
           }
         />
 
@@ -231,7 +260,46 @@ export function OnboardingPage() {
           </div>
         ) : null}
 
-        {currentStep === "INFLUENCER" ? (
+        {needsRoleChoice ? (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Кто вы?</h2>
+              <p className="text-sm text-muted-foreground">
+                Выберите основной сценарий. Это определит порядок шагов onboarding.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setPreferredFirstStep("ATHLETE")}
+                className={`rounded-xl border p-4 text-left transition ${
+                  preferredFirstStep === "ATHLETE"
+                    ? "border-secondary/50 bg-secondary/15"
+                    : "border-border bg-sidebar/30 hover:bg-sidebar/50"
+                }`}
+              >
+                <p className="font-semibold text-foreground">Я атлет</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Сначала заполнить спортивный профиль.
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreferredFirstStep("INFLUENCER")}
+                className={`rounded-xl border p-4 text-left transition ${
+                  preferredFirstStep === "INFLUENCER"
+                    ? "border-secondary/50 bg-secondary/15"
+                    : "border-border bg-sidebar/30 hover:bg-sidebar/50"
+                }`}
+              >
+                <p className="font-semibold text-foreground">Я инфлюэнсер</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Сначала заполнить публичный профиль.
+                </p>
+              </button>
+            </div>
+          </div>
+        ) : currentStep === "INFLUENCER" ? (
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold text-foreground">
@@ -355,9 +423,15 @@ export function OnboardingPage() {
         )}
 
         <div className="mt-6 flex justify-end">
-          <AppButton type="button" disabled={isSubmitting || !currentStep} onClick={onSubmitStep}>
-            {isSubmitting ? "Сохраняем..." : "Создать профиль"}
-          </AppButton>
+          {needsRoleChoice ? (
+            <AppButton type="button" disabled={!preferredFirstStep} onClick={() => setStepIndex(0)}>
+              Продолжить
+            </AppButton>
+          ) : (
+            <AppButton type="button" disabled={isSubmitting || !currentStep} onClick={onSubmitStep}>
+              {isSubmitting ? "Сохраняем..." : "Создать профиль"}
+            </AppButton>
+          )}
         </div>
       </section>
     </main>
