@@ -74,16 +74,30 @@ export function resolveOnboardingEntryPath(
 ): string {
   const onboarding: OnboardingFlags = me.onboarding;
   const noProfiles = !me.profiles.athleteProfileExists && !me.profiles.influencerProfileExists;
+  const hasInfluencerAccess =
+    me.roles.includes("INFLUENCER") || me.profiles.influencerProfileExists;
+  const hasAdminAccess = me.roles.includes("ADMIN");
 
   if (onboarding.requiresInfluencerProfile && !onboarding.requiresAthleteProfile) {
     return withReturnTo("/onboarding/influencer", options?.returnTo);
   }
 
   if (onboarding.requiresAthleteProfile && !onboarding.requiresInfluencerProfile) {
+    if (hasInfluencerAccess || hasAdminAccess) {
+      return resolveRoleHomePath(me);
+    }
     return withReturnTo("/onboarding/athlete", options?.returnTo);
   }
 
-  if (onboarding.requiresAthleteProfile || onboarding.requiresInfluencerProfile || noProfiles) {
+  if (onboarding.requiresInfluencerProfile) {
+    return withReturnTo("/onboarding/influencer", options?.returnTo);
+  }
+
+  if (onboarding.requiresAthleteProfile && !(hasInfluencerAccess || hasAdminAccess)) {
+    return withReturnTo("/onboarding/athlete", options?.returnTo);
+  }
+
+  if (noProfiles) {
     return withReturnTo("/onboarding", options?.returnTo);
   }
 

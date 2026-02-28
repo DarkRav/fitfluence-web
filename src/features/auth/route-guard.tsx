@@ -44,17 +44,14 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const needsOnboarding =
-      Boolean(me?.onboarding.requiresInfluencerProfile) ||
-      Boolean(me?.onboarding.requiresAthleteProfile);
+    if (!me) {
+      setIsRedirectingToOnboarding(false);
+      return;
+    }
 
-    if (needsOnboarding) {
-      if (!me) {
-        return;
-      }
-
+    const onboardingPath = resolveOnboardingEntryPath(me, { returnTo: pathname });
+    if (onboardingPath.startsWith("/onboarding")) {
       setIsRedirectingToOnboarding(true);
-      const onboardingPath = resolveOnboardingEntryPath(me, { returnTo: pathname });
       router.replace(onboardingPath);
       return;
     }
