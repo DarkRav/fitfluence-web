@@ -83,6 +83,10 @@ export function resolveOnboardingEntryPath(
     me.roles.includes("INFLUENCER") || me.profiles.influencerProfileExists;
   const hasAdminAccess = me.roles.includes("ADMIN");
 
+  if (options?.manualChoice) {
+    return withReturnTo("/onboarding", options.returnTo);
+  }
+
   if (hasAnyProfile && !options?.manualChoice) {
     return resolveRoleHomePath(me);
   }
@@ -108,10 +112,6 @@ export function resolveOnboardingEntryPath(
 
   if (noProfiles) {
     return withReturnTo("/onboarding", options?.returnTo);
-  }
-
-  if (options?.manualChoice) {
-    return withReturnTo("/onboarding", options.returnTo);
   }
 
   return resolveRoleHomePath(me);
