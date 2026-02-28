@@ -31,7 +31,7 @@ function resolveLandingPath(roles: string[]): string {
     return "/athlete";
   }
 
-  return "/welcome";
+  return "/forbidden";
 }
 
 function resolvePendingSteps(

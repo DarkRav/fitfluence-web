@@ -28,7 +28,7 @@ function resolveLandingPath(
     return "/athlete";
   }
 
-  return "/welcome";
+  return "/forbidden";
 }
 
 export default function AuthCallbackPage() {

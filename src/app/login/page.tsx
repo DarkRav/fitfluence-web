@@ -37,7 +37,7 @@ export default function LoginPage() {
         router.replace("/athlete");
         return;
       }
-      router.replace("/welcome");
+      router.replace("/forbidden");
     }
   }, [auth, router]);
 
