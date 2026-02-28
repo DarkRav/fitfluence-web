@@ -83,10 +83,7 @@ export function MediaUploadDialog({
       }}
     >
       <Dialog.Trigger asChild>
-        <AppButton
-          variant={triggerVariant}
-          className={triggerVariant === "primary" ? "shadow-glow" : ""}
-        >
+        <AppButton variant={triggerVariant}>
           <Upload className="mr-2 h-4 w-4" />
           {triggerLabel}
         </AppButton>

@@ -87,17 +87,15 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
 
   const actions = useMemo(
     () => (
-      <div className="flex w-full flex-wrap items-start gap-2">
-        <div className="min-w-[220px] flex-1">
-          <AppInput
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setPage(0);
-            }}
-            placeholder="Поиск по ID или тегу"
-          />
-        </div>
+      <div className="flex w-full flex-wrap items-center gap-2">
+        <AppInput
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(0);
+          }}
+          placeholder="Поиск по ID или тегу"
+        />
         {isAdmin ? (
           <>
             <div className="w-[210px]">
@@ -129,7 +127,7 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
             </div>
           </>
         ) : null}
-        <MediaUploadDialog role={role} />
+        <MediaUploadDialog role={role} triggerLabel="Создать" />
       </div>
     ),
     [isAdmin, isOwnerIdInvalid, ownerId, ownerType, role, search],
