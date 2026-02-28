@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -210,13 +209,6 @@ export function InfluencerProfilePage() {
       <PageHeader
         title={onboardingMode ? ru.profile.titleCreate : ru.profile.titleEdit}
         subtitle={onboardingMode ? ru.profile.subtitleCreate : ru.profile.subtitleEdit}
-        actions={
-          !onboardingMode ? (
-            <AppButton asChild variant="secondary">
-              <Link href="/onboarding">Открыть onboarding</Link>
-            </AppButton>
-          ) : undefined
-        }
       />
 
       <form
