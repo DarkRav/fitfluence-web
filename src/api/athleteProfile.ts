@@ -18,7 +18,7 @@ export type AthleteProfileRecord = {
   updatedAt?: string;
 };
 
-export type UpsertAthleteProfilePayload = CreateAthleteProfileRequest;
+export type CreateAthleteProfilePayload = CreateAthleteProfileRequest;
 
 function mapAthleteProfile(profile: AthleteProfile): AthleteProfileRecord {
   return {
@@ -45,7 +45,7 @@ export async function getAthleteProfile(): Promise<ApiResult<AthleteProfileRecor
 }
 
 export async function createAthleteProfile(
-  payload: UpsertAthleteProfilePayload,
+  payload: CreateAthleteProfilePayload,
 ): Promise<ApiResult<AthleteProfileRecord>> {
   const result = await toApiResult(
     ProfilesService.athleteProfilePost({

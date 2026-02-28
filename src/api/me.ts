@@ -32,6 +32,10 @@ export type MeRecord = {
   avatarMediaId?: string;
 };
 
+export function meRequiresOnboarding(me: MeRecord): boolean {
+  return me.onboarding.requiresInfluencerProfile || me.onboarding.requiresAthleteProfile;
+}
+
 function asObject(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object") {
     return null;

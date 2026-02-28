@@ -34,6 +34,10 @@ export type UpsertInfluencerProfilePayload = {
   socialLinks?: InfluencerSocialLink[];
 };
 
+export function isInfluencerProfileCreateSupported(): boolean {
+  return typeof ProfilesService.influencerProfilePost === "function";
+}
+
 function resolveBaseUrl(): string {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   return baseUrl && baseUrl.length > 0 ? baseUrl : "http://localhost:9876";
@@ -118,6 +122,16 @@ export async function getInfluencerProfile(): Promise<ApiResult<InfluencerProfil
 export async function createInfluencerProfile(
   payload: UpsertInfluencerProfilePayload,
 ): Promise<ApiResult<InfluencerProfileRecord>> {
+  if (!isInfluencerProfileCreateSupported()) {
+    return {
+      ok: false,
+      error: {
+        kind: "validation",
+        message: "Создание профиля инфлюэнсера не поддержано сервером",
+      },
+    };
+  }
+
   const result = await toApiResult(
     ProfilesService.influencerProfilePost({
       requestBody: normalizeCreatePayload(payload),
