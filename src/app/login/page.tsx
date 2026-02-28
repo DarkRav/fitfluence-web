@@ -16,7 +16,8 @@ export default function LoginPage() {
     if (auth.status === "authenticated") {
       const needsOnboarding =
         Boolean(auth.me?.onboarding.requiresInfluencerProfile) ||
-        Boolean(auth.me?.onboarding.requiresAthleteProfile);
+        (Boolean(auth.me?.onboarding.requiresAthleteProfile) &&
+          !Boolean(auth.me?.profiles.influencerProfileExists));
 
       if (needsOnboarding) {
         router.replace("/onboarding");
