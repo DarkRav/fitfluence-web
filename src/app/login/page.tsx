@@ -8,6 +8,7 @@ import { useAuth } from "@/features/auth/use-auth";
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegisterLoading, setIsRegisterLoading] = useState(false);
   const auth = useAuth();
   const { pushToast } = useAppToast();
 
@@ -40,6 +41,24 @@ export default function LoginPage() {
     }
   };
 
+  const onRegister = async () => {
+    setIsRegisterLoading(true);
+    try {
+      await auth.signUp();
+    } catch (error) {
+      pushToast({
+        kind: "error",
+        title: "Не удалось открыть регистрацию",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Проверьте OIDC-настройки и страницу регистрации Keycloak",
+      });
+    } finally {
+      setIsRegisterLoading(false);
+    }
+  };
+
   return (
     <main className="mx-auto flex min-h-screen max-w-lg items-center justify-center px-6">
       <section className="w-full rounded-lg border border-border bg-card p-8 shadow-card">
@@ -48,6 +67,21 @@ export default function LoginPage() {
           <AppButton className="w-full" type="button" disabled={isLoading} onClick={onSubmit}>
             {isLoading ? "Перенаправляем..." : "Войти"}
           </AppButton>
+          <AppButton
+            className="w-full"
+            type="button"
+            variant="secondary"
+            disabled={isRegisterLoading}
+            onClick={onRegister}
+          >
+            {isRegisterLoading ? "Открываем регистрацию..." : "Создать аккаунт"}
+          </AppButton>
+          <p className="text-center text-xs text-muted-foreground">
+            Регистрация выполняется на стороне Keycloak.
+            <span className="ml-1">
+              Если форма не открылась, используйте кнопку Register на странице входа.
+            </span>
+          </p>
         </div>
       </section>
     </main>

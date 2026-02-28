@@ -9,6 +9,7 @@ import type { AuthState, AppRole } from "@/features/auth/types";
 
 type AuthContextValue = AuthState & {
   signIn: () => Promise<void>;
+  signUp: () => Promise<void>;
   completeSignIn: () => Promise<AppRole[]>;
   logout: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
@@ -80,6 +81,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await oidcUserManager.signinRedirect();
   }, []);
 
+  const signUp = useCallback(async () => {
+    await oidcUserManager.signinRedirect({
+      extraQueryParams: {
+        kc_action: "register",
+      },
+    });
+  }, []);
+
   const completeSignIn = useCallback(async () => {
     const user = await oidcUserManager.signinRedirectCallback();
     setApiAccessToken(user.access_token);
@@ -126,12 +135,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       ...state,
       signIn,
+      signUp,
       completeSignIn,
       logout,
       hasRole,
       refreshMe,
     }),
-    [state, signIn, completeSignIn, logout, hasRole, refreshMe],
+    [state, signIn, signUp, completeSignIn, logout, hasRole, refreshMe],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
