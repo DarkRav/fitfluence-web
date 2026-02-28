@@ -234,7 +234,7 @@ export const ru = {
     detailsLoadError: "Не удалось загрузить тренировку",
     detailsNotFound: "Тренировка не найдена",
     detailsEmptyServer: "Пустой ответ сервера.",
-    detailsSubtitle: "Программа {programId} · Версия {programVersionId}",
+    detailsSubtitle: "Настройте упражнения, порядок и параметры текущей тренировки.",
     exerciseCount: "упражнений",
     exerciseAdded: "Упражнение добавлено в тренировку.",
     exerciseUpdated: "Параметры упражнения сохранены.",

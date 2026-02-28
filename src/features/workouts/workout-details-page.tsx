@@ -291,9 +291,7 @@ export function WorkoutDetailsPage({
 
       <PageHeader
         title={workout.title ?? `${ru.common.labels.dayOrder} ${workout.dayOrder}`}
-        subtitle={ru.workouts.detailsSubtitle
-          .replace("{programId}", programId)
-          .replace("{programVersionId}", programVersionId)}
+        subtitle={ru.workouts.detailsSubtitle}
         actions={
           <AppButton
             type="button"
