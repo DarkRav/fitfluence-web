@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const registrationUrl = buildRegistrationUrl();
+    const registrationUrl = await buildRegistrationUrl();
     if (registrationUrl && typeof window !== "undefined") {
       window.location.assign(registrationUrl);
       return;
