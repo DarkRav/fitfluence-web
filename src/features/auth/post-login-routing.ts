@@ -54,12 +54,16 @@ export function resolveRoleHomePath(me: MeRecord): string {
     return "/admin/programs";
   }
 
-  if (me.roles.includes("INFLUENCER") || me.profiles.influencerProfileExists) {
+  if (me.roles.includes("INFLUENCER")) {
     return "/influencer/programs";
   }
 
   if (me.roles.includes("ATHLETE") || me.profiles.athleteProfileExists) {
     return ATHLETE_WEB_UI_AVAILABLE ? "/athlete/catalog" : "/athlete/created";
+  }
+
+  if (me.profiles.influencerProfileExists) {
+    return "/welcome";
   }
 
   return "/onboarding";

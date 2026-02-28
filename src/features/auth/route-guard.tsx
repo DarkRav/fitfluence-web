@@ -21,17 +21,23 @@ function resolveRequiredRole(pathname: string): "ADMIN" | "INFLUENCER" | null {
 function hasAccessForRequiredRole(
   requiredRole: "ADMIN" | "INFLUENCER" | null,
   hasRole: (role: "ADMIN" | "INFLUENCER") => boolean,
-  me: { profiles: { influencerProfileExists: boolean } } | null,
 ): boolean {
   if (!requiredRole) {
     return true;
   }
 
-  if (requiredRole === "ADMIN") {
-    return hasRole("ADMIN");
+  return hasRole(requiredRole);
+}
+
+function resolveDeniedPath(
+  requiredRole: "ADMIN" | "INFLUENCER" | null,
+  me: { profiles: { influencerProfileExists: boolean } } | null,
+): string {
+  if (requiredRole === "INFLUENCER" && me?.profiles.influencerProfileExists) {
+    return "/welcome";
   }
 
-  return hasRole("INFLUENCER") || Boolean(me?.profiles.influencerProfileExists);
+  return "/forbidden";
 }
 
 export function RouteGuard({ children }: { children: React.ReactNode }) {
@@ -49,8 +55,8 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (status === "authenticated" && !hasAccessForRequiredRole(requiredRole, hasRole, me)) {
-      router.replace("/forbidden");
+    if (status === "authenticated" && !hasAccessForRequiredRole(requiredRole, hasRole)) {
+      router.replace(resolveDeniedPath(requiredRole, me));
     }
   }, [hasRole, me, pathname, requiredRole, router, status]);
 
@@ -83,8 +89,8 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     return <LoadingState title="Требуется завершить onboarding..." />;
   }
 
-  if (!hasAccessForRequiredRole(requiredRole, hasRole, me)) {
-    return <LoadingState title="Перенаправляем на страницу 403..." />;
+  if (!hasAccessForRequiredRole(requiredRole, hasRole)) {
+    return <LoadingState title="Проверяем права доступа..." />;
   }
 
   return <>{children}</>;
