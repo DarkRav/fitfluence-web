@@ -93,7 +93,7 @@ export default function LoginPage() {
           </AppButton>
           <p className="text-center text-xs text-muted-foreground">
             Регистрация выполняется на стороне Keycloak.
-            <span className="ml-1">Кнопка открывает страницу создания аккаунта.</span>
+            <span className="ml-1">После перехода нажмите Register на странице входа.</span>
           </p>
         </div>
       </section>
