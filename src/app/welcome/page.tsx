@@ -32,6 +32,8 @@ export default function WelcomePage() {
     return null;
   }
 
+  const loginLabel = auth.me?.identity.email ?? auth.me?.identity.userId ?? "не определен";
+
   const onCheckAccess = async () => {
     setIsCheckingAccess(true);
     try {
@@ -58,6 +60,9 @@ export default function WelcomePage() {
         />
 
         <div className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            Вы вошли как <span className="font-medium text-foreground">{loginLabel}</span>.
+          </p>
           <p>Обычно права назначаются автоматически или администратором системы.</p>
           <p>Нажмите «Проверить доступ», чтобы обновить статус.</p>
         </div>

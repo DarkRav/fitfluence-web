@@ -125,12 +125,15 @@ export default function OnboardingAthletePage() {
       }
     },
     onSuccess: async () => {
+      await auth.refreshMe();
+      const meResult = await getMe();
       pushToast({
         kind: "success",
         title: "Профиль атлета создан.",
+        description: meResult.ok
+          ? `Вы вошли как ${meResult.data.identity.email ?? meResult.data.identity.userId ?? "пользователь"}.`
+          : undefined,
       });
-      await auth.refreshMe();
-      const meResult = await getMe();
       if (meResult.ok) {
         router.replace(resolvePostLoginPath(meResult.data, { returnTo }));
         return;

@@ -35,6 +35,8 @@ export default function AthleteCreatedPage() {
     );
   }
 
+  const loginLabel = auth.me?.identity.email ?? auth.me?.identity.userId ?? "не определен";
+
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-10">
       <section className="w-full rounded-2xl border border-border bg-card p-8 shadow-card">
@@ -44,6 +46,9 @@ export default function AthleteCreatedPage() {
         />
 
         <div className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            Вы вошли как <span className="font-medium text-foreground">{loginLabel}</span>.
+          </p>
           <p>Веб-интерфейс атлета пока недоступен.</p>
           <p>Вы можете выйти из аккаунта или создать профиль инфлюэнсера для работы в web-admin.</p>
         </div>
