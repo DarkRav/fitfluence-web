@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppButton, PageHeader } from "@/shared/ui";
+import { resolvePostLoginPath } from "@/features/auth/post-login-routing";
 import { useAuth } from "@/features/auth/use-auth";
 
 export default function AthleteCreatedPage() {
@@ -17,11 +18,9 @@ export default function AthleteCreatedPage() {
     }
 
     if (auth.status === "authenticated" && auth.me) {
-      if (
-        auth.me.onboarding.requiresAthleteProfile ||
-        auth.me.onboarding.requiresInfluencerProfile
-      ) {
-        router.replace("/onboarding");
+      const nextPath = resolvePostLoginPath(auth.me);
+      if (nextPath !== "/athlete/created") {
+        router.replace(nextPath);
       }
     }
   }, [auth.me, auth.status, router]);
