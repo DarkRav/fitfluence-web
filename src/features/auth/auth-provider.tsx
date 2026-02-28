@@ -4,7 +4,7 @@ import { createContext, useCallback, useEffect, useMemo, useState } from "react"
 import { getMe } from "@/api/me";
 import type { MeRecord } from "@/api/me";
 import { setApiAccessToken } from "@/api/auth-token";
-import { buildRegistrationUrl, oidcUserManager } from "@/features/auth/oidc";
+import { oidcUserManager } from "@/features/auth/oidc";
 import { normalizeRoles } from "@/features/auth/roles";
 import type { AuthState, AppRole } from "@/features/auth/types";
 
@@ -97,15 +97,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = useCallback(async (options?: { returnTo?: string | null }) => {
-    const registrationUrl = buildRegistrationUrl();
-    if (registrationUrl && typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
       if (options?.returnTo) {
         window.sessionStorage.setItem(SIGNUP_RETURN_TO_KEY, options.returnTo);
       } else {
         window.sessionStorage.removeItem(SIGNUP_RETURN_TO_KEY);
       }
-      window.location.assign(registrationUrl);
-      return;
     }
 
     await oidcUserManager.signinRedirect({
