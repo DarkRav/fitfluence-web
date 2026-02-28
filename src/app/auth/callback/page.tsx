@@ -5,9 +5,15 @@ import { useRouter } from "next/navigation";
 import { LoadingState, PageHeader } from "@/shared/ui";
 import { useAuth } from "@/features/auth/use-auth";
 
-function resolveLandingPath(roles: string[]): string {
+function resolveLandingPath(
+  roles: string[],
+  profiles?: {
+    athleteProfileExists: boolean;
+    influencerProfileExists: boolean;
+  },
+): string {
   if (roles.includes("ADMIN")) {
-    return "/admin";
+    return "/admin/programs";
   }
 
   if (roles.includes("INFLUENCER")) {
@@ -18,7 +24,11 @@ function resolveLandingPath(roles: string[]): string {
     return "/athlete";
   }
 
-  return "/forbidden";
+  if (profiles?.athleteProfileExists) {
+    return "/athlete";
+  }
+
+  return "/welcome";
 }
 
 export default function AuthCallbackPage() {
@@ -34,7 +44,12 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        router.replace(resolveLandingPath(result.roles));
+        router.replace(
+          resolveLandingPath(result.roles, {
+            athleteProfileExists: result.athleteProfileExists,
+            influencerProfileExists: result.influencerProfileExists,
+          }),
+        );
       } catch {
         router.replace("/login");
       }

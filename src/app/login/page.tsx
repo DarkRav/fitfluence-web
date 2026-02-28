@@ -33,7 +33,11 @@ export default function LoginPage() {
         router.replace("/athlete");
         return;
       }
-      router.replace("/forbidden");
+      if (auth.me?.profiles.athleteProfileExists) {
+        router.replace("/athlete");
+        return;
+      }
+      router.replace("/welcome");
     }
   }, [auth, router]);
 

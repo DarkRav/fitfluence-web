@@ -31,7 +31,7 @@ function resolveLandingPath(roles: string[]): string {
     return "/athlete";
   }
 
-  return "/forbidden";
+  return "/welcome";
 }
 
 function resolvePendingSteps(
@@ -121,6 +121,11 @@ export function OnboardingPage() {
     }
 
     if (steps.length === 0) {
+      if (auth.me?.profiles.athleteProfileExists) {
+        router.replace("/athlete");
+        return;
+      }
+
       router.replace(resolveLandingPath(auth.roles));
       return;
     }
@@ -128,7 +133,7 @@ export function OnboardingPage() {
     if (stepIndex >= steps.length) {
       setStepIndex(steps.length - 1);
     }
-  }, [auth.roles, auth.status, router, stepIndex, steps]);
+  }, [auth.me?.profiles.athleteProfileExists, auth.roles, auth.status, router, stepIndex, steps]);
 
   if (auth.status !== "authenticated") {
     return (

@@ -14,6 +14,8 @@ type AuthContextValue = AuthState & {
     roles: AppRole[];
     requiresAthleteProfile: boolean;
     requiresInfluencerProfile: boolean;
+    athleteProfileExists: boolean;
+    influencerProfileExists: boolean;
   }>;
   logout: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
@@ -125,6 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         roles: [],
         requiresAthleteProfile: false,
         requiresInfluencerProfile: false,
+        athleteProfileExists: false,
+        influencerProfileExists: false,
       };
     }
 
@@ -139,6 +143,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       roles,
       requiresAthleteProfile: meResult.data.onboarding.requiresAthleteProfile,
       requiresInfluencerProfile: meResult.data.onboarding.requiresInfluencerProfile,
+      athleteProfileExists: meResult.data.profiles.athleteProfileExists,
+      influencerProfileExists: meResult.data.profiles.influencerProfileExists,
     };
   }, []);
 
