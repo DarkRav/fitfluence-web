@@ -155,44 +155,45 @@ export function InfluencerWorkoutsHubPage() {
         title={ru.workouts.title}
         subtitle={ru.workouts.hubSubtitle}
         actions={
-          <div className="flex w-full flex-wrap items-center gap-2">
-            <div className="min-w-[220px] flex-1">
-              <AppInput
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={ru.common.placeholders.searchPrograms}
-              />
+          <div className="grid w-full gap-2">
+            <AppInput
+              className="w-full sm:w-[320px]"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={ru.common.placeholders.searchPrograms}
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="min-w-[250px] flex-1">
+                <AppSelect
+                  value={selectedProgramId}
+                  onValueChange={(value) => {
+                    setSelectedProgramId(value);
+                    setSelectedProgramVersionId("");
+                  }}
+                  options={programOptions}
+                  placeholder={ru.common.placeholders.selectProgram}
+                />
+              </div>
+              <div className="min-w-[250px] flex-1">
+                <AppSelect
+                  value={selectedProgramVersionId}
+                  onValueChange={setSelectedProgramVersionId}
+                  options={versionOptions}
+                  placeholder={
+                    selectedProgramId
+                      ? ru.common.placeholders.selectVersion
+                      : ru.common.placeholders.selectProgramFirst
+                  }
+                />
+              </div>
+              <AppButton
+                type="button"
+                variant="secondary"
+                onClick={() => router.push("/influencer/programs")}
+              >
+                {ru.common.labels.programs}
+              </AppButton>
             </div>
-            <div className="min-w-[250px] flex-1">
-              <AppSelect
-                value={selectedProgramId}
-                onValueChange={(value) => {
-                  setSelectedProgramId(value);
-                  setSelectedProgramVersionId("");
-                }}
-                options={programOptions}
-                placeholder={ru.common.placeholders.selectProgram}
-              />
-            </div>
-            <div className="min-w-[250px] flex-1">
-              <AppSelect
-                value={selectedProgramVersionId}
-                onValueChange={setSelectedProgramVersionId}
-                options={versionOptions}
-                placeholder={
-                  selectedProgramId
-                    ? ru.common.placeholders.selectVersion
-                    : ru.common.placeholders.selectProgramFirst
-                }
-              />
-            </div>
-            <AppButton
-              type="button"
-              variant="secondary"
-              onClick={() => router.push("/influencer/programs")}
-            >
-              {ru.common.labels.programs}
-            </AppButton>
           </div>
         }
       />

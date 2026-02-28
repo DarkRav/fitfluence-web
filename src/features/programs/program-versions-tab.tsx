@@ -227,13 +227,16 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2">
+      <div className="grid gap-2">
+        <div>
           <AppInput
+            className="w-full sm:w-[320px]"
             value={versionsSearch}
             onChange={(event) => setVersionsSearch(event.target.value)}
             placeholder={ru.common.placeholders.searchVersions}
           />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <div className="w-[190px]">
             <AppSelect
               value={versionsStatusFilter}
@@ -248,14 +251,14 @@ export function ProgramVersionsTab({ programId, config }: ProgramVersionsTabProp
               placeholder={ru.common.labels.status}
             />
           </div>
+          <AppButton
+            type="button"
+            disabled={!config.api.createVersion}
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
+            {ru.programs.versions.createVersion}
+          </AppButton>
         </div>
-        <AppButton
-          type="button"
-          disabled={!config.api.createVersion}
-          onClick={() => setIsCreateDialogOpen(true)}
-        >
-          {ru.programs.versions.createVersion}
-        </AppButton>
       </div>
 
       <div className="rounded-xl border border-secondary/35 bg-secondary/10 px-4 py-3 text-sm text-secondary">

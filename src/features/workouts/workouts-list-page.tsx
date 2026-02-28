@@ -232,47 +232,49 @@ export function WorkoutsListPage({
       ) : null}
 
       {embedded ? (
-        <div className="mb-4 flex w-full flex-wrap items-center gap-2">
-          <div className="min-w-[220px] flex-1">
-            <AppInput
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={ru.common.placeholders.searchWorkouts}
-            />
+        <div className="mb-4 grid w-full gap-2">
+          <AppInput
+            className="w-full sm:w-[320px]"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={ru.common.placeholders.searchWorkouts}
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            {canManage ? (
+              <AppButton type="button" onClick={() => setCreateOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {ru.workouts.createWorkout}
+              </AppButton>
+            ) : null}
           </div>
-          {canManage ? (
-            <AppButton type="button" onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {ru.workouts.createWorkout}
-            </AppButton>
-          ) : null}
         </div>
       ) : (
         <PageHeader
           title={ru.workouts.listTitle}
           subtitle={ru.workouts.listSubtitle}
           actions={
-            <div className="flex w-full flex-wrap items-center gap-2">
-              <div className="min-w-[220px] flex-1">
-                <AppInput
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder={ru.common.placeholders.searchWorkouts}
-                />
-              </div>
-              <AppButton
-                type="button"
-                variant="secondary"
-                onClick={() => router.push(scope.routes.programDetails(programId))}
-              >
-                {ru.workouts.backToProgram}
-              </AppButton>
-              {canManage ? (
-                <AppButton type="button" onClick={() => setCreateOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {ru.workouts.createWorkout}
+            <div className="grid w-full gap-2">
+              <AppInput
+                className="w-full sm:w-[320px]"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={ru.common.placeholders.searchWorkouts}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <AppButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => router.push(scope.routes.programDetails(programId))}
+                >
+                  {ru.workouts.backToProgram}
                 </AppButton>
-              ) : null}
+                {canManage ? (
+                  <AppButton type="button" onClick={() => setCreateOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    {ru.workouts.createWorkout}
+                  </AppButton>
+                ) : null}
+              </div>
             </div>
           }
         />

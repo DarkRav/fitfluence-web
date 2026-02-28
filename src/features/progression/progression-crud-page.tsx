@@ -273,53 +273,56 @@ export function ProgressionCrudPage({ config }: ProgressionCrudPageProps) {
         title={config.title}
         subtitle={config.subtitle}
         actions={
-          <div className="flex w-full flex-wrap items-center gap-2">
+          <div className="grid w-full gap-2">
             <AppInput
+              className="w-full sm:w-[320px]"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={config.searchPlaceholder}
             />
-            <div className="w-[220px]">
-              <AppSelect
-                value={type}
-                onValueChange={(value) => {
-                  setType(value as (typeof typeOptions)[number]["value"]);
-                  setPage(0);
-                }}
-                options={typeOptions}
-                placeholder={ru.progression.filters.typePlaceholder}
-              />
-            </div>
-            <div className="w-[180px]">
-              <AppSelect
-                value={status}
-                onValueChange={(value) => {
-                  setStatus(value as (typeof statusOptions)[number]["value"]);
-                  setPage(0);
-                }}
-                options={statusOptions}
-                placeholder={ru.progression.filters.statusPlaceholder}
-              />
-            </div>
-            {config.capabilities.canFilterOwnerType ? (
-              <div className="w-[180px]">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="w-[220px]">
                 <AppSelect
-                  value={ownerType}
+                  value={type}
                   onValueChange={(value) => {
-                    setOwnerType(value as (typeof ownerTypeOptions)[number]["value"]);
+                    setType(value as (typeof typeOptions)[number]["value"]);
                     setPage(0);
                   }}
-                  options={ownerTypeOptions}
-                  placeholder={ru.progression.filters.ownerPlaceholder}
+                  options={typeOptions}
+                  placeholder={ru.progression.filters.typePlaceholder}
                 />
               </div>
-            ) : null}
-            {config.capabilities.canCreate ? (
-              <AppButton type="button" onClick={() => setIsCreateOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                {config.createButtonLabel}
-              </AppButton>
-            ) : null}
+              <div className="w-[180px]">
+                <AppSelect
+                  value={status}
+                  onValueChange={(value) => {
+                    setStatus(value as (typeof statusOptions)[number]["value"]);
+                    setPage(0);
+                  }}
+                  options={statusOptions}
+                  placeholder={ru.progression.filters.statusPlaceholder}
+                />
+              </div>
+              {config.capabilities.canFilterOwnerType ? (
+                <div className="w-[180px]">
+                  <AppSelect
+                    value={ownerType}
+                    onValueChange={(value) => {
+                      setOwnerType(value as (typeof ownerTypeOptions)[number]["value"]);
+                      setPage(0);
+                    }}
+                    options={ownerTypeOptions}
+                    placeholder={ru.progression.filters.ownerPlaceholder}
+                  />
+                </div>
+              ) : null}
+              {config.capabilities.canCreate ? (
+                <AppButton type="button" onClick={() => setIsCreateOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {config.createButtonLabel}
+                </AppButton>
+              ) : null}
+            </div>
           </div>
         }
       />

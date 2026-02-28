@@ -19,16 +19,19 @@ export function ExerciseToolbar({
   onCreateClick,
 }: ExerciseToolbarProps) {
   return (
-    <div className="flex w-full flex-wrap items-center gap-2">
+    <div className="grid w-full gap-2">
       <AppInput
+        className="w-full sm:w-[320px]"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder={searchPlaceholder}
       />
-      <AppButton onClick={onCreateClick}>
-        <Plus className="mr-2 h-4 w-4" />
-        {createButtonLabel}
-      </AppButton>
+      <div className="flex flex-wrap items-center gap-2">
+        <AppButton onClick={onCreateClick}>
+          <Plus className="mr-2 h-4 w-4" />
+          {createButtonLabel}
+        </AppButton>
+      </div>
     </div>
   );
 }

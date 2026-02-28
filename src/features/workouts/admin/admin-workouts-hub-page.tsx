@@ -92,21 +92,22 @@ export function AdminWorkoutsHubPage() {
         title={ru.workouts.title}
         subtitle={ru.workouts.selectProgramDescription}
         actions={
-          <div className="flex w-full flex-wrap items-center gap-2">
-            <div className="min-w-[220px] flex-1">
-              <AppInput
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={ru.common.placeholders.searchPrograms}
-              />
+          <div className="grid w-full gap-2">
+            <AppInput
+              className="w-full sm:w-[320px]"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={ru.common.placeholders.searchPrograms}
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <AppButton
+                type="button"
+                variant="secondary"
+                onClick={() => router.push("/admin/programs")}
+              >
+                {ru.common.labels.allPrograms}
+              </AppButton>
             </div>
-            <AppButton
-              type="button"
-              variant="secondary"
-              onClick={() => router.push("/admin/programs")}
-            >
-              {ru.common.labels.allPrograms}
-            </AppButton>
           </div>
         }
       />

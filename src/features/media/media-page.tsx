@@ -87,7 +87,7 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
 
   const actions = useMemo(
     () => (
-      <div className="flex w-full flex-wrap items-center gap-2">
+      <div className="grid w-full gap-2">
         <AppInput
           className="w-full sm:w-[320px]"
           value={search}
@@ -97,38 +97,40 @@ export function MediaPage({ role, title, subtitle, pickMode = false, onPick }: M
           }}
           placeholder="Поиск по ID или тегу"
         />
-        {isAdmin ? (
-          <>
-            <div className="w-[210px]">
-              <AppSelect
-                value={ownerType}
-                onValueChange={(value) => {
-                  setOwnerType(value as (typeof ownerTypeOptions)[number]["value"]);
-                  setPage(0);
-                }}
-                options={ownerTypeOptions.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-                placeholder="Тип владельца"
-              />
-            </div>
-            <div className="w-[300px]">
-              <AppInput
-                value={ownerId}
-                onChange={(event) => {
-                  setOwnerId(event.target.value);
-                  setPage(0);
-                }}
-                placeholder="ID владельца (UUID)"
-              />
-              {isOwnerIdInvalid ? (
-                <p className="mt-1 text-xs text-destructive">Укажите корректный UUID.</p>
-              ) : null}
-            </div>
-          </>
-        ) : null}
-        <MediaUploadDialog role={role} triggerLabel="Создать" />
+        <div className="flex flex-wrap items-center gap-2">
+          {isAdmin ? (
+            <>
+              <div className="w-[210px]">
+                <AppSelect
+                  value={ownerType}
+                  onValueChange={(value) => {
+                    setOwnerType(value as (typeof ownerTypeOptions)[number]["value"]);
+                    setPage(0);
+                  }}
+                  options={ownerTypeOptions.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                  placeholder="Тип владельца"
+                />
+              </div>
+              <div className="w-[300px]">
+                <AppInput
+                  value={ownerId}
+                  onChange={(event) => {
+                    setOwnerId(event.target.value);
+                    setPage(0);
+                  }}
+                  placeholder="ID владельца (UUID)"
+                />
+                {isOwnerIdInvalid ? (
+                  <p className="mt-1 text-xs text-destructive">Укажите корректный UUID.</p>
+                ) : null}
+              </div>
+            </>
+          ) : null}
+          <MediaUploadDialog role={role} triggerLabel="Создать" />
+        </div>
       </div>
     ),
     [isAdmin, isOwnerIdInvalid, ownerId, ownerType, role, search],

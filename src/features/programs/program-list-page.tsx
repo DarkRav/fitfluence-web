@@ -146,39 +146,41 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
         title={config.title}
         subtitle={config.subtitle}
         actions={
-          <div className="flex w-full flex-wrap items-center gap-2">
+          <div className="grid w-full gap-2">
             <AppInput
               className="w-full sm:w-[320px]"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={config.searchPlaceholder}
             />
-            {config.capabilities.enableStatusFilter ? (
-              <div className="w-[190px]">
-                <AppSelect
-                  value={statusFilter}
-                  onValueChange={(value) => {
-                    setStatusFilter(value as (typeof statusFilterOptions)[number]["value"]);
-                    setPage(0);
-                  }}
-                  options={statusFilterOptions.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                  placeholder={ru.common.labels.status}
-                />
-              </div>
-            ) : null}
-            {config.capabilities.canCreate ? (
-              <AppButton
-                type="button"
-                onClick={() => setIsCreateOpen(true)}
-                disabled={createMutation.isPending}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                {config.createButtonLabel}
-              </AppButton>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-2">
+              {config.capabilities.enableStatusFilter ? (
+                <div className="w-[190px]">
+                  <AppSelect
+                    value={statusFilter}
+                    onValueChange={(value) => {
+                      setStatusFilter(value as (typeof statusFilterOptions)[number]["value"]);
+                      setPage(0);
+                    }}
+                    options={statusFilterOptions.map((option) => ({
+                      value: option.value,
+                      label: option.label,
+                    }))}
+                    placeholder={ru.common.labels.status}
+                  />
+                </div>
+              ) : null}
+              {config.capabilities.canCreate ? (
+                <AppButton
+                  type="button"
+                  onClick={() => setIsCreateOpen(true)}
+                  disabled={createMutation.isPending}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {config.createButtonLabel}
+                </AppButton>
+              ) : null}
+            </div>
           </div>
         }
       />
