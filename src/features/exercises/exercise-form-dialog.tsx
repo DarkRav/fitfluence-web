@@ -49,6 +49,7 @@ type ExerciseFormDialogProps = {
   mode: "create" | "edit";
   scope: ExerciseCrudScope;
   item?: ExerciseCrudItem;
+  readOnly?: boolean;
   muscleOptions: ReferenceOption[];
   equipmentOptions: ReferenceOption[];
   isSubmitting: boolean;
@@ -91,6 +92,7 @@ export function ExerciseFormDialog({
   mode,
   scope,
   item,
+  readOnly = false,
   muscleOptions,
   equipmentOptions,
   isSubmitting,
@@ -130,15 +132,25 @@ export function ExerciseFormDialog({
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[96vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-border bg-card p-6 shadow-card focus:outline-none">
           <Dialog.Title className="text-lg font-semibold text-card-foreground">
-            {mode === "create" ? "Новое упражнение" : "Редактировать упражнение"}
+            {readOnly
+              ? "Карточка упражнения"
+              : mode === "create"
+                ? "Новое упражнение"
+                : "Редактировать упражнение"}
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-            Заполните базовые поля упражнения и сохраните изменения.
+            {readOnly
+              ? "Просмотр упражнения из общей библиотеки."
+              : "Заполните базовые поля упражнения и сохраните изменения."}
           </Dialog.Description>
 
           <form
             className="mt-4 space-y-4"
             onSubmit={form.handleSubmit(async (values) => {
+              if (readOnly) {
+                return;
+              }
+
               const payload = {
                 ...(mode === "create" ? { code: values.code.trim() } : {}),
                 name: values.name.trim(),
@@ -160,7 +172,7 @@ export function ExerciseFormDialog({
                 <AppInput
                   {...form.register("code")}
                   placeholder="BARBELL_BENCH_PRESS"
-                  disabled={mode === "edit" || isSubmitting}
+                  disabled={readOnly || mode === "edit" || isSubmitting}
                 />
                 {form.formState.errors.code ? (
                   <p className="text-xs text-destructive">{form.formState.errors.code.message}</p>
@@ -172,7 +184,7 @@ export function ExerciseFormDialog({
                 <AppInput
                   {...form.register("name")}
                   placeholder="Жим штанги лёжа"
-                  disabled={isSubmitting}
+                  disabled={readOnly || isSubmitting}
                 />
                 {form.formState.errors.name ? (
                   <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
@@ -185,7 +197,7 @@ export function ExerciseFormDialog({
               <textarea
                 {...form.register("description")}
                 placeholder="Краткая подсказка по технике"
-                disabled={isSubmitting}
+                disabled={readOnly || isSubmitting}
                 className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
               />
             </div>
@@ -202,6 +214,7 @@ export function ExerciseFormDialog({
                       onValueChange={field.onChange}
                       options={movementOptions}
                       placeholder="Выберите паттерн"
+                      className={readOnly ? "pointer-events-none opacity-80" : undefined}
                     />
                   )}
                 />
@@ -218,6 +231,7 @@ export function ExerciseFormDialog({
                       onValueChange={field.onChange}
                       options={difficultyOptions}
                       placeholder="Выберите уровень"
+                      className={readOnly ? "pointer-events-none opacity-80" : undefined}
                     />
                   )}
                 />
@@ -228,7 +242,7 @@ export function ExerciseFormDialog({
               <input
                 type="checkbox"
                 {...form.register("isBodyweight")}
-                disabled={isSubmitting}
+                disabled={readOnly || isSubmitting}
                 className="h-4 w-4 rounded border-border bg-card text-secondary"
               />
               Упражнение с весом собственного тела
@@ -243,7 +257,7 @@ export function ExerciseFormDialog({
                     value={field.value}
                     options={muscleOptions}
                     onChange={field.onChange}
-                    disabled={isSubmitting}
+                    disabled={readOnly || isSubmitting}
                   />
                 )}
               />
@@ -256,7 +270,7 @@ export function ExerciseFormDialog({
                     value={field.value}
                     options={equipmentOptions}
                     onChange={field.onChange}
-                    disabled={isSubmitting}
+                    disabled={readOnly || isSubmitting}
                   />
                 )}
               />
@@ -274,7 +288,7 @@ export function ExerciseFormDialog({
                   scope={scope}
                   mediaIds={field.value}
                   onChange={field.onChange}
-                  disabled={isSubmitting}
+                  disabled={readOnly || isSubmitting}
                 />
               )}
             />
@@ -286,11 +300,13 @@ export function ExerciseFormDialog({
                 disabled={isSubmitting}
                 onClick={() => onOpenChange(false)}
               >
-                Отмена
+                {readOnly ? "Закрыть" : "Отмена"}
               </AppButton>
-              <AppButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Сохраняем..." : "Сохранить"}
-              </AppButton>
+              {!readOnly ? (
+                <AppButton type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Сохраняем..." : "Сохранить"}
+                </AppButton>
+              ) : null}
             </div>
           </form>
 

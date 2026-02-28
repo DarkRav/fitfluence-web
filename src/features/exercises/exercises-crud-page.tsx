@@ -26,6 +26,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
   const [editingItem, setEditingItem] = useState<ExerciseCrudItem | null>(null);
+  const [isReadOnlyCard, setIsReadOnlyCard] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteItem, setDeleteItem] = useState<ExerciseCrudItem | null>(null);
   const filters = useMemo(() => ({}), []);
@@ -158,6 +159,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
       onSearchChange={setSearch}
       onCreateClick={() => {
         setEditingItem(null);
+        setIsReadOnlyCard(false);
         setIsFormOpen(true);
       }}
     />
@@ -200,6 +202,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
                     items={ownItems}
                     onEdit={(item) => {
                       setEditingItem(item);
+                      setIsReadOnlyCard(false);
                       setIsFormOpen(true);
                     }}
                     onDelete={(item) => {
@@ -218,7 +221,15 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
                   Общая библиотека
                 </h3>
                 {sharedItems.length > 0 ? (
-                  <ExercisesTable items={sharedItems} readOnly />
+                  <ExercisesTable
+                    items={sharedItems}
+                    readOnly
+                    onView={(item) => {
+                      setEditingItem(item);
+                      setIsReadOnlyCard(true);
+                      setIsFormOpen(true);
+                    }}
+                  />
                 ) : (
                   <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
                     В общей библиотеке нет упражнений по текущему фильтру.
@@ -231,6 +242,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
               items={listQuery.data.items}
               onEdit={(item) => {
                 setEditingItem(item);
+                setIsReadOnlyCard(false);
                 setIsFormOpen(true);
               }}
               onDelete={(item) => {
@@ -269,6 +281,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
         mode={editingItem ? "edit" : "create"}
         scope={config.scope}
         item={editingItem ?? undefined}
+        readOnly={isReadOnlyCard}
         muscleOptions={musclesQuery.data ?? []}
         equipmentOptions={equipmentQuery.data ?? []}
         isSubmitting={saveMutation.isPending}
@@ -276,6 +289,7 @@ export function ExercisesCrudPage({ config }: ExercisesCrudPageProps) {
           setIsFormOpen(open);
           if (!open) {
             setEditingItem(null);
+            setIsReadOnlyCard(false);
           }
         }}
         onSubmit={async (values) => {

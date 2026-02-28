@@ -52,11 +52,18 @@ function mapMovementLabel(value?: ExerciseCrudItem["movementPattern"]): string {
 type ExercisesTableProps = {
   items: ExerciseCrudItem[];
   onEdit?: (item: ExerciseCrudItem) => void;
+  onView?: (item: ExerciseCrudItem) => void;
   onDelete?: (item: ExerciseCrudItem) => void;
   readOnly?: boolean;
 };
 
-export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: ExercisesTableProps) {
+export function ExercisesTable({
+  items,
+  onEdit,
+  onView,
+  onDelete,
+  readOnly = false,
+}: ExercisesTableProps) {
   return (
     <TableContainer>
       <table className="w-full text-left text-sm">
@@ -68,9 +75,7 @@ export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: Ex
             <th className={`${tableCellClassName} font-medium`}>Мышцы</th>
             <th className={`${tableCellClassName} font-medium`}>Оборудование</th>
             <th className={`${tableCellClassName} text-center font-medium`}>Медиа</th>
-            {!readOnly ? (
-              <th className={`${tableCellClassName} text-right font-medium`}>Действия</th>
-            ) : null}
+            <th className={`${tableCellClassName} text-right font-medium`}>Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -79,6 +84,11 @@ export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: Ex
               key={item.id}
               className={`${tableRowClassName} ${readOnly ? "" : "cursor-pointer"}`}
               onClick={() => {
+                if (readOnly) {
+                  onView?.(item);
+                  return;
+                }
+
                 if (!readOnly) {
                   onEdit?.(item);
                 }
@@ -99,34 +109,48 @@ export function ExercisesTable({ items, onEdit, onDelete, readOnly = false }: Ex
                 {item.equipmentLabel || "—"}
               </td>
               <td className={`${tableCellClassName} text-center`}>{item.mediaIds.length}</td>
-              {!readOnly ? (
-                <td className={tableCellClassName}>
-                  <div className="flex items-center justify-end gap-2">
+              <td className={tableCellClassName}>
+                <div className="flex items-center justify-end gap-2">
+                  {readOnly ? (
                     <AppButton
                       type="button"
                       variant="secondary"
                       className="h-9 px-3 text-xs"
                       onClick={(event) => {
                         event.stopPropagation();
-                        onEdit?.(item);
+                        onView?.(item);
                       }}
                     >
-                      Изменить
+                      Открыть
                     </AppButton>
-                    <AppButton
-                      type="button"
-                      variant="destructive"
-                      className="h-9 px-3 text-xs"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onDelete?.(item);
-                      }}
-                    >
-                      Архивировать
-                    </AppButton>
-                  </div>
-                </td>
-              ) : null}
+                  ) : (
+                    <>
+                      <AppButton
+                        type="button"
+                        variant="secondary"
+                        className="h-9 px-3 text-xs"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onEdit?.(item);
+                        }}
+                      >
+                        Изменить
+                      </AppButton>
+                      <AppButton
+                        type="button"
+                        variant="destructive"
+                        className="h-9 px-3 text-xs"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onDelete?.(item);
+                        }}
+                      >
+                        Архивировать
+                      </AppButton>
+                    </>
+                  )}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
