@@ -138,6 +138,7 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
   const totalPages = listQuery.data?.totalPages ?? 0;
   const hasPrev = page > 0;
   const hasNext = page + 1 < totalPages;
+  const hasItems = (listQuery.data?.items.length ?? 0) > 0;
 
   return (
     <div>
@@ -191,16 +192,18 @@ export function ProgramListPage({ config }: ProgramListPageProps) {
         />
       ) : null}
 
-      {!listQuery.isLoading && !listQuery.isError && (listQuery.data?.items.length ?? 0) === 0 ? (
-        <EmptyState
-          title={ru.programs.page.emptyTitle}
-          description={
-            search ? ru.programs.page.emptyDescriptionSearch : ru.programs.page.emptyDescription
-          }
-        />
+      {!listQuery.isLoading && !listQuery.isError && !hasItems ? (
+        <div className="mt-4">
+          <EmptyState
+            title={ru.programs.page.emptyTitle}
+            description={
+              search ? ru.programs.page.emptyDescriptionSearch : ru.programs.page.emptyDescription
+            }
+          />
+        </div>
       ) : null}
 
-      {!listQuery.isLoading && !listQuery.isError && listQuery.data ? (
+      {!listQuery.isLoading && !listQuery.isError && listQuery.data && hasItems ? (
         <div className="space-y-4">
           <ProgramsTable
             items={listQuery.data.items}
