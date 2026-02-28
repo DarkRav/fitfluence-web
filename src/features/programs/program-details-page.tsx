@@ -155,6 +155,13 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
     () => versions.find((item) => item.id === selectedVersionId),
     [selectedVersionId, versions],
   );
+  const nextVersionNumber = useMemo(() => {
+    if (versions.length === 0) {
+      return 1;
+    }
+
+    return Math.max(...versions.map((item) => item.versionNumber)) + 1;
+  }, [versions]);
 
   const replaceQuery = useCallback(
     (updates: { tab?: ProgramTopTabId; version?: string }) => {
@@ -428,6 +435,7 @@ export function ProgramDetailsPage({ programId, config }: ProgramDetailsPageProp
       <ProgramVersionFormDialog
         open={isCreateVersionOpen}
         mode="create"
+        suggestedVersionNumber={nextVersionNumber}
         isSubmitting={createVersionMutation.isPending}
         onOpenChange={setIsCreateVersionOpen}
         onCreate={async (payload) => {

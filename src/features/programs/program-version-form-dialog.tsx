@@ -32,6 +32,7 @@ type ProgramVersionFormDialogProps = {
   open: boolean;
   mode: "create" | "edit";
   version?: InfluencerProgramVersionRecord;
+  suggestedVersionNumber?: number;
   isSubmitting: boolean;
   onOpenChange: (open: boolean) => void;
   onCreate?: (payload: CreateInfluencerProgramVersionPayload) => Promise<void>;
@@ -42,6 +43,7 @@ export function ProgramVersionFormDialog({
   open,
   mode,
   version,
+  suggestedVersionNumber = 1,
   isSubmitting,
   onOpenChange,
   onCreate,
@@ -55,7 +57,7 @@ export function ProgramVersionFormDialog({
   const createForm = useForm<CreateValues>({
     resolver: zodResolver(createSchema),
     defaultValues: {
-      versionNumber: 1,
+      versionNumber: suggestedVersionNumber,
       level: "",
       frequencyPerWeek: undefined,
     },
@@ -71,7 +73,11 @@ export function ProgramVersionFormDialog({
 
   useEffect(() => {
     if (mode === "create") {
-      createForm.reset({ versionNumber: 1, level: "", frequencyPerWeek: undefined });
+      createForm.reset({
+        versionNumber: suggestedVersionNumber,
+        level: "",
+        frequencyPerWeek: undefined,
+      });
       return;
     }
 
@@ -79,7 +85,7 @@ export function ProgramVersionFormDialog({
       level: version?.level ?? "",
       frequencyPerWeek: version?.frequencyPerWeek,
     });
-  }, [createForm, editForm, mode, version]);
+  }, [createForm, editForm, mode, suggestedVersionNumber, version]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
