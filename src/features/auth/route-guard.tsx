@@ -41,10 +41,12 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (
-      auth.me?.onboarding.requiresAthleteProfile ||
-      auth.me?.onboarding.requiresInfluencerProfile
-    ) {
+    const needsOnboarding =
+      Boolean(auth.me?.onboarding.requiresInfluencerProfile) ||
+      (Boolean(auth.me?.onboarding.requiresAthleteProfile) &&
+        !Boolean(auth.me?.profiles.influencerProfileExists));
+
+    if (needsOnboarding) {
       setIsRedirectingToOnboarding(true);
       router.replace("/onboarding");
       return;
@@ -52,6 +54,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
 
     setIsRedirectingToOnboarding(false);
   }, [
+    auth.me?.profiles.influencerProfileExists,
     auth.me?.onboarding.requiresAthleteProfile,
     auth.me?.onboarding.requiresInfluencerProfile,
     auth.status,

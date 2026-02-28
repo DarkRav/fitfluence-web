@@ -20,6 +20,10 @@ function resolveLandingPath(
     return "/influencer/programs";
   }
 
+  if (profiles?.influencerProfileExists) {
+    return "/influencer/programs";
+  }
+
   if (roles.includes("ATHLETE")) {
     return "/athlete";
   }
@@ -39,7 +43,11 @@ export default function AuthCallbackPage() {
     const complete = async () => {
       try {
         const result = await auth.completeSignIn();
-        if (result.requiresInfluencerProfile || result.requiresAthleteProfile) {
+        const needsOnboarding =
+          result.requiresInfluencerProfile ||
+          (result.requiresAthleteProfile && !result.influencerProfileExists);
+
+        if (needsOnboarding) {
           router.replace("/onboarding");
           return;
         }
