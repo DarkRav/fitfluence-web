@@ -118,7 +118,7 @@ export function AddExerciseDialog({
     queryFn: async () => {
       const result = await scope.api.searchProgressionPolicies({
         page: 0,
-        size: 200,
+        size: 100,
       });
       if (!result.ok) {
         throw new Error(result.error.message);
