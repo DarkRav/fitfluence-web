@@ -21,6 +21,9 @@ export const ru = {
       saveProfile: "Сохранить профиль",
       close: "Закрыть",
     },
+    messages: {
+      discardChanges: "Есть несохраненные изменения. Закрыть без сохранения?",
+    },
     labels: {
       status: "Статус",
       description: "Описание",
@@ -178,7 +181,9 @@ export const ru = {
       archiveNotSupported: "Архивация версии недоступна для этой роли",
     },
     form: {
-      goalsHint: "через запятую",
+      goalsHint: "через запятую или с новой строки",
+      advancedTitle: "Дополнительно",
+      advancedDescription: "Описание, цели и обложка можно заполнить сразу или позже.",
       influencerRequired: "Укажите инфлюэнсера",
       noInfluencers: "Инфлюэнсеры не найдены.",
       statusSelect: "Выберите статус",
@@ -256,6 +261,7 @@ export const ru = {
     selectExerciseValidation: "Выберите упражнение",
     addExerciseDescription: "Найдите упражнение и задайте стартовые параметры.",
     fillTemplateParams: "Заполните базовые параметры шаблона тренировки.",
+    advancedFormTitle: "Дополнительные параметры",
     unnamedWorkout: "Без названия",
     workoutBreadcrumbFallback: "Тренировка",
     minSetsValidation: "Минимум 1 подход",

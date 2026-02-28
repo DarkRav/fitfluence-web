@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -72,7 +72,7 @@ function parseGoals(goalsInput?: string): string[] | undefined {
   }
 
   const goals = goalsInput
-    .split(",")
+    .split(/[,;\n]/)
     .map((item) => item.trim())
     .filter(Boolean);
 
@@ -88,6 +88,7 @@ export function ProgramForm({
   onCancel,
   requireInfluencerId = false,
 }: ProgramFormProps) {
+  const isCreateMode = mode === "create";
   const [influencerSearch, setInfluencerSearch] = useState("");
   const [debouncedInfluencerSearch, setDebouncedInfluencerSearch] = useState("");
 
@@ -99,6 +100,20 @@ export function ProgramForm({
   useEffect(() => {
     form.reset(buildDefaultValues(initialValues));
   }, [form, initialValues]);
+
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!form.formState.isDirty || isSubmitting) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [form.formState.isDirty, isSubmitting]);
 
   useEffect(() => {
     if (!requireInfluencerId || mode !== "create") {
@@ -124,6 +139,65 @@ export function ProgramForm({
       return result.data;
     },
   });
+
+  const optionalFields = useMemo(
+    () => (
+      <>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">
+            {ru.common.labels.description}
+          </label>
+          <textarea
+            {...form.register("description")}
+            placeholder={ru.common.placeholders.descriptionProgram}
+            disabled={isSubmitting}
+            className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">
+            {ru.common.labels.goals} ({ru.programs.form.goalsHint})
+          </label>
+          <AppInput
+            {...form.register("goalsInput")}
+            placeholder={ru.common.placeholders.goalsComma}
+            disabled={isSubmitting}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">
+            {ru.common.labels.coverMedia}
+          </label>
+          <Controller
+            control={form.control}
+            name="coverMediaId"
+            render={({ field }) => (
+              <div className="space-y-2">
+                <MediaPicker value={field.value || undefined} onChange={field.onChange} />
+                {field.value ? (
+                  <AppButton
+                    type="button"
+                    variant="secondary"
+                    className="h-9 px-3 text-xs"
+                    onClick={() => field.onChange("")}
+                    disabled={isSubmitting}
+                  >
+                    {ru.common.actions.clearCover}
+                  </AppButton>
+                ) : null}
+              </div>
+            )}
+          />
+          {form.formState.errors.coverMediaId ? (
+            <p className="text-xs text-destructive">{form.formState.errors.coverMediaId.message}</p>
+          ) : null}
+        </div>
+      </>
+    ),
+    [form, isSubmitting],
+  );
 
   return (
     <form
@@ -209,28 +283,19 @@ export function ProgramForm({
         ) : null}
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">
-          {ru.common.labels.description}
-        </label>
-        <textarea
-          {...form.register("description")}
-          placeholder={ru.common.placeholders.descriptionProgram}
-          disabled={isSubmitting}
-          className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">
-          {ru.common.labels.goals} ({ru.programs.form.goalsHint})
-        </label>
-        <AppInput
-          {...form.register("goalsInput")}
-          placeholder={ru.common.placeholders.goalsComma}
-          disabled={isSubmitting}
-        />
-      </div>
+      {isCreateMode ? (
+        <details className="rounded-xl border border-border bg-sidebar/35 p-4">
+          <summary className="cursor-pointer text-sm font-medium text-foreground">
+            {ru.programs.form.advancedTitle}
+          </summary>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {ru.programs.form.advancedDescription}
+          </p>
+          <div className="mt-3 space-y-4">{optionalFields}</div>
+        </details>
+      ) : (
+        optionalFields
+      )}
 
       {mode === "edit" ? (
         <div className="space-y-1.5">
@@ -253,36 +318,19 @@ export function ProgramForm({
         </div>
       ) : null}
 
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">{ru.common.labels.coverMedia}</label>
-        <Controller
-          control={form.control}
-          name="coverMediaId"
-          render={({ field }) => (
-            <div className="space-y-2">
-              <MediaPicker value={field.value || undefined} onChange={field.onChange} />
-              {field.value ? (
-                <AppButton
-                  type="button"
-                  variant="secondary"
-                  className="h-9 px-3 text-xs"
-                  onClick={() => field.onChange("")}
-                  disabled={isSubmitting}
-                >
-                  {ru.common.actions.clearCover}
-                </AppButton>
-              ) : null}
-            </div>
-          )}
-        />
-        {form.formState.errors.coverMediaId ? (
-          <p className="text-xs text-destructive">{form.formState.errors.coverMediaId.message}</p>
-        ) : null}
-      </div>
-
       <div className="flex justify-end gap-2 pt-2">
         {onCancel ? (
-          <AppButton type="button" variant="secondary" disabled={isSubmitting} onClick={onCancel}>
+          <AppButton
+            type="button"
+            variant="secondary"
+            disabled={isSubmitting}
+            onClick={() => {
+              if (form.formState.isDirty && !window.confirm(ru.common.messages.discardChanges)) {
+                return;
+              }
+              onCancel();
+            }}
+          >
             {ru.common.actions.cancel}
           </AppButton>
         ) : null}

@@ -58,6 +58,20 @@ export function WorkoutFormDialog({
     form.reset(buildDefaultValues(workout));
   }, [form, workout]);
 
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!form.formState.isDirty || isSubmitting) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [form.formState.isDirty, isSubmitting]);
+
   const title = useMemo(() => {
     if (mode === "create") {
       return ru.workouts.createWorkout;
@@ -67,7 +81,21 @@ export function WorkoutFormDialog({
   }, [mode]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (
+          !nextOpen &&
+          form.formState.isDirty &&
+          !isSubmitting &&
+          !window.confirm(ru.common.messages.discardChanges)
+        ) {
+          return;
+        }
+
+        onOpenChange(nextOpen);
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[96vw] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-card focus:outline-none">
@@ -131,22 +159,47 @@ export function WorkoutFormDialog({
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">
-                {ru.common.labels.coachNote}
-              </label>
-              <textarea
-                {...form.register("coachNote")}
-                className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
-              />
-            </div>
+            {mode === "create" ? (
+              <details className="rounded-xl border border-border bg-sidebar/35 p-3">
+                <summary className="cursor-pointer text-sm font-medium text-foreground">
+                  {ru.workouts.advancedFormTitle}
+                </summary>
+                <div className="mt-3 space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">
+                    {ru.common.labels.coachNote}
+                  </label>
+                  <textarea
+                    {...form.register("coachNote")}
+                    className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+                  />
+                </div>
+              </details>
+            ) : (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
+                  {ru.common.labels.coachNote}
+                </label>
+                <textarea
+                  {...form.register("coachNote")}
+                  className="min-h-24 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+                />
+              </div>
+            )}
 
             <div className="flex justify-end gap-2">
               <AppButton
                 type="button"
                 variant="secondary"
                 disabled={isSubmitting}
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  if (
+                    form.formState.isDirty &&
+                    !window.confirm(ru.common.messages.discardChanges)
+                  ) {
+                    return;
+                  }
+                  onOpenChange(false);
+                }}
               >
                 {ru.common.actions.cancel}
               </AppButton>

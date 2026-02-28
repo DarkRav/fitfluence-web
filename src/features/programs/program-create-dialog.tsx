@@ -34,7 +34,7 @@ export function ProgramCreateDialog({
             {ru.programs.createProgram}
           </AppDialogTitle>
           <AppDialogDescription className="text-sm text-muted-foreground">
-            Заполните метаданные программы. Версии и публикация будут доступны на следующем шаге.
+            Укажите название, затем при необходимости заполните дополнительные параметры.
           </AppDialogDescription>
         </AppDialogHeader>
 
