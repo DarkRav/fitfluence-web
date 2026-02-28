@@ -22,3 +22,18 @@ const oidcSettings: UserManagerSettings = {
 };
 
 export const oidcUserManager = new UserManager(oidcSettings);
+
+export function buildRegistrationUrl(): string | null {
+  const authority = process.env.NEXT_PUBLIC_OIDC_ISSUER ?? "";
+  const clientId = process.env.NEXT_PUBLIC_OIDC_CLIENT_ID ?? "";
+  if (!authority || !clientId) {
+    return null;
+  }
+
+  const url = new URL(`${authority.replace(/\/$/, "")}/protocol/openid-connect/registrations`);
+  url.searchParams.set("client_id", clientId);
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("scope", scope);
+  url.searchParams.set("redirect_uri", redirectUri);
+  return url.toString();
+}

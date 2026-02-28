@@ -3,7 +3,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { getMe } from "@/api/me";
 import { setApiAccessToken } from "@/api/auth-token";
-import { oidcUserManager } from "@/features/auth/oidc";
+import { buildRegistrationUrl, oidcUserManager } from "@/features/auth/oidc";
 import { normalizeRoles } from "@/features/auth/roles";
 import type { AuthState, AppRole } from "@/features/auth/types";
 
@@ -93,6 +93,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           kc_action: "register",
         },
       });
+      return;
+    }
+
+    const registrationUrl = buildRegistrationUrl();
+    if (registrationUrl && typeof window !== "undefined") {
+      window.location.assign(registrationUrl);
       return;
     }
 
