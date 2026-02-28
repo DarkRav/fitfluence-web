@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -80,10 +80,12 @@ function parseFloatNumber(value?: string): number | undefined {
 
 export default function OnboardingAthletePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const auth = useAuth();
   const { pushToast } = useAppToast();
-  const returnTo = resolveAuthReturnTo(searchParams.get("returnTo"));
+  const returnTo =
+    typeof window === "undefined"
+      ? null
+      : resolveAuthReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
   const onboardingBackPath = returnTo
     ? `/onboarding?${new URLSearchParams({ returnTo }).toString()}`
     : "/onboarding";

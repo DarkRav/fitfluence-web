@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AppButton, PageHeader, useAppToast } from "@/shared/ui";
 import { resolveAuthReturnTo, resolvePostLoginPath } from "@/features/auth/post-login-routing";
 import { useAuth } from "@/features/auth/use-auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isRegisterLoading, setIsRegisterLoading] = useState(false);
   const auth = useAuth();
   const { pushToast } = useAppToast();
-  const returnTo = resolveAuthReturnTo(searchParams.get("returnTo"));
+  const returnTo =
+    typeof window === "undefined"
+      ? null
+      : resolveAuthReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
 
   useEffect(() => {
     if (auth.status === "authenticated" && auth.me) {

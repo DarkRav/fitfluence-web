@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AppButton, LoadingState, PageHeader } from "@/shared/ui";
 import {
   resolveAuthReturnTo,
@@ -12,9 +12,11 @@ import { useAuth } from "@/features/auth/use-auth";
 
 export default function OnboardingEntryPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const auth = useAuth();
-  const returnTo = resolveAuthReturnTo(searchParams.get("returnTo"));
+  const returnTo =
+    typeof window === "undefined"
+      ? null
+      : resolveAuthReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
 
   useEffect(() => {
     if (auth.status !== "authenticated" || !auth.me) {
