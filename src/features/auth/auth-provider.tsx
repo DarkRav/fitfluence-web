@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import { api } from "@/api";
+import { getMe } from "@/api/me";
 import { setApiAccessToken } from "@/api/auth-token";
 import { oidcUserManager } from "@/features/auth/oidc";
 import { normalizeRoles } from "@/features/auth/roles";
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>(initialState);
 
   const refreshMe = useCallback(async () => {
-    const meResult = await api.me.get();
+    const meResult = await getMe();
 
     if (meResult.ok) {
       const roles = normalizeRoles(meResult.data.roles);
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       accessToken: user.access_token,
       status: "loading",
     }));
-    const meResult = await api.me.get();
+    const meResult = await getMe();
     if (!meResult.ok) {
       setState({
         status: "anonymous",
