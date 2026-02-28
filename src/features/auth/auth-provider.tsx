@@ -86,11 +86,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = useCallback(async () => {
-    await oidcUserManager.signinRedirect({
-      extraQueryParams: {
-        kc_action: "register",
-      },
-    });
+    const useKcActionRegister = process.env.NEXT_PUBLIC_OIDC_USE_KC_ACTION_REGISTER === "true";
+    if (useKcActionRegister) {
+      await oidcUserManager.signinRedirect({
+        extraQueryParams: {
+          kc_action: "register",
+        },
+      });
+      return;
+    }
+
+    await oidcUserManager.signinRedirect();
   }, []);
 
   const completeSignIn = useCallback(async () => {

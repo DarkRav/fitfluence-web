@@ -90,7 +90,7 @@ export default function LoginPage() {
           <p className="text-center text-xs text-muted-foreground">
             Регистрация выполняется на стороне Keycloak.
             <span className="ml-1">
-              Если форма не открылась, используйте кнопку Register на странице входа.
+              Если форма не открылась сразу, нажмите Register на странице входа Keycloak.
             </span>
           </p>
         </div>
