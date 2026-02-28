@@ -43,8 +43,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
 
     const needsOnboarding =
       Boolean(auth.me?.onboarding.requiresInfluencerProfile) ||
-      (Boolean(auth.me?.onboarding.requiresAthleteProfile) &&
-        !Boolean(auth.me?.profiles.influencerProfileExists));
+      Boolean(auth.me?.onboarding.requiresAthleteProfile);
 
     if (needsOnboarding) {
       setIsRedirectingToOnboarding(true);

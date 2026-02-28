@@ -43,9 +43,7 @@ export default function AuthCallbackPage() {
     const complete = async () => {
       try {
         const result = await auth.completeSignIn();
-        const needsOnboarding =
-          result.requiresInfluencerProfile ||
-          (result.requiresAthleteProfile && !result.influencerProfileExists);
+        const needsOnboarding = result.requiresInfluencerProfile || result.requiresAthleteProfile;
 
         if (needsOnboarding) {
           router.replace("/onboarding");
