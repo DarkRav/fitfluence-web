@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LoadingState } from "@/shared/ui";
+import { resolveOnboardingEntryPath } from "@/features/auth/post-login-routing";
 import { useAuth } from "@/features/auth/use-auth";
 
 function resolveRequiredRole(pathname: string): "ADMIN" | "INFLUENCER" | null {
@@ -21,47 +22,47 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { status, me, hasRole } = auth;
   const requiredRole = resolveRequiredRole(pathname);
   const [isRedirectingToOnboarding, setIsRedirectingToOnboarding] = useState(false);
 
   useEffect(() => {
-    if (auth.status === "anonymous") {
-      router.replace("/login");
+    if (status === "anonymous") {
+      const query = new URLSearchParams({ returnTo: pathname });
+      router.replace(`/login?${query.toString()}`);
       return;
     }
 
-    if (auth.status === "authenticated" && requiredRole && !auth.hasRole(requiredRole)) {
+    if (status === "authenticated" && requiredRole && !hasRole(requiredRole)) {
       router.replace("/forbidden");
     }
-  }, [auth, requiredRole, router]);
+  }, [hasRole, pathname, requiredRole, router, status]);
 
   useEffect(() => {
-    if (auth.status !== "authenticated") {
+    if (status !== "authenticated") {
       setIsRedirectingToOnboarding(false);
       return;
     }
 
     const needsOnboarding =
-      Boolean(auth.me?.onboarding.requiresInfluencerProfile) ||
-      (Boolean(auth.me?.onboarding.requiresAthleteProfile) &&
-        !Boolean(auth.me?.profiles.influencerProfileExists));
+      Boolean(me?.onboarding.requiresInfluencerProfile) ||
+      Boolean(me?.onboarding.requiresAthleteProfile);
 
     if (needsOnboarding) {
+      if (!me) {
+        return;
+      }
+
       setIsRedirectingToOnboarding(true);
-      router.replace("/onboarding");
+      const onboardingPath = resolveOnboardingEntryPath(me, { returnTo: pathname });
+      router.replace(onboardingPath);
       return;
     }
 
     setIsRedirectingToOnboarding(false);
-  }, [
-    auth.me?.profiles.influencerProfileExists,
-    auth.me?.onboarding.requiresAthleteProfile,
-    auth.me?.onboarding.requiresInfluencerProfile,
-    auth.status,
-    router,
-  ]);
+  }, [me, pathname, router, status]);
 
-  if (auth.status !== "authenticated") {
+  if (status !== "authenticated") {
     return <LoadingState title="Проверяем доступ..." />;
   }
 
@@ -69,7 +70,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     return <LoadingState title="Требуется завершить onboarding..." />;
   }
 
-  if (requiredRole && !auth.hasRole(requiredRole)) {
+  if (requiredRole && !hasRole(requiredRole)) {
     return <LoadingState title="Перенаправляем на страницу 403..." />;
   }
 

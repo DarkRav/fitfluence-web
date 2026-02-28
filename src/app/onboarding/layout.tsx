@@ -7,7 +7,6 @@ import { useAuth } from "@/features/auth/use-auth";
 
 type OnboardingLayoutProps = {
   children: React.ReactNode;
-  params: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default function OnboardingLayout({ children }: OnboardingLayoutProps) {
@@ -16,7 +15,7 @@ export default function OnboardingLayout({ children }: OnboardingLayoutProps) {
 
   useEffect(() => {
     if (auth.status === "anonymous") {
-      router.replace("/login");
+      router.replace("/login?returnTo=/onboarding");
     }
   }, [auth.status, router]);
 

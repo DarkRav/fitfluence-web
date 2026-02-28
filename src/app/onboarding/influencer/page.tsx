@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -11,6 +11,8 @@ import {
   isInfluencerProfileCreateSupported,
 } from "@/api/influencerProfile";
 import { normalizeApiError } from "@/api/httpClient";
+import { getMe } from "@/api/me";
+import { resolveAuthReturnTo, resolvePostLoginPath } from "@/features/auth/post-login-routing";
 import { useAuth } from "@/features/auth/use-auth";
 import {
   AppButton,
@@ -59,9 +61,14 @@ type InfluencerFormValues = z.infer<typeof influencerSchema>;
 
 export default function OnboardingInfluencerPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const auth = useAuth();
   const { pushToast } = useAppToast();
   const createSupported = isInfluencerProfileCreateSupported();
+  const returnTo = resolveAuthReturnTo(searchParams.get("returnTo"));
+  const onboardingBackPath = returnTo
+    ? `/onboarding?${new URLSearchParams({ returnTo }).toString()}`
+    : "/onboarding";
 
   const form = useForm<InfluencerFormValues>({
     resolver: zodResolver(influencerSchema),
@@ -80,10 +87,10 @@ export default function OnboardingInfluencerPage() {
       return;
     }
 
-    if (auth.status === "authenticated" && auth.me?.profiles.influencerProfileExists) {
-      router.replace("/influencer/programs");
+    if (auth.status === "authenticated" && auth.me?.profiles.influencerProfileExists && auth.me) {
+      router.replace(resolvePostLoginPath(auth.me, { returnTo }));
     }
-  }, [auth.me?.profiles.influencerProfileExists, auth.status, router]);
+  }, [auth.me, auth.me?.profiles.influencerProfileExists, auth.status, returnTo, router]);
 
   useEffect(() => {
     if (!createSupported) {
@@ -121,7 +128,13 @@ export default function OnboardingInfluencerPage() {
         title: "Профиль инфлюэнсера создан.",
       });
       await auth.refreshMe();
-      router.replace("/me");
+      const meResult = await getMe();
+      if (meResult.ok) {
+        router.replace(resolvePostLoginPath(meResult.data, { returnTo }));
+        return;
+      }
+
+      router.replace("/influencer/programs");
     },
   });
 
@@ -264,7 +277,7 @@ export default function OnboardingInfluencerPage() {
                   type="button"
                   variant="secondary"
                   disabled={createMutation.isPending}
-                  onClick={() => router.push("/onboarding")}
+                  onClick={() => router.push(onboardingBackPath)}
                 >
                   Назад
                 </AppButton>

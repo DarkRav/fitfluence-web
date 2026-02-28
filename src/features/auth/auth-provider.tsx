@@ -2,16 +2,19 @@
 
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { getMe } from "@/api/me";
+import type { MeRecord } from "@/api/me";
 import { setApiAccessToken } from "@/api/auth-token";
 import { buildRegistrationUrl, oidcUserManager } from "@/features/auth/oidc";
 import { normalizeRoles } from "@/features/auth/roles";
 import type { AuthState, AppRole } from "@/features/auth/types";
 
 type AuthContextValue = AuthState & {
-  signIn: () => Promise<void>;
-  signUp: () => Promise<void>;
+  signIn: (options?: { returnTo?: string | null }) => Promise<void>;
+  signUp: (options?: { returnTo?: string | null }) => Promise<void>;
   completeSignIn: () => Promise<{
     roles: AppRole[];
+    me: MeRecord | null;
+    returnTo: string | null;
     requiresAthleteProfile: boolean;
     requiresInfluencerProfile: boolean;
     athleteProfileExists: boolean;
@@ -30,6 +33,8 @@ const initialState: AuthState = {
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
+
+const SIGNUP_RETURN_TO_KEY = "fitfluence:signup:returnTo";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>(initialState);
@@ -83,35 +88,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void loadUser();
   }, [loadUser]);
 
-  const signIn = useCallback(async () => {
-    await oidcUserManager.signinRedirect();
+  const signIn = useCallback(async (options?: { returnTo?: string | null }) => {
+    await oidcUserManager.signinRedirect({
+      state: {
+        returnTo: options?.returnTo ?? null,
+      },
+    });
   }, []);
 
-  const signUp = useCallback(async () => {
-    const mode = process.env.NEXT_PUBLIC_OIDC_SIGNUP_MODE ?? "login";
-
-    if (mode === "kc_action") {
-      await oidcUserManager.signinRedirect({
-        extraQueryParams: {
-          kc_action: "register",
-        },
-      });
+  const signUp = useCallback(async (options?: { returnTo?: string | null }) => {
+    const registrationUrl = buildRegistrationUrl();
+    if (registrationUrl && typeof window !== "undefined") {
+      if (options?.returnTo) {
+        window.sessionStorage.setItem(SIGNUP_RETURN_TO_KEY, options.returnTo);
+      } else {
+        window.sessionStorage.removeItem(SIGNUP_RETURN_TO_KEY);
+      }
+      window.location.assign(registrationUrl);
       return;
     }
 
-    if (mode === "registrations") {
-      const registrationUrl = buildRegistrationUrl();
-      if (registrationUrl && typeof window !== "undefined") {
-        window.location.assign(registrationUrl);
-        return;
-      }
-    }
-
-    await oidcUserManager.signinRedirect();
+    await oidcUserManager.signinRedirect({
+      extraQueryParams: {
+        kc_action: "register",
+      },
+      state: {
+        returnTo: options?.returnTo ?? null,
+      },
+    });
   }, []);
 
   const completeSignIn = useCallback(async () => {
     const user = await oidcUserManager.signinRedirectCallback();
+    const callbackState =
+      user.state && typeof user.state === "object" ? (user.state as Record<string, unknown>) : null;
+    let returnTo =
+      callbackState && typeof callbackState.returnTo === "string" ? callbackState.returnTo : null;
+    if (!returnTo && typeof window !== "undefined") {
+      returnTo = window.sessionStorage.getItem(SIGNUP_RETURN_TO_KEY);
+      window.sessionStorage.removeItem(SIGNUP_RETURN_TO_KEY);
+    }
     setApiAccessToken(user.access_token);
     setState((prev) => ({
       ...prev,
@@ -128,6 +144,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       return {
         roles: [],
+        me: null,
+        returnTo,
         requiresAthleteProfile: false,
         requiresInfluencerProfile: false,
         athleteProfileExists: false,
@@ -144,6 +162,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }));
     return {
       roles,
+      me: meResult.data,
+      returnTo,
       requiresAthleteProfile: meResult.data.onboarding.requiresAthleteProfile,
       requiresInfluencerProfile: meResult.data.onboarding.requiresInfluencerProfile,
       athleteProfileExists: meResult.data.profiles.athleteProfileExists,

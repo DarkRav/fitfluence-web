@@ -1,27 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppButton, PageHeader, useAppToast } from "@/shared/ui";
+import { resolveAuthReturnTo, resolvePostLoginPath } from "@/features/auth/post-login-routing";
 import { useAuth } from "@/features/auth/use-auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isRegisterLoading, setIsRegisterLoading] = useState(false);
   const auth = useAuth();
   const { pushToast } = useAppToast();
+  const returnTo = resolveAuthReturnTo(searchParams.get("returnTo"));
 
   useEffect(() => {
-    if (auth.status === "authenticated") {
-      router.replace("/me");
+    if (auth.status === "authenticated" && auth.me) {
+      router.replace(resolvePostLoginPath(auth.me, { returnTo }));
     }
-  }, [auth, router]);
+  }, [auth.me, auth.status, returnTo, router]);
 
   const onSubmit = async () => {
     setIsLoading(true);
     try {
-      await auth.signIn();
+      await auth.signIn({ returnTo });
     } catch (error) {
       pushToast({
         kind: "error",
@@ -36,7 +39,7 @@ export default function LoginPage() {
   const onRegister = async () => {
     setIsRegisterLoading(true);
     try {
-      await auth.signUp();
+      await auth.signUp({ returnTo });
     } catch (error) {
       pushToast({
         kind: "error",

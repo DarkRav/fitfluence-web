@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createAthleteProfile } from "@/api/athleteProfile";
 import { normalizeApiError } from "@/api/httpClient";
+import { getMe } from "@/api/me";
+import { resolveAuthReturnTo, resolvePostLoginPath } from "@/features/auth/post-login-routing";
 import { useAuth } from "@/features/auth/use-auth";
 import {
   AppButton,
@@ -78,8 +80,13 @@ function parseFloatNumber(value?: string): number | undefined {
 
 export default function OnboardingAthletePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const auth = useAuth();
   const { pushToast } = useAppToast();
+  const returnTo = resolveAuthReturnTo(searchParams.get("returnTo"));
+  const onboardingBackPath = returnTo
+    ? `/onboarding?${new URLSearchParams({ returnTo }).toString()}`
+    : "/onboarding";
 
   const form = useForm<AthleteFormValues>({
     resolver: zodResolver(athleteSchema),
@@ -97,10 +104,10 @@ export default function OnboardingAthletePage() {
       return;
     }
 
-    if (auth.status === "authenticated" && auth.me?.profiles.athleteProfileExists) {
-      router.replace("/athlete");
+    if (auth.status === "authenticated" && auth.me?.profiles.athleteProfileExists && auth.me) {
+      router.replace(resolvePostLoginPath(auth.me, { returnTo }));
     }
-  }, [auth.me?.profiles.athleteProfileExists, auth.status, router]);
+  }, [auth.me, auth.me?.profiles.athleteProfileExists, auth.status, returnTo, router]);
 
   const createMutation = useMutation({
     mutationFn: async (values: AthleteFormValues) => {
@@ -121,7 +128,13 @@ export default function OnboardingAthletePage() {
         title: "Профиль атлета создан.",
       });
       await auth.refreshMe();
-      router.replace("/me");
+      const meResult = await getMe();
+      if (meResult.ok) {
+        router.replace(resolvePostLoginPath(meResult.data, { returnTo }));
+        return;
+      }
+
+      router.replace("/athlete/created");
     },
   });
 
@@ -244,7 +257,7 @@ export default function OnboardingAthletePage() {
               type="button"
               variant="secondary"
               disabled={createMutation.isPending}
-              onClick={() => router.push("/onboarding")}
+              onClick={() => router.push(onboardingBackPath)}
             >
               Назад
             </AppButton>
