@@ -146,7 +146,7 @@ export default function OnboardingInfluencerPage() {
       <section className="w-full rounded-2xl border border-border bg-card p-8 shadow-card">
         <PageHeader
           title="Создание профиля инфлюэнсера"
-          subtitle="Заполните данные профиля инфлюэнсера для завершения onboarding."
+          subtitle="Укажите публичные данные профиля. Всё можно обновить позже."
         />
 
         {!createSupported ? (
@@ -172,40 +172,56 @@ export default function OnboardingInfluencerPage() {
                 await createMutation.mutateAsync(values);
               })}
             >
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Отображаемое имя</label>
-                <AppInput
-                  {...form.register("displayName")}
-                  placeholder="Например: Анна Fit"
-                  disabled={createMutation.isPending}
-                />
-                <p className="text-xs text-muted-foreground">Поле `displayName` из OpenAPI.</p>
+              <div className="rounded-xl border border-border bg-sidebar/35 p-4">
+                <p className="text-sm font-medium text-foreground">Публичная информация</p>
+
+                <div className="mt-3 space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">
+                      Отображаемое имя{" "}
+                      <span className="text-muted-foreground">(необязательно)</span>
+                    </label>
+                    <AppInput
+                      {...form.register("displayName")}
+                      placeholder="Например: Анна Fit"
+                      disabled={createMutation.isPending}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">
+                      О себе <span className="text-muted-foreground">(необязательно)</span>
+                    </label>
+                    <AppTextarea
+                      {...form.register("bio")}
+                      placeholder="Кратко расскажите о себе"
+                      disabled={createMutation.isPending}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">О себе</label>
-                <AppTextarea
-                  {...form.register("bio")}
-                  placeholder="Кратко расскажите о себе"
-                  disabled={createMutation.isPending}
-                />
-                <p className="text-xs text-muted-foreground">Поле `bio` из OpenAPI.</p>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">ID аватара (UUID)</label>
-                <AppInput
-                  {...form.register("avatarMediaId")}
-                  placeholder="Необязательно"
-                  disabled={createMutation.isPending}
-                />
-                {form.formState.errors.avatarMediaId ? (
-                  <p className="text-xs text-destructive">
-                    {form.formState.errors.avatarMediaId.message}
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">Поле `avatarMediaId` из OpenAPI.</p>
-                )}
+              <div className="rounded-xl border border-border bg-sidebar/35 p-4">
+                <p className="text-sm font-medium text-foreground">Аватар</p>
+                <div className="mt-3 space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">
+                    ID аватара (UUID) <span className="text-muted-foreground">(необязательно)</span>
+                  </label>
+                  <AppInput
+                    {...form.register("avatarMediaId")}
+                    placeholder="Например: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    disabled={createMutation.isPending}
+                  />
+                  {form.formState.errors.avatarMediaId ? (
+                    <p className="text-xs text-destructive">
+                      {form.formState.errors.avatarMediaId.message}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Если поле пустое, аватар можно добавить позже.
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="rounded-xl border border-border bg-sidebar/40 p-4">
@@ -239,11 +255,19 @@ export default function OnboardingInfluencerPage() {
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Поле `socialLinks` из OpenAPI (тип + URL).
+                  Заполните оба поля вместе: тип и URL.
                 </p>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-between gap-2">
+                <AppButton
+                  type="button"
+                  variant="secondary"
+                  disabled={createMutation.isPending}
+                  onClick={() => router.push("/onboarding")}
+                >
+                  Назад
+                </AppButton>
                 <AppButton type="submit" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Создаем..." : "Создать профиль"}
                 </AppButton>

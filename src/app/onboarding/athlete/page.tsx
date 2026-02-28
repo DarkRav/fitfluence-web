@@ -22,8 +22,17 @@ import {
 const athleteSchema = z.object({
   goalsInput: z.string().optional(),
   level: z.string().optional(),
-  heightCm: z.string().optional(),
-  weightKg: z.string().optional(),
+  heightCm: z
+    .string()
+    .optional()
+    .refine((value) => !value?.trim() || Number(value) > 0, "Рост должен быть больше 0"),
+  weightKg: z
+    .string()
+    .optional()
+    .refine(
+      (value) => !value?.trim() || Number(value.replace(",", ".")) > 0,
+      "Вес должен быть больше 0",
+    ),
 });
 
 type AthleteFormValues = z.infer<typeof athleteSchema>;
@@ -137,7 +146,7 @@ export default function OnboardingAthletePage() {
       <section className="w-full rounded-2xl border border-border bg-card p-8 shadow-card">
         <PageHeader
           title="Создание профиля атлета"
-          subtitle="Заполните данные профиля атлета для завершения onboarding."
+          subtitle="Укажите базовые параметры. Все поля можно заполнить позже."
         />
 
         {createError ? (
@@ -159,54 +168,86 @@ export default function OnboardingAthletePage() {
             await createMutation.mutateAsync(values);
           })}
         >
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Цели</label>
-            <AppTextarea
-              {...form.register("goalsInput")}
-              placeholder="Например: снижение веса, выносливость"
-              disabled={createMutation.isPending}
-            />
-            <p className="text-xs text-muted-foreground">
-              Поле `goals` из OpenAPI. Можно перечислить через запятую или с новой строки.
-            </p>
-          </div>
+          <div className="rounded-xl border border-border bg-sidebar/35 p-4">
+            <p className="text-sm font-medium text-foreground">Цели и уровень</p>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Уровень подготовки</label>
-            <AppInput
-              {...form.register("level")}
-              placeholder="Например: начальный"
-              disabled={createMutation.isPending}
-            />
-            <p className="text-xs text-muted-foreground">Поле `level` из OpenAPI.</p>
-          </div>
+            <div className="mt-3 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
+                  Цели <span className="text-muted-foreground">(необязательно)</span>
+                </label>
+                <AppTextarea
+                  {...form.register("goalsInput")}
+                  placeholder="Например: снижение веса, выносливость"
+                  disabled={createMutation.isPending}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Можно перечислить через запятую или с новой строки.
+                </p>
+              </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Рост (см)</label>
-              <AppInput
-                type="number"
-                {...form.register("heightCm")}
-                placeholder="Необязательно"
-                disabled={createMutation.isPending}
-              />
-              <p className="text-xs text-muted-foreground">Поле `heightCm` (integer).</p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Вес (кг)</label>
-              <AppInput
-                type="number"
-                step="0.1"
-                {...form.register("weightKg")}
-                placeholder="Необязательно"
-                disabled={createMutation.isPending}
-              />
-              <p className="text-xs text-muted-foreground">Поле `weightKg` (number).</p>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
+                  Уровень подготовки <span className="text-muted-foreground">(необязательно)</span>
+                </label>
+                <AppInput
+                  {...form.register("level")}
+                  placeholder="Например: начальный"
+                  disabled={createMutation.isPending}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="rounded-xl border border-border bg-sidebar/35 p-4">
+            <p className="text-sm font-medium text-foreground">Физические параметры</p>
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
+                  Рост (см) <span className="text-muted-foreground">(необязательно)</span>
+                </label>
+                <AppInput
+                  type="number"
+                  {...form.register("heightCm")}
+                  placeholder="Например: 180"
+                  disabled={createMutation.isPending}
+                />
+                {form.formState.errors.heightCm ? (
+                  <p className="text-xs text-destructive">
+                    {form.formState.errors.heightCm.message}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
+                  Вес (кг) <span className="text-muted-foreground">(необязательно)</span>
+                </label>
+                <AppInput
+                  type="number"
+                  step="0.1"
+                  {...form.register("weightKg")}
+                  placeholder="Например: 74.5"
+                  disabled={createMutation.isPending}
+                />
+                {form.formState.errors.weightKg ? (
+                  <p className="text-xs text-destructive">
+                    {form.formState.errors.weightKg.message}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-between gap-2">
+            <AppButton
+              type="button"
+              variant="secondary"
+              disabled={createMutation.isPending}
+              onClick={() => router.push("/onboarding")}
+            >
+              Назад
+            </AppButton>
             <AppButton type="submit" disabled={createMutation.isPending}>
               {createMutation.isPending ? "Создаем..." : "Создать профиль"}
             </AppButton>
