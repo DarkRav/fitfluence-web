@@ -112,7 +112,7 @@ export default function OnboardingAthletePage() {
         title: "Профиль атлета создан.",
       });
       await auth.refreshMe();
-      router.replace("/athlete");
+      router.replace("/me");
     },
   });
 

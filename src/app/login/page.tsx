@@ -14,37 +14,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (auth.status === "authenticated") {
-      const needsOnboarding =
-        Boolean(auth.me?.onboarding.requiresInfluencerProfile) ||
-        (Boolean(auth.me?.onboarding.requiresAthleteProfile) &&
-          !Boolean(auth.me?.profiles.influencerProfileExists));
-
-      if (needsOnboarding) {
-        router.replace("/onboarding");
-        return;
-      }
-
-      if (auth.hasRole("ADMIN")) {
-        router.replace("/admin/programs");
-        return;
-      }
-      if (auth.hasRole("INFLUENCER")) {
-        router.replace("/influencer/programs");
-        return;
-      }
-      if (auth.me?.profiles.influencerProfileExists) {
-        router.replace("/influencer/programs");
-        return;
-      }
-      if (auth.hasRole("ATHLETE")) {
-        router.replace("/athlete");
-        return;
-      }
-      if (auth.me?.profiles.athleteProfileExists) {
-        router.replace("/athlete");
-        return;
-      }
-      router.replace("/forbidden");
+      router.replace("/me");
     }
   }, [auth, router]);
 

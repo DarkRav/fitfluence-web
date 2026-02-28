@@ -12,27 +12,9 @@ function resolveLandingPath(
     influencerProfileExists: boolean;
   },
 ): string {
-  if (roles.includes("ADMIN")) {
-    return "/admin/programs";
-  }
-
-  if (roles.includes("INFLUENCER")) {
-    return "/influencer/programs";
-  }
-
-  if (profiles?.influencerProfileExists) {
-    return "/influencer/programs";
-  }
-
-  if (roles.includes("ATHLETE")) {
-    return "/athlete";
-  }
-
-  if (profiles?.athleteProfileExists) {
-    return "/athlete";
-  }
-
-  return "/forbidden";
+  void roles;
+  void profiles;
+  return "/me";
 }
 
 export default function AuthCallbackPage() {
@@ -43,15 +25,6 @@ export default function AuthCallbackPage() {
     const complete = async () => {
       try {
         const result = await auth.completeSignIn();
-        const needsOnboarding =
-          result.requiresInfluencerProfile ||
-          (result.requiresAthleteProfile && !result.influencerProfileExists);
-
-        if (needsOnboarding) {
-          router.replace("/onboarding");
-          return;
-        }
-
         router.replace(
           resolveLandingPath(result.roles, {
             athleteProfileExists: result.athleteProfileExists,

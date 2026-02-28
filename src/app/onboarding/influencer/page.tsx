@@ -121,7 +121,7 @@ export default function OnboardingInfluencerPage() {
         title: "Профиль инфлюэнсера создан.",
       });
       await auth.refreshMe();
-      router.replace("/influencer/programs");
+      router.replace("/me");
     },
   });
 
