@@ -43,12 +43,52 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Scripts
 
 - `npm run dev` — dev server
-- `npm run build` — production build
+- `npm run build` — production static build (outputs `out/`)
+- `npm run build:artifact` — build and prepare Docker artifact in `dist/`
 - `npm run start` — run built app
 - `npm run lint` — eslint
 - `npm run typecheck` — TypeScript checks
 - `npm run format` — prettier
 - `npm run gen:api` — regenerate OpenAPI client into `src/api/gen`
+
+## Production Environment
+
+All `NEXT_PUBLIC_*` values are embedded at build time. For Docker release you must
+set production values before running `npm run build:artifact`.
+
+Required variables:
+
+- `NEXT_PUBLIC_API_BASE_URL`
+- `NEXT_PUBLIC_OIDC_ISSUER`
+- `NEXT_PUBLIC_OIDC_CLIENT_ID`
+- `NEXT_PUBLIC_OIDC_REDIRECT_URI`
+- `NEXT_PUBLIC_OIDC_SCOPE`
+
+Optional variables:
+
+- `NEXT_PUBLIC_OIDC_USE_KC_ACTION_REGISTER`
+
+## Docker (Production)
+
+1. Build frontend artifact:
+
+```bash
+npm ci
+cp .env.production.example .env.local # replace with real production values
+npm run build:artifact
+```
+
+2. Build Docker image:
+
+```bash
+docker build -t <dockerhub-user>/fitfluence-web:latest .
+```
+
+3. Run container:
+
+```bash
+docker run --rm -p 8080:80 <dockerhub-user>/fitfluence-web:latest
+```
 
 ## Auth Flow
 

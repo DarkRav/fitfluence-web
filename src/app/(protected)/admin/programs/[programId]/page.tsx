@@ -6,6 +6,10 @@ type AdminProgramDetailsRoutePageProps = {
   }>;
 };
 
+export async function generateStaticParams() {
+  return [{ programId: "__placeholder__" }];
+}
+
 export default async function AdminProgramDetailsRoutePage({
   params,
 }: AdminProgramDetailsRoutePageProps) {

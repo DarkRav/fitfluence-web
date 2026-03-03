@@ -1,0 +1,10 @@
+*
+
+!.dockerignore
+!Dockerfile
+!nginx/
+!nginx/default.conf
+!dist/
+!dist/**
+!build/
+!build/**

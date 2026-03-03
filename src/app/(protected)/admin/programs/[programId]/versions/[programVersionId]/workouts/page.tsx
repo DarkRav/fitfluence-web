@@ -7,6 +7,10 @@ type AdminProgramVersionWorkoutsRoutePageProps = {
   }>;
 };
 
+export async function generateStaticParams() {
+  return [{ programId: "__placeholder__", programVersionId: "__placeholder__" }];
+}
+
 export default async function AdminProgramVersionWorkoutsRoutePage({
   params,
 }: AdminProgramVersionWorkoutsRoutePageProps) {

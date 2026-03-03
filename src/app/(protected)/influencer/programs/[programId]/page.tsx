@@ -6,6 +6,10 @@ type InfluencerProgramDetailsRoutePageProps = {
   }>;
 };
 
+export async function generateStaticParams() {
+  return [{ programId: "__placeholder__" }];
+}
+
 export default async function InfluencerProgramDetailsRoutePage({
   params,
 }: InfluencerProgramDetailsRoutePageProps) {
