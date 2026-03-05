@@ -22,7 +22,7 @@ import { ru } from "@/localization/ru";
 import { AppButton, AppInput, AppTextarea } from "@/shared/ui";
 
 const addExerciseSchema = z.object({
-  exerciseId: z.string().uuid(ru.workouts.selectExerciseValidation),
+  exerciseId: z.string().trim().min(1, ru.workouts.selectExerciseValidation),
   sets: z.number().int().min(1, ru.workouts.minSetsValidation),
   repsMin: z.number().int().min(1).optional(),
   repsMax: z.number().int().min(1).optional(),
@@ -199,7 +199,13 @@ export function AddExerciseDialog({
           <div className="grid gap-3 md:grid-cols-3">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">{ru.common.labels.sets}</label>
-              <AppInput type="number" min={1} {...form.register("sets", { valueAsNumber: true })} />
+              <AppInput
+                type="number"
+                min={1}
+                {...form.register("sets", {
+                  setValueAs: (value) => (value === "" ? Number.NaN : Number(value)),
+                })}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
@@ -208,7 +214,9 @@ export function AddExerciseDialog({
               <AppInput
                 type="number"
                 min={1}
-                {...form.register("repsMin", { valueAsNumber: true })}
+                {...form.register("repsMin", {
+                  setValueAs: (value) => (value === "" ? undefined : Number(value)),
+                })}
               />
             </div>
             <div className="space-y-1.5">
@@ -218,7 +226,9 @@ export function AddExerciseDialog({
               <AppInput
                 type="number"
                 min={1}
-                {...form.register("repsMax", { valueAsNumber: true })}
+                {...form.register("repsMax", {
+                  setValueAs: (value) => (value === "" ? undefined : Number(value)),
+                })}
               />
             </div>
           </div>
@@ -233,7 +243,9 @@ export function AddExerciseDialog({
                 min={1}
                 max={10}
                 step="0.5"
-                {...form.register("targetRpe", { valueAsNumber: true })}
+                {...form.register("targetRpe", {
+                  setValueAs: (value) => (value === "" ? undefined : Number(value)),
+                })}
               />
             </div>
             <div className="space-y-1.5">
@@ -243,7 +255,9 @@ export function AddExerciseDialog({
               <AppInput
                 type="number"
                 min={0}
-                {...form.register("restSeconds", { valueAsNumber: true })}
+                {...form.register("restSeconds", {
+                  setValueAs: (value) => (value === "" ? undefined : Number(value)),
+                })}
               />
             </div>
           </div>
