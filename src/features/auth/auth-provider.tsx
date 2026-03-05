@@ -202,25 +202,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     persistReturnTo(SIGNIN_RETURN_TO_KEY, null);
     persistReturnTo(SIGNUP_RETURN_TO_KEY, null);
 
+    let idTokenHint: string | undefined;
     try {
-      await oidcUserManager.signoutRedirect();
-      return;
+      const currentUser = await oidcUserManager.getUser();
+      idTokenHint = currentUser?.id_token;
     } catch {
-      try {
-        await oidcUserManager.removeUser();
-        await oidcUserManager.clearStaleState();
-      } catch {
-        // Ignore cleanup failures and proceed with local logout state.
-      }
+      idTokenHint = undefined;
+    }
 
-      setApiAccessToken(null);
-      setState({
-        status: "anonymous",
-        accessToken: null,
-        me: null,
-        roles: [],
-      });
+    try {
+      await oidcUserManager.removeUser();
+      await oidcUserManager.clearStaleState();
+    } catch {
+      // Ignore cleanup failures and continue with local state reset.
+    }
 
+    setApiAccessToken(null);
+    setState({
+      status: "anonymous",
+      accessToken: null,
+      me: null,
+      roles: [],
+    });
+
+    try {
+      await oidcUserManager.signoutRedirect(
+        idTokenHint
+          ? {
+              id_token_hint: idTokenHint,
+            }
+          : undefined,
+      );
+    } catch {
       if (typeof window !== "undefined") {
         window.location.replace("/login");
       }

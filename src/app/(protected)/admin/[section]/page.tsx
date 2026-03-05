@@ -4,10 +4,6 @@ type SectionPageProps = {
   params: Promise<{ section: string }>;
 };
 
-export async function generateStaticParams() {
-  return [{ section: "__placeholder__" }];
-}
-
 export default async function AdminSectionPage({ params }: SectionPageProps) {
   const { section } = await params;
 

@@ -40,6 +40,15 @@ function resolveDeniedPath(
   return "/forbidden";
 }
 
+function resolveReturnTo(pathname: string): string {
+  if (typeof window === "undefined") {
+    return pathname;
+  }
+
+  const query = window.location.search;
+  return query ? `${pathname}${query}` : pathname;
+}
+
 export function RouteGuard({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const router = useRouter();
@@ -49,8 +58,9 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   const [isRedirectingToOnboarding, setIsRedirectingToOnboarding] = useState(false);
 
   useEffect(() => {
+    const returnTo = resolveReturnTo(pathname);
     if (status === "anonymous") {
-      const query = new URLSearchParams({ returnTo: pathname });
+      const query = new URLSearchParams({ returnTo });
       router.replace(`/login?${query.toString()}`);
       return;
     }
@@ -71,7 +81,8 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const onboardingPath = resolveOnboardingEntryPath(me, { returnTo: pathname });
+    const returnTo = resolveReturnTo(pathname);
+    const onboardingPath = resolveOnboardingEntryPath(me, { returnTo });
     if (onboardingPath.startsWith("/onboarding")) {
       setIsRedirectingToOnboarding(true);
       router.replace(onboardingPath);

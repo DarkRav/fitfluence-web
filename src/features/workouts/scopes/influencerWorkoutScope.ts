@@ -21,12 +21,11 @@ export const influencerWorkoutScope: WorkoutsScopeConfig = {
     addExercise: ["workout-add-exercise", "influencer"],
   },
   routes: {
-    programDetails: (programId) =>
-      `/influencer/programs?programId=${encodeURIComponent(programId)}`,
+    programDetails: (programId) => `/influencer/programs/${encodeURIComponent(programId)}`,
     workoutsList: (programId, programVersionId) =>
-      `/influencer/programs?programId=${encodeURIComponent(programId)}&tab=workouts&version=${encodeURIComponent(programVersionId)}`,
+      `/influencer/programs/${encodeURIComponent(programId)}?tab=workouts&version=${encodeURIComponent(programVersionId)}`,
     workoutDetails: (programId, programVersionId, workoutTemplateId) =>
-      `/influencer/programs/${programId}/workouts/${workoutTemplateId}?version=${programVersionId}`,
+      `/influencer/programs/${encodeURIComponent(programId)}/workouts/${encodeURIComponent(workoutTemplateId)}?version=${encodeURIComponent(programVersionId)}`,
   },
   api: {
     listWorkouts: searchInfluencerWorkoutTemplates,

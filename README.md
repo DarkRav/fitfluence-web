@@ -43,8 +43,8 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Scripts
 
 - `npm run dev` — dev server
-- `npm run build` — production static build (outputs `out/`)
-- `npm run build:artifact` — build and prepare Docker artifact in `dist/`
+- `npm run build` — production build (Next standalone output in `.next/standalone`)
+- `npm run build:artifact` — build and prepare Docker runtime artifact in `dist/`
 - `npm run start` — run built app
 - `npm run lint` — eslint
 - `npm run typecheck` — TypeScript checks

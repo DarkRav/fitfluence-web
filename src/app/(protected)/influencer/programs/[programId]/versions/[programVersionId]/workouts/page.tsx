@@ -7,15 +7,11 @@ type InfluencerProgramVersionWorkoutsRoutePageProps = {
   }>;
 };
 
-export async function generateStaticParams() {
-  return [{ programId: "__placeholder__", programVersionId: "__placeholder__" }];
-}
-
 export default async function InfluencerProgramVersionWorkoutsRoutePage({
   params,
 }: InfluencerProgramVersionWorkoutsRoutePageProps) {
   const { programId, programVersionId } = await params;
   redirect(
-    `/influencer/programs?programId=${encodeURIComponent(programId)}&tab=workouts&version=${encodeURIComponent(programVersionId)}`,
+    `/influencer/programs/${encodeURIComponent(programId)}?tab=workouts&version=${encodeURIComponent(programVersionId)}`,
   );
 }

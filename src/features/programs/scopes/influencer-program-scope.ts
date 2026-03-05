@@ -29,7 +29,7 @@ export const influencerProgramScope: ProgramsScopeConfig = {
   queryKeyPrefix: ["programs", "influencer"],
   routes: {
     list: "/influencer/programs",
-    details: (programId) => `/influencer/programs?programId=${encodeURIComponent(programId)}`,
+    details: (programId) => `/influencer/programs/${encodeURIComponent(programId)}`,
   },
   capabilities: {
     canCreate: true,

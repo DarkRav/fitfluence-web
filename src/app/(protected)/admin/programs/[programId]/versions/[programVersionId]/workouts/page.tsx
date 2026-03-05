@@ -7,15 +7,11 @@ type AdminProgramVersionWorkoutsRoutePageProps = {
   }>;
 };
 
-export async function generateStaticParams() {
-  return [{ programId: "__placeholder__", programVersionId: "__placeholder__" }];
-}
-
 export default async function AdminProgramVersionWorkoutsRoutePage({
   params,
 }: AdminProgramVersionWorkoutsRoutePageProps) {
   const { programId, programVersionId } = await params;
   redirect(
-    `/admin/programs?programId=${encodeURIComponent(programId)}&tab=workouts&version=${encodeURIComponent(programVersionId)}`,
+    `/admin/programs/${encodeURIComponent(programId)}?tab=workouts&version=${encodeURIComponent(programVersionId)}`,
   );
 }

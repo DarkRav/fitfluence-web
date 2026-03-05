@@ -14,7 +14,7 @@ export function InfluencerWorkoutDetailsRouteClientPage() {
 
   useEffect(() => {
     if (!version && typeof programId === "string" && programId.length > 0) {
-      router.replace(`/influencer/programs?programId=${encodeURIComponent(programId)}`);
+      router.replace(`/influencer/programs/${encodeURIComponent(programId)}`);
     }
   }, [programId, router, version]);
 

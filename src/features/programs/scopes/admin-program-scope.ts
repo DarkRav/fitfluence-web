@@ -22,7 +22,7 @@ export const adminProgramScope: ProgramsScopeConfig = {
   queryKeyPrefix: ["programs", "admin"],
   routes: {
     list: "/admin/programs",
-    details: (programId) => `/admin/programs?programId=${encodeURIComponent(programId)}`,
+    details: (programId) => `/admin/programs/${encodeURIComponent(programId)}`,
   },
   capabilities: {
     canCreate: true,

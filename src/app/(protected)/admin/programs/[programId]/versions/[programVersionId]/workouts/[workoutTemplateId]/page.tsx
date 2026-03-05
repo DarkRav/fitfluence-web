@@ -8,21 +8,11 @@ type AdminWorkoutDetailsLegacyRoutePageProps = {
   }>;
 };
 
-export async function generateStaticParams() {
-  return [
-    {
-      programId: "__placeholder__",
-      programVersionId: "__placeholder__",
-      workoutTemplateId: "__placeholder__",
-    },
-  ];
-}
-
 export default async function AdminWorkoutDetailsLegacyRoutePage({
   params,
 }: AdminWorkoutDetailsLegacyRoutePageProps) {
   const { programId, programVersionId, workoutTemplateId } = await params;
   redirect(
-    `/admin/programs/${programId}/workouts/${workoutTemplateId}?version=${programVersionId}`,
+    `/admin/programs/${encodeURIComponent(programId)}/workouts/${encodeURIComponent(workoutTemplateId)}?version=${encodeURIComponent(programVersionId)}`,
   );
 }
