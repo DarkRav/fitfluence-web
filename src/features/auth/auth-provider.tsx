@@ -76,7 +76,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loadUser = useCallback(async () => {
-    const user = await oidcUserManager.getUser();
+    let user = await oidcUserManager.getUser();
+
+    if (user?.access_token && user.expired) {
+      try {
+        user = await oidcUserManager.signinSilent();
+      } catch {
+        user = null;
+      }
+    }
 
     if (!user?.access_token || user.expired) {
       setApiAccessToken(null);
@@ -125,7 +133,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const completeSignIn = useCallback(async () => {
-    const user = await oidcUserManager.signinRedirectCallback();
+    let user;
+    try {
+      user = await oidcUserManager.signinRedirectCallback();
+    } catch (callbackError) {
+      const fallbackUser = await oidcUserManager.getUser();
+      if (!fallbackUser?.access_token || fallbackUser.expired) {
+        throw callbackError;
+      }
+      user = fallbackUser;
+    }
+
     const callbackState =
       user.state && typeof user.state === "object" ? (user.state as Record<string, unknown>) : null;
     let returnTo =
