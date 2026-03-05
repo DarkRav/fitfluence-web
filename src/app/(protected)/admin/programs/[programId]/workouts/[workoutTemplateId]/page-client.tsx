@@ -14,7 +14,7 @@ export function AdminWorkoutDetailsRouteClientPage() {
 
   useEffect(() => {
     if (!version && typeof programId === "string" && programId.length > 0) {
-      router.replace(`/admin/programs/${programId}`);
+      router.replace(`/admin/programs?programId=${encodeURIComponent(programId)}`);
     }
   }, [programId, router, version]);
 

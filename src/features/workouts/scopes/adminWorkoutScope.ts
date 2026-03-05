@@ -21,9 +21,9 @@ export const adminWorkoutScope: WorkoutsScopeConfig = {
     addExercise: ["workout-add-exercise", "admin"],
   },
   routes: {
-    programDetails: (programId) => `/admin/programs/${programId}`,
+    programDetails: (programId) => `/admin/programs?programId=${encodeURIComponent(programId)}`,
     workoutsList: (programId, programVersionId) =>
-      `/admin/programs/${programId}?tab=workouts&version=${programVersionId}`,
+      `/admin/programs?programId=${encodeURIComponent(programId)}&tab=workouts&version=${encodeURIComponent(programVersionId)}`,
     workoutDetails: (programId, programVersionId, workoutTemplateId) =>
       `/admin/programs/${programId}/workouts/${workoutTemplateId}?version=${programVersionId}`,
   },

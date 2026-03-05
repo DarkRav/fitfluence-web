@@ -15,5 +15,7 @@ export default async function InfluencerProgramVersionWorkoutsRoutePage({
   params,
 }: InfluencerProgramVersionWorkoutsRoutePageProps) {
   const { programId, programVersionId } = await params;
-  redirect(`/influencer/programs/${programId}?tab=workouts&version=${programVersionId}`);
+  redirect(
+    `/influencer/programs?programId=${encodeURIComponent(programId)}&tab=workouts&version=${encodeURIComponent(programVersionId)}`,
+  );
 }

@@ -15,5 +15,7 @@ export default async function AdminProgramVersionWorkoutsRoutePage({
   params,
 }: AdminProgramVersionWorkoutsRoutePageProps) {
   const { programId, programVersionId } = await params;
-  redirect(`/admin/programs/${programId}?tab=workouts&version=${programVersionId}`);
+  redirect(
+    `/admin/programs?programId=${encodeURIComponent(programId)}&tab=workouts&version=${encodeURIComponent(programVersionId)}`,
+  );
 }
