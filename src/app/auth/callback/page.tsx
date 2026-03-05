@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { LoadingState, PageHeader } from "@/shared/ui";
 import { resolvePostLoginPath } from "@/features/auth/post-login-routing";
@@ -9,11 +9,18 @@ import { useAuth } from "@/features/auth/use-auth";
 export default function AuthCallbackPage() {
   const router = useRouter();
   const auth = useAuth();
+  const { completeSignIn } = auth;
+  const startedRef = useRef(false);
 
   useEffect(() => {
+    if (startedRef.current) {
+      return;
+    }
+    startedRef.current = true;
+
     const complete = async () => {
       try {
-        const result = await auth.completeSignIn();
+        const result = await completeSignIn();
         if (!result.me) {
           router.replace("/login");
           return;
@@ -26,7 +33,7 @@ export default function AuthCallbackPage() {
     };
 
     void complete();
-  }, [auth, router]);
+  }, [completeSignIn, router]);
 
   return (
     <main className="mx-auto max-w-2xl p-8">
