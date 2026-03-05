@@ -199,14 +199,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    setApiAccessToken(null);
-    setState({
-      status: "anonymous",
-      accessToken: null,
-      me: null,
-      roles: [],
-    });
-    await oidcUserManager.signoutRedirect();
+    persistReturnTo(SIGNIN_RETURN_TO_KEY, null);
+    persistReturnTo(SIGNUP_RETURN_TO_KEY, null);
+
+    try {
+      await oidcUserManager.signoutRedirect();
+      return;
+    } catch {
+      try {
+        await oidcUserManager.removeUser();
+        await oidcUserManager.clearStaleState();
+      } catch {
+        // Ignore cleanup failures and proceed with local logout state.
+      }
+
+      setApiAccessToken(null);
+      setState({
+        status: "anonymous",
+        accessToken: null,
+        me: null,
+        roles: [],
+      });
+
+      if (typeof window !== "undefined") {
+        window.location.replace("/login");
+      }
+    }
   }, []);
 
   const hasRole = useCallback((role: AppRole) => state.roles.includes(role), [state.roles]);
