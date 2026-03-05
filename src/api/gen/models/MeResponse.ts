@@ -2,13 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Media } from "./Media";
+import type { MeIdentity } from "./MeIdentity";
+import type { MeOnboarding } from "./MeOnboarding";
+import type { MeProfiles } from "./MeProfiles";
 export type MeResponse = {
-  userId: string;
+  identity: MeIdentity;
   roles: Array<string>;
-  displayName?: string;
-  avatar?: Media;
-  avatarMediaId?: string;
-  email?: string;
-  createdAt?: string;
+  profiles: MeProfiles;
+  onboarding: MeOnboarding;
 };

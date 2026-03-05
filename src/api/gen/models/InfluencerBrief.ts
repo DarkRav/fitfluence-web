@@ -8,4 +8,18 @@ export type InfluencerBrief = {
   displayName: string;
   avatar?: Media;
   bio?: string;
+  /**
+   * Количество подписчиков инфлюэнсера.
+   */
+  followersCount?: number;
+  /**
+   * Количество опубликованных программ инфлюэнсера.
+   */
+  programsCount?: number | null;
+  /**
+   * Признак подписки текущего пользователя-атлета.
+   * Для неаутентифицированных запросов и пользователей без athleteProfile всегда возвращается false.
+   *
+   */
+  isFollowedByMe?: boolean;
 };

@@ -27,11 +27,25 @@ const kindClasses: Record<ToastKind, string> = {
   error: "border-destructive/30",
 };
 
+const createToastId = (): string => {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+
+  if (typeof globalThis.crypto?.getRandomValues === "function") {
+    const bytes = new Uint8Array(16);
+    globalThis.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 export function AppToastProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = React.useState<ToastItem[]>([]);
 
   const pushToast = React.useCallback((toast: Omit<ToastItem, "id">) => {
-    const id = crypto.randomUUID();
+    const id = createToastId();
     setItems((prev) => [...prev, { ...toast, id }]);
   }, []);
 

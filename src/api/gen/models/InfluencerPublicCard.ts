@@ -10,4 +10,18 @@ export type InfluencerPublicCard = {
   bio?: string;
   avatar?: Media;
   socialLinks?: Array<SocialLink>;
+  /**
+   * Количество подписчиков инфлюэнсера.
+   */
+  followersCount?: number;
+  /**
+   * Количество опубликованных программ инфлюэнсера.
+   */
+  programsCount?: number | null;
+  /**
+   * Признак подписки текущего пользователя-атлета.
+   * Для неаутентифицированных запросов и пользователей без athleteProfile всегда возвращается false.
+   *
+   */
+  isFollowedByMe?: boolean;
 };

@@ -10,6 +10,7 @@ import { request as __request } from "../core/request";
 export class MeService {
   /**
    * Получить текущего пользователя
+   * Identity берётся из OIDC token claims, профиль хранится в системе Fitfluence.
    * @returns MeResponse Текущий пользователь
    * @throws ApiError
    */
@@ -17,6 +18,10 @@ export class MeService {
     return __request(OpenAPI, {
       method: "GET",
       url: "/v1/me",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
     });
   }
   /**
@@ -36,6 +41,9 @@ export class MeService {
       mediaType: "application/json",
       errors: {
         400: `Некорректный запрос`,
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+        404: `Ресурс не найден`,
       },
     });
   }

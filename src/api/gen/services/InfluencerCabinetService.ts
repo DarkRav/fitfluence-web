@@ -7,10 +7,13 @@ import type { CreateExerciseTemplateRequest } from "../models/CreateExerciseTemp
 import type { CreateInfluencerProgramRequest } from "../models/CreateInfluencerProgramRequest";
 import type { CreateProgramVersionRequest } from "../models/CreateProgramVersionRequest";
 import type { CreateWorkoutTemplateRequest } from "../models/CreateWorkoutTemplateRequest";
+import type { CreatorAnalyticsResponse } from "../models/CreatorAnalyticsResponse";
 import type { Exercise } from "../models/Exercise";
 import type { ExerciseReorderItem } from "../models/ExerciseReorderItem";
 import type { ExercisesSearchRequest } from "../models/ExercisesSearchRequest";
 import type { ExerciseTemplate } from "../models/ExerciseTemplate";
+import type { InfluencerProgramAnalyticsFunnelResponse } from "../models/InfluencerProgramAnalyticsFunnelResponse";
+import type { InfluencerProgramAnalyticsSummaryResponse } from "../models/InfluencerProgramAnalyticsSummaryResponse";
 import type { Media } from "../models/Media";
 import type { MediaSearchRequest } from "../models/MediaSearchRequest";
 import type { PagedExerciseResponse } from "../models/PagedExerciseResponse";
@@ -132,6 +135,98 @@ export class InfluencerCabinetService {
         programId: programId,
       },
       errors: {
+        404: `Ресурс не найден`,
+      },
+    });
+  }
+  /**
+   * Сводная аналитика creator для экрана профиля
+   * @returns CreatorAnalyticsResponse Сводные метрики creator
+   * @throws ApiError
+   */
+  public static creatorAnalyticsGet(): CancelablePromise<CreatorAnalyticsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/creator/analytics",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
+   * Совместимый alias analytics для influencer
+   * @returns CreatorAnalyticsResponse Сводные метрики influencer
+   * @throws ApiError
+   */
+  public static influencerAnalyticsGet(): CancelablePromise<CreatorAnalyticsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/influencer/analytics",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
+   * Сводная аналитика программы инфлюэнсера за период
+   * @returns InfluencerProgramAnalyticsSummaryResponse Summary-метрики creator analytics
+   * @throws ApiError
+   */
+  public static influencerProgramsProgramIdAnalyticsSummaryGet({
+    programId,
+    dateFrom,
+    dateTo,
+  }: {
+    programId: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): CancelablePromise<InfluencerProgramAnalyticsSummaryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/influencer/programs/{programId}/analytics/summary",
+      path: {
+        programId: programId,
+      },
+      query: {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      },
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+        404: `Ресурс не найден`,
+      },
+    });
+  }
+  /**
+   * Воронка прохождения программы инфлюэнсера
+   * @returns InfluencerProgramAnalyticsFunnelResponse Шаги воронки program_view -> program_start -> first_workout_start -> first_workout_complete -> completion
+   * @throws ApiError
+   */
+  public static influencerProgramsProgramIdAnalyticsFunnelGet({
+    programId,
+    dateFrom,
+    dateTo,
+  }: {
+    programId: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): CancelablePromise<InfluencerProgramAnalyticsFunnelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/influencer/programs/{programId}/analytics/funnel",
+      path: {
+        programId: programId,
+      },
+      query: {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      },
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
         404: `Ресурс не найден`,
       },
     });

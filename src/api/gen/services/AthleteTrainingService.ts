@@ -2,13 +2,24 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AbandonWorkoutRequest } from "../models/AbandonWorkoutRequest";
+import type { ActiveEnrollmentProgress } from "../models/ActiveEnrollmentProgress";
 import type { AddCustomWorkoutExerciseRequest } from "../models/AddCustomWorkoutExerciseRequest";
+import type { AthleteCalendarResponse } from "../models/AthleteCalendarResponse";
+import type { AthleteExerciseHistoryResponse } from "../models/AthleteExerciseHistoryResponse";
+import type { AthletePersonalRecordsResponse } from "../models/AthletePersonalRecordsResponse";
+import type { AthleteRecoveryTodayResponse } from "../models/AthleteRecoveryTodayResponse";
+import type { AthleteStatsSummaryResponse } from "../models/AthleteStatsSummaryResponse";
+import type { AthleteSyncStatusResponse } from "../models/AthleteSyncStatusResponse";
+import type { AthleteWorkoutComparisonResponse } from "../models/AthleteWorkoutComparisonResponse";
 import type { CompleteWorkoutRequest } from "../models/CompleteWorkoutRequest";
 import type { CreateCustomWorkoutRequest } from "../models/CreateCustomWorkoutRequest";
 import type { CreateEnrollmentRequest } from "../models/CreateEnrollmentRequest";
 import type { Exercise } from "../models/Exercise";
 import type { ExerciseExecution } from "../models/ExerciseExecution";
+import type { ExerciseLastPerformanceResponse } from "../models/ExerciseLastPerformanceResponse";
 import type { ExercisesSearchRequest } from "../models/ExercisesSearchRequest";
+import type { MuscleGroup } from "../models/MuscleGroup";
 import type { PagedExerciseResponse } from "../models/PagedExerciseResponse";
 import type { PagedWorkoutDetailsResponse } from "../models/PagedWorkoutDetailsResponse";
 import type { ProgramEnrollment } from "../models/ProgramEnrollment";
@@ -19,6 +30,7 @@ import type { UpdateEnrollmentStatusRequest } from "../models/UpdateEnrollmentSt
 import type { UpsertSetExecutionRequest } from "../models/UpsertSetExecutionRequest";
 import type { WorkoutDetails } from "../models/WorkoutDetails";
 import type { WorkoutInstance } from "../models/WorkoutInstance";
+import type { WorkoutLastCompletionResponse } from "../models/WorkoutLastCompletionResponse";
 import type { WorkoutScheduleResponse } from "../models/WorkoutScheduleResponse";
 import type { WorkoutSearchRequest } from "../models/WorkoutSearchRequest";
 import type { CancelablePromise } from "../core/CancelablePromise";
@@ -136,6 +148,192 @@ export class AthleteTrainingService {
     });
   }
   /**
+   * Прогресс по активной программе текущего атлета
+   * @returns ActiveEnrollmentProgress Текущее состояние активной программы. При отсутствии активной программы поля возвращаются как null.
+   * @throws ApiError
+   */
+  public static athleteEnrollmentsActiveGet(): CancelablePromise<ActiveEnrollmentProgress> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/enrollments/active",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
+   * Агрегированная сводка статистики атлета для домашнего экрана
+   * @returns AthleteStatsSummaryResponse Сводная статистика атлета
+   * @throws ApiError
+   */
+  public static athleteStatsSummaryGet(): CancelablePromise<AthleteStatsSummaryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/stats/summary",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
+   * Календарь тренировок атлета за месяц
+   * @returns AthleteCalendarResponse Календарь тренировок за месяц
+   * @throws ApiError
+   */
+  public static athleteCalendarGet({
+    month,
+  }: {
+    month: string;
+  }): CancelablePromise<AthleteCalendarResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/calendar",
+      query: {
+        month: month,
+      },
+      errors: {
+        400: `Некорректный запрос`,
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
+   * Последний performance по упражнению
+   * @returns ExerciseLastPerformanceResponse Последнее завершённое выполнение упражнения
+   * @throws ApiError
+   */
+  public static athleteExercisesExerciseIdLastPerformanceGet({
+    exerciseId,
+  }: {
+    exerciseId: string;
+  }): CancelablePromise<ExerciseLastPerformanceResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/exercises/{exerciseId}/last-performance",
+      path: {
+        exerciseId: exerciseId,
+      },
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+        404: `Ресурс не найден`,
+      },
+    });
+  }
+  /**
+   * История выполнений упражнения текущего атлета
+   * @returns AthleteExerciseHistoryResponse История выполнений упражнения (плоский формат для клиента iOS)
+   * @throws ApiError
+   */
+  public static athleteExercisesExerciseIdHistoryGet({
+    exerciseId,
+    dateFrom,
+    dateTo,
+    onlyCompleted = true,
+    page,
+    size = 20,
+  }: {
+    exerciseId: string;
+    dateFrom?: string;
+    dateTo?: string;
+    onlyCompleted?: boolean;
+    page?: number;
+    size?: number;
+  }): CancelablePromise<AthleteExerciseHistoryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/exercises/{exerciseId}/history",
+      path: {
+        exerciseId: exerciseId,
+      },
+      query: {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        onlyCompleted: onlyCompleted,
+        page: page,
+        size: size,
+      },
+      errors: {
+        400: `Некорректный запрос`,
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
+   * Personal records текущего атлета по упражнениям
+   * @returns AthletePersonalRecordsResponse Список personal records текущего атлета
+   * @throws ApiError
+   */
+  public static athletePrsGet({
+    exerciseId,
+    muscleGroup,
+    page,
+    size = 20,
+  }: {
+    exerciseId?: string;
+    muscleGroup?: MuscleGroup;
+    page?: number;
+    size?: number;
+  }): CancelablePromise<AthletePersonalRecordsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/prs",
+      query: {
+        exerciseId: exerciseId,
+        muscleGroup: muscleGroup,
+        page: page,
+        size: size,
+      },
+      errors: {
+        400: `Некорректный запрос`,
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
+   * Последнее завершение тренировки по workout template id
+   * @returns WorkoutLastCompletionResponse Агрегированная метрика последнего завершения
+   * @throws ApiError
+   */
+  public static athleteWorkoutsWorkoutIdLastCompletionGet({
+    workoutId,
+  }: {
+    workoutId: string;
+  }): CancelablePromise<WorkoutLastCompletionResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/workouts/{workoutId}/last-completion",
+      path: {
+        workoutId: workoutId,
+      },
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+        404: `Ресурс не найден`,
+      },
+    });
+  }
+  /**
+   * Daily recovery/readiness signal для текущего атлета
+   * @returns AthleteRecoveryTodayResponse Текущий recovery-сигнал
+   * @throws ApiError
+   */
+  public static athleteRecoveryTodayGet(): CancelablePromise<AthleteRecoveryTodayResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/recovery/today",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+      },
+    });
+  }
+  /**
    * Открытие конкретной тренировки с упражнениями
    * @returns WorkoutDetails Детали тренировки
    * @throws ApiError
@@ -153,6 +351,30 @@ export class AthleteTrainingService {
       },
       errors: {
         404: `Ресурс не найден`,
+      },
+    });
+  }
+  /**
+   * Сравнение текущей завершённой тренировки с предыдущей по этому же workout template
+   * @returns AthleteWorkoutComparisonResponse Разница относительно предыдущей тренировки. Если сравнивать не с чем, поля delta возвращаются как null.
+   * @throws ApiError
+   */
+  public static athleteWorkoutsWorkoutInstanceIdComparisonGet({
+    workoutInstanceId,
+  }: {
+    workoutInstanceId: string;
+  }): CancelablePromise<AthleteWorkoutComparisonResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/workouts/{workoutInstanceId}/comparison",
+      path: {
+        workoutInstanceId: workoutInstanceId,
+      },
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+        404: `Ресурс не найден`,
+        422: `Семантически некорректный запрос`,
       },
     });
   }
@@ -203,6 +425,49 @@ export class AthleteTrainingService {
       mediaType: "application/json",
       errors: {
         404: `Ресурс не найден`,
+      },
+    });
+  }
+  /**
+   * Прервать тренировку без удаления данных
+   * @returns WorkoutInstance Тренировка переведена в статус ABANDONED
+   * @throws ApiError
+   */
+  public static athleteWorkoutsWorkoutInstanceIdAbandonPost({
+    workoutInstanceId,
+    requestBody,
+  }: {
+    workoutInstanceId: string;
+    requestBody?: AbandonWorkoutRequest;
+  }): CancelablePromise<WorkoutInstance> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/v1/athlete/workouts/{workoutInstanceId}/abandon",
+      path: {
+        workoutInstanceId: workoutInstanceId,
+      },
+      body: requestBody,
+      mediaType: "application/json",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
+        404: `Ресурс не найден`,
+        409: `Конфликт ресурса`,
+      },
+    });
+  }
+  /**
+   * Диагностика серверной синхронизации атлета
+   * @returns AthleteSyncStatusResponse Серверный статус синхронизации по данным атлета
+   * @throws ApiError
+   */
+  public static athleteSyncStatusGet(): CancelablePromise<AthleteSyncStatusResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/v1/athlete/sync/status",
+      errors: {
+        401: `Требуется авторизация`,
+        403: `Доступ запрещён`,
       },
     });
   }

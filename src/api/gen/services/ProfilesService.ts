@@ -14,6 +14,7 @@ import { request as __request } from "../core/request";
 export class ProfilesService {
   /**
    * Создать профиль атлета
+   * Создает доменный профиль атлета для текущего principal (связывание по OIDC sub).
    * @returns AthleteProfile Профиль создан
    * @throws ApiError
    */
@@ -29,6 +30,7 @@ export class ProfilesService {
       mediaType: "application/json",
       errors: {
         400: `Некорректный запрос`,
+        409: `Конфликт ресурса`,
       },
     });
   }

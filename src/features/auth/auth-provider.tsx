@@ -34,7 +34,21 @@ const initialState: AuthState = {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+const SIGNIN_RETURN_TO_KEY = "fitfluence:signin:returnTo";
 const SIGNUP_RETURN_TO_KEY = "fitfluence:signup:returnTo";
+
+function persistReturnTo(key: string, value?: string | null): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (value) {
+    window.sessionStorage.setItem(key, value);
+    return;
+  }
+
+  window.sessionStorage.removeItem(key);
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>(initialState);
@@ -89,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [loadUser]);
 
   const signIn = useCallback(async (options?: { returnTo?: string | null }) => {
+    persistReturnTo(SIGNIN_RETURN_TO_KEY, options?.returnTo ?? null);
     await oidcUserManager.signinRedirect({
       state: {
         returnTo: options?.returnTo ?? null,
@@ -97,13 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = useCallback(async (options?: { returnTo?: string | null }) => {
-    if (typeof window !== "undefined") {
-      if (options?.returnTo) {
-        window.sessionStorage.setItem(SIGNUP_RETURN_TO_KEY, options.returnTo);
-      } else {
-        window.sessionStorage.removeItem(SIGNUP_RETURN_TO_KEY);
-      }
-    }
+    persistReturnTo(SIGNUP_RETURN_TO_KEY, options?.returnTo ?? null);
 
     await oidcUserManager.signinRedirect({
       extraQueryParams: {
@@ -122,9 +131,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let returnTo =
       callbackState && typeof callbackState.returnTo === "string" ? callbackState.returnTo : null;
     if (!returnTo && typeof window !== "undefined") {
-      returnTo = window.sessionStorage.getItem(SIGNUP_RETURN_TO_KEY);
-      window.sessionStorage.removeItem(SIGNUP_RETURN_TO_KEY);
+      returnTo =
+        window.sessionStorage.getItem(SIGNIN_RETURN_TO_KEY) ??
+        window.sessionStorage.getItem(SIGNUP_RETURN_TO_KEY);
     }
+    persistReturnTo(SIGNIN_RETURN_TO_KEY, null);
+    persistReturnTo(SIGNUP_RETURN_TO_KEY, null);
     setApiAccessToken(user.access_token);
     setState((prev) => ({
       ...prev,
