@@ -78,6 +78,14 @@ cp .env.production.example .env.local # replace with real production values
 npm run build:artifact
 ```
 
+For current production deployment use:
+
+- `NEXT_PUBLIC_API_BASE_URL=https://fitfluence.ru/api`
+- `NEXT_PUBLIC_OIDC_ISSUER=https://fitfluence.ru/auth/realms/fitfluence`
+- `NEXT_PUBLIC_OIDC_CLIENT_ID=fitfluence-web-admin`
+- `NEXT_PUBLIC_OIDC_REDIRECT_URI=https://fitfluence.ru/auth/callback`
+- `NEXT_PUBLIC_OIDC_SCOPE=openid`
+
 2. Build Docker image:
 
 ```bash
@@ -111,6 +119,14 @@ Minimal setup:
 - Standard Flow enabled
 - Redirect URI includes: `http://localhost:3000/auth/callback`
 - Web origins include: `http://localhost:3000`
+
+## Keycloak (production)
+
+- Realm: `fitfluence`
+- Client ID: `fitfluence-web-admin`
+- Redirect URI includes: `https://fitfluence.ru/auth/callback`
+- Web origins include: `https://fitfluence.ru`
+- Issuer: `https://fitfluence.ru/auth/realms/fitfluence`
 
 ## API Generation
 

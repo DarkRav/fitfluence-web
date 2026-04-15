@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-KEYCLOAK_BASE_URL="${KEYCLOAK_BASE_URL:-http://localhost:9990}"
+KEYCLOAK_BASE_URL="${KEYCLOAK_BASE_URL:-https://fitfluence.ru/auth}"
 REALM="${REALM:-fitfluence}"
 CLIENT_ID="${CLIENT_ID:-fitfluence-web-admin}"
-REDIRECT_URI="${REDIRECT_URI:-http://localhost:3000/auth/callback}"
-WEB_ORIGIN="${WEB_ORIGIN:-http://localhost:3000}"
+REDIRECT_URI="${REDIRECT_URI:-https://fitfluence.ru/auth/callback}"
+WEB_ORIGIN="${WEB_ORIGIN:-https://fitfluence.ru}"
 ADMIN_USER="${ADMIN_USER:-}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
 
